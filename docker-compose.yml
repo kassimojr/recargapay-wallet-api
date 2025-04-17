@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: wallet_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: wallet_db
+      POSTGRES_USER: wallet_user
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - wallet_db_data:/var/lib/postgresql/data
+
+  wallet-api:
+    build: .
+    container_name: wallet_api
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/wallet_db
+      SPRING_DATASOURCE_USERNAME: wallet_user
+      SPRING_DATASOURCE_PASSWORD: secret
+      JWT_ISSUER: https://auth.example.com/
+      JWT_AUDIENCE: wallet-api
+    ports:
+      - "8080:8080"
+    command: ["java", "-jar", "target/wallet-1.0.0.jar"]
+
+volumes:
+  wallet_db_data:
+
+# Agora com Docker Compose, basta rodar:
+# docker-compose up --build
+
+# Sugestão de ambiente de staging:
+# - Use serviços como Render, Railway, Fly.io ou AWS Elastic Beanstalk
+# - Configure variáveis de ambiente com os mesmos valores do .env
+# - Utilize banco PostgreSQL gerenciado (ex: Supabase, ElephantSQL, RDS)
+# - Exponha a URL pública da API e configure regras de CORS se necessário
+  
+# Fim da estrutura DevOps pronta para staging e produção.
