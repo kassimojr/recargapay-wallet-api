@@ -1,4 +1,4 @@
-package io.github.dev.recargapaywalletapi.core.domain;
+package com.recargapay.wallet.core.domain;
 
 public enum TransactionType {
     DEPOSIT,

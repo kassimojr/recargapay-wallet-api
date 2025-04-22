@@ -1,6 +1,6 @@
-package io.github.dev.recargapaywalletapi.adapter.dtos;
+package com.recargapay.wallet.adapter.dtos;
 
-import io.github.dev.recargapaywalletapi.core.domain.TransactionType;
+import com.recargapay.wallet.core.domain.TransactionType;
 import lombok.Getter;
 import lombok.Setter;
 

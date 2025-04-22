@@ -1,8 +1,8 @@
-package io.github.dev.recargapaywalletapi.adapter.converters;
+package com.recargapay.wallet.adapter.converters;
 
-import io.github.dev.recargapaywalletapi.adapter.dtos.UserDTO;
-import io.github.dev.recargapaywalletapi.adapter.entities.UserEntity;
-import io.github.dev.recargapaywalletapi.core.domain.User;
+import com.recargapay.wallet.adapter.dtos.UserDTO;
+import com.recargapay.wallet.adapter.entities.UserEntity;
+import com.recargapay.wallet.core.domain.User;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 

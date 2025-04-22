@@ -1,4 +1,4 @@
-package io.github.dev.recargapaywalletapi.infra;
+package com.recargapay.wallet.infra;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;

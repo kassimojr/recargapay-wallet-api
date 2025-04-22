@@ -1,4 +1,4 @@
-package io.github.dev.recargapaywalletapi.adapter.entities;
+package com.recargapay.wallet.adapter.entities;
 
 import jakarta.persistence.*;
 import lombok.Getter;
