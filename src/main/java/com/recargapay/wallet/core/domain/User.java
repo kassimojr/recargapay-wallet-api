@@ -1,4 +1,4 @@
-package io.github.dev.recargapaywalletapi.core.domain;
+package com.recargapay.wallet.core.domain;
 
 import java.util.UUID;
 

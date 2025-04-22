@@ -1,4 +1,4 @@
-package io.github.dev.recargapaywalletapi;
+package com.recargapay.wallet;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

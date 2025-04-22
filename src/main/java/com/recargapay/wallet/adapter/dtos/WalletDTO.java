@@ -1,4 +1,4 @@
-package io.github.dev.recargapaywalletapi.adapter.dtos;
+package com.recargapay.wallet.adapter.dtos;
 
 import lombok.Getter;
 import lombok.Setter;
