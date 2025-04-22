@@ -1,4 +1,4 @@
-package io.github.dev.recargapay_wallet_api;
+package com.recargapay.wallet;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
