@@ -1,44 +1,37 @@
-version: '3.8'
-
 services:
   postgres:
-    image: postgres:15
-    container_name: wallet_postgres
-    restart: always
+    image: postgres:16
+    container_name: postgres-sonar
+    restart: unless-stopped
     environment:
-      POSTGRES_DB: wallet_db
-      POSTGRES_USER: wallet_user
-      POSTGRES_PASSWORD: secret
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: sonarqube
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./src/main/resources/db/init/init-walletdb.sql:/docker-entrypoint-initdb.d/init-walletdb.sql
     ports:
       - "5432:5432"
-    volumes:
-      - wallet_db_data:/var/lib/postgresql/data
 
-  wallet-api:
-    build: .
-    container_name: wallet_api
+  sonarqube:
+    image: sonarqube:10.4-community
+    container_name: sonarqube
     depends_on:
       - postgres
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/wallet_db
-      SPRING_DATASOURCE_USERNAME: wallet_user
-      SPRING_DATASOURCE_PASSWORD: secret
-      JWT_ISSUER: https://auth.example.com/
-      JWT_AUDIENCE: wallet-api
+      SONAR_JDBC_URL: jdbc:postgresql://postgres:5432/sonarqube
+      SONAR_JDBC_USERNAME: admin
+      SONAR_JDBC_PASSWORD: admin
+      #Change password first login on http//localhost:9000
     ports:
-      - "8080:8080"
-    command: ["java", "-jar", "target/wallet-1.0.0.jar"]
+      - "9000:9000"
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
 
 volumes:
-  wallet_db_data:
-
-# Agora com Docker Compose, basta rodar:
-# docker-compose up --build
-
-# Sugestão de ambiente de staging:
-# - Use serviços como Render, Railway, Fly.io ou AWS Elastic Beanstalk
-# - Configure variáveis de ambiente com os mesmos valores do .env
-# - Utilize banco PostgreSQL gerenciado (ex: Supabase, ElephantSQL, RDS)
-# - Exponha a URL pública da API e configure regras de CORS se necessário
-  
-# Fim da estrutura DevOps pronta para staging e produção.
+  postgres_data:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:
