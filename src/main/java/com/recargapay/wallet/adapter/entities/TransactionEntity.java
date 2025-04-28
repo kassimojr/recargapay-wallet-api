@@ -2,9 +2,7 @@ package com.recargapay.wallet.adapter.entities;
 
 import com.recargapay.wallet.core.domain.TransactionType;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-
+import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -13,13 +11,15 @@ import java.util.UUID;
 @Table(name = "transactions")
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class TransactionEntity {
-
     @Id
-    @Column(nullable = false, updatable = false)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "wallet_id", nullable = false)
     private WalletEntity wallet;
 
@@ -33,4 +33,6 @@ public class TransactionEntity {
     @Column(nullable = false)
     private LocalDateTime timestamp;
 
+    @Column(name = "related_user_id")
+    private UUID relatedUserId;
 }

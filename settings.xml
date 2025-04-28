@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+  <!-- Mirror do Maven Central para builds mais rápidos e confiáveis -->
+  <mirrors>
+    <mirror>
+      <id>central</id>
+      <name>Maven Central Mirror</name>
+      <url>https://repo.maven.apache.org/maven2</url>
+      <mirrorOf>central</mirrorOf>
+    </mirror>
+  </mirrors>
+
+  <!-- Exemplo de configuração de proxy (descomente e ajuste se necessário)
+  <proxies>
+    <proxy>
+      <id>example-proxy</id>
+      <active>false</active>
+      <protocol>http</protocol>
+      <host>proxy.example.com</host>
+      <port>8080</port>
+      <username>proxyuser</username>
+      <password>somepassword</password>
+      <nonProxyHosts>localhost|127.0.0.1</nonProxyHosts>
+    </proxy>
+  </proxies>
+  -->
+
+  <servers>
+    <server>
+      <id>sonar</id>
+      <username>sonar</username>
+      <password>sonar</password> <!-- Substitua ${SONAR_TOKEN} pelo seu token real ou defina como variável de ambiente -->
+    </server>
+  </servers>
+
+  <profiles>
+
+    <!-- Profile padrão para encoding UTF-8 (boa prática para evitar problemas de acentuação) -->
+    <profile>
+      <id>default-encoding</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+      </properties>
+    </profile>
+
+    <!-- Profile do SonarQube -->
+    <profile>
+      <id>sonar</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <sonar.login>squ_a7bf541e44abf343cde9bcc7bbb03f9b5751f207</sonar.login> <!-- Placeholder para o token do SonarQube -->
+      </properties>
+    </profile>
+  </profiles>
+</settings>

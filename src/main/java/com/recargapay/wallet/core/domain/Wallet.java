@@ -14,23 +14,29 @@ public class Wallet {
         this.balance = balance;
     }
 
+    public Wallet() {}
+
     public UUID getId() {
         return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public UUID getUserId() {
         return userId;
     }
 
+    public void setUserId(UUID userId) {
+        this.userId = userId;
+    }
+
     public BigDecimal getBalance() {
         return balance;
     }
 
-    public void deposit(BigDecimal amount) {
-        this.balance = this.balance.add(amount);
-    }
-
-    public void withdraw(BigDecimal amount) {
-        this.balance = this.balance.subtract(amount);
+    public void setBalance(BigDecimal balance) {
+        this.balance = balance;
     }
 }
