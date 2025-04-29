@@ -6,6 +6,9 @@ import com.recargapay.wallet.core.domain.Transaction;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.Objects;
+
 @Component
 public class TransactionMapper {
     private final ModelMapper mapper;
@@ -15,14 +18,18 @@ public class TransactionMapper {
     }
 
     public Transaction toDomain(TransactionEntity entity) {
-        return mapper.map(entity, Transaction.class);
+        return MapperUtils.mapIfNotNull(entity, e -> mapper.map(e, Transaction.class));
     }
 
     public TransactionEntity toEntity(Transaction domain) {
-        return mapper.map(domain, TransactionEntity.class);
+        return MapperUtils.mapIfNotNull(domain, d -> mapper.map(d, TransactionEntity.class));
     }
 
     public TransactionDTO toDTO(Transaction domain) {
-        return mapper.map(domain, TransactionDTO.class);
+        return MapperUtils.mapIfNotNull(domain, d -> mapper.map(d, TransactionDTO.class));
+    }
+
+    public List<TransactionDTO> toDTOList(List<Transaction> domains) {
+        return Objects.requireNonNullElse(domains, List.<Transaction>of()).stream().map(this::toDTO).toList();
     }
 }
