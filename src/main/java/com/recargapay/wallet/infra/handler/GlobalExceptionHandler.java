@@ -3,18 +3,22 @@ package com.recargapay.wallet.infra.handler;
 import com.recargapay.wallet.core.exceptions.InsufficientBalanceException;
 import com.recargapay.wallet.core.exceptions.UserNotFoundException;
 import com.recargapay.wallet.core.exceptions.WalletNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Object> handleValidationException(MethodArgumentNotValidException ex) {
@@ -25,18 +29,21 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(WalletNotFoundException.class)
-    public ResponseEntity<Object> handleWalletNotFoundException(WalletNotFoundException ex) {
-        return new ResponseEntity<>(Map.of("error", ex.getMessage()), HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<Object> handleUserNotFoundException(UserNotFoundException ex) {
-        return new ResponseEntity<>(Map.of("error", ex.getMessage()), HttpStatus.NOT_FOUND);
+    public ResponseEntity<String> handleWalletNotFound(WalletNotFoundException ex) {
+        log.warn("Wallet not found: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
     @ExceptionHandler(InsufficientBalanceException.class)
-    public ResponseEntity<Object> handleInsufficientBalanceException(InsufficientBalanceException ex) {
-        return new ResponseEntity<>(Map.of("error", ex.getMessage()), HttpStatus.UNPROCESSABLE_ENTITY);
+    public ResponseEntity<String> handleInsufficientBalance(InsufficientBalanceException ex) {
+        log.warn("Insufficient balance: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<String> handleUserNotFound(UserNotFoundException ex) {
+        log.warn("User not found: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
