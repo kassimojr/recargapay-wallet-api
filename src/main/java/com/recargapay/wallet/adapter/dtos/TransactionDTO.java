@@ -1,6 +1,5 @@
 package com.recargapay.wallet.adapter.dtos;
 
-import com.recargapay.wallet.core.domain.TransactionType;
 import lombok.*;
 
 import java.math.BigDecimal;

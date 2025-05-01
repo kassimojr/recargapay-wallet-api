@@ -32,7 +32,7 @@
     <server>
       <id>sonar</id>
       <username>sonar</username>
-      <password>sonar</password> <!-- Substitua ${SONAR_TOKEN} pelo seu token real ou defina como variável de ambiente -->
+      <password>sonar</password>
     </server>
   </servers>
 
