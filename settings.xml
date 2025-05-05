@@ -57,7 +57,7 @@
         <activeByDefault>true</activeByDefault>
       </activation>
       <properties>
-        <sonar.login>squ_a7bf541e44abf343cde9bcc7bbb03f9b5751f207</sonar.login> <!-- Placeholder para o token do SonarQube -->
+        <sonar.token>squ_12da379a01415d1f81204f1a7ebabb199e94dc0d</sonar.token> <!-- Placeholder para o token do SonarQube -->
       </properties>
     </profile>
   </profiles>

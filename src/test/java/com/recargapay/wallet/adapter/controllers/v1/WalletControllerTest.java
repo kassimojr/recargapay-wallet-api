@@ -1,6 +1,12 @@
 package com.recargapay.wallet.adapter.controllers.v1;
 
+import com.recargapay.wallet.adapter.converters.WalletMapper;
+
+import com.recargapay.wallet.adapter.converters.TransactionMapper;
+import com.recargapay.wallet.core.ports.in.CreateWalletUseCase;
+import com.recargapay.wallet.core.ports.in.DepositUseCase;
 import com.recargapay.wallet.core.ports.in.TransferFundsUseCase;
+import com.recargapay.wallet.core.ports.in.WithdrawUseCase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -20,6 +26,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.security.test.context.support.WithAnonymousUser;
@@ -35,12 +42,44 @@ class WalletControllerTest {
     static class MockConfig {
         @Bean
         public TransferFundsUseCase transferFundsUseCase() {
-            return org.mockito.Mockito.mock(TransferFundsUseCase.class);
+            return mock(TransferFundsUseCase.class);
+        }
+        @Bean
+        public CreateWalletUseCase createWalletUseCase() {
+            return mock(CreateWalletUseCase.class);
+        }
+        @Bean
+        public DepositUseCase depositUseCase() {
+            return mock(DepositUseCase.class);
+        }
+        @Bean
+        public WithdrawUseCase withdrawUseCase() {
+            return mock(WithdrawUseCase.class);
+        }
+        @Bean
+        public TransactionMapper transactionMapper() {
+            return mock(TransactionMapper.class);
+        }
+        @Bean
+        public WalletMapper walletMapper() {
+            return mock(WalletMapper.class);
         }
     }
 
     @Autowired
     private TransferFundsUseCase transferFundsUseCase;
+
+    @Autowired
+    private CreateWalletUseCase createWalletUseCase;
+
+    @Autowired
+    private DepositUseCase depositUseCase;
+
+    @Autowired
+    private WithdrawUseCase withdrawUseCase;
+
+    @Autowired
+    private TransactionMapper transactionMapper;
 
     @Test
     @WithMockUser
@@ -49,10 +88,12 @@ class WalletControllerTest {
         Mockito.doNothing().when(transferFundsUseCase)
                 .transfer(any(UUID.class), any(UUID.class), any(BigDecimal.class));
 
+        String fromWalletId = UUID.randomUUID().toString();
+        String toWalletId = UUID.randomUUID().toString();
+        String json = """
+            {\n  \"fromWalletId\": \"%s\",\n  \"toWalletId\": \"%s\",\n  \"amount\": 10.00\n}""".formatted(fromWalletId, toWalletId);
         mockMvc.perform(post("/api/v1/wallets/transfer")
-                .param("fromWalletId", UUID.randomUUID().toString())
-                .param("toWalletId", UUID.randomUUID().toString())
-                .param("amount", "10.00")
+                .content(json)
                 .with(SecurityMockMvcRequestPostProcessors.csrf())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -66,10 +107,12 @@ class WalletControllerTest {
                 .when(transferFundsUseCase)
                 .transfer(any(UUID.class), any(UUID.class), any(BigDecimal.class));
 
+        String fromWalletId = UUID.randomUUID().toString();
+        String toWalletId = UUID.randomUUID().toString();
+        String json = """
+            {\n  \"fromWalletId\": \"%s\",\n  \"toWalletId\": \"%s\",\n  \"amount\": -1.00\n}""".formatted(fromWalletId, toWalletId);
         mockMvc.perform(post("/api/v1/wallets/transfer")
-                .param("fromWalletId", UUID.randomUUID().toString())
-                .param("toWalletId", UUID.randomUUID().toString())
-                .param("amount", "-1.00")
+                .content(json)
                 .with(SecurityMockMvcRequestPostProcessors.csrf())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
@@ -83,10 +126,12 @@ class WalletControllerTest {
                 .when(transferFundsUseCase)
                 .transfer(any(UUID.class), any(UUID.class), any(BigDecimal.class));
 
+        String fromWalletId = UUID.randomUUID().toString();
+        String toWalletId = UUID.randomUUID().toString();
+        String json = """
+            {\n  \"fromWalletId\": \"%s\",\n  \"toWalletId\": \"%s\",\n  \"amount\": 10.00\n}""".formatted(fromWalletId, toWalletId);
         mockMvc.perform(post("/api/v1/wallets/transfer")
-                .param("fromWalletId", UUID.randomUUID().toString())
-                .param("toWalletId", UUID.randomUUID().toString())
-                .param("amount", "10.00")
+                .content(json)
                 .with(SecurityMockMvcRequestPostProcessors.csrf())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
