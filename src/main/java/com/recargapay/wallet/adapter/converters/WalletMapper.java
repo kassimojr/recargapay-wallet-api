@@ -1,6 +1,10 @@
 package com.recargapay.wallet.adapter.converters;
 
 import com.recargapay.wallet.adapter.dtos.WalletDTO;
+import com.recargapay.wallet.adapter.dtos.CreateWalletRequestDTO;
+import com.recargapay.wallet.adapter.dtos.DepositRequestDTO;
+import com.recargapay.wallet.adapter.dtos.WithdrawRequestDTO;
+
 import com.recargapay.wallet.adapter.entities.WalletEntity;
 import com.recargapay.wallet.core.domain.Wallet;
 import org.modelmapper.ModelMapper;
@@ -31,6 +35,32 @@ public class WalletMapper {
 
     public List<WalletDTO> toDTOList(List<Wallet> domains) {
         return Objects.requireNonNullElse(domains, List.<Wallet>of()).stream().map(this::toDTO).toList();
+    }
+
+
+    // Conversão de CreateWalletRequestDTO para domínio Wallet
+    public Wallet toDomain(CreateWalletRequestDTO dto) {
+        if (dto == null) return null;
+        Wallet wallet = new Wallet();
+        wallet.setUserId(dto.getUserId());
+        wallet.setBalance(java.math.BigDecimal.ZERO); // Saldo inicial padrão
+        return wallet;
+    }
+
+    // Conversão de DepositRequestDTO para domínio Wallet (apenas walletId)
+    public Wallet toDomain(DepositRequestDTO dto) {
+        if (dto == null) return null;
+        Wallet wallet = new Wallet();
+        wallet.setId(dto.getWalletId());
+        return wallet;
+    }
+
+    // Conversão de WithdrawRequestDTO para domínio Wallet (apenas walletId)
+    public Wallet toDomain(WithdrawRequestDTO dto) {
+        if (dto == null) return null;
+        Wallet wallet = new Wallet();
+        wallet.setId(dto.getWalletId());
+        return wallet;
     }
 }
 
