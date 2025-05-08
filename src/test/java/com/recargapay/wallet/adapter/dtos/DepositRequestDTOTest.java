@@ -15,4 +15,27 @@ class DepositRequestDTOTest {
         assertEquals(walletId, dto.getWalletId());
         assertEquals(amount, dto.getAmount());
     }
+
+    @Test
+    void builderShouldBuildCorrectly() {
+        UUID walletId = UUID.randomUUID();
+        BigDecimal amount = new BigDecimal("20.00");
+        DepositRequestDTO dto = DepositRequestDTO.builder()
+                .walletId(walletId)
+                .amount(amount)
+                .build();
+        assertEquals(walletId, dto.getWalletId());
+        assertEquals(amount, dto.getAmount());
+    }
+
+    @Test
+    void noArgsConstructorAndSetters() {
+        UUID walletId = UUID.randomUUID();
+        BigDecimal amount = new BigDecimal("30.00");
+        DepositRequestDTO dto = new DepositRequestDTO();
+        dto.setWalletId(walletId);
+        dto.setAmount(amount);
+        assertEquals(walletId, dto.getWalletId());
+        assertEquals(amount, dto.getAmount());
+    }
 }

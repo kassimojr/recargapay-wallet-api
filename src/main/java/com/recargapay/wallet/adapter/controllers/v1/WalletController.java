@@ -1,19 +1,16 @@
 package com.recargapay.wallet.adapter.controllers.v1;
 
-import com.recargapay.wallet.core.ports.in.TransferFundsUseCase;
+import com.recargapay.wallet.adapter.dtos.*;
+import com.recargapay.wallet.core.domain.Transaction;
 import com.recargapay.wallet.core.ports.in.CreateWalletUseCase;
 import com.recargapay.wallet.core.ports.in.DepositUseCase;
+import com.recargapay.wallet.core.ports.in.TransferFundsUseCase;
 import com.recargapay.wallet.core.ports.in.WithdrawUseCase;
-import com.recargapay.wallet.adapter.dtos.TransferRequestDTO;
-import com.recargapay.wallet.adapter.dtos.CreateWalletRequestDTO;
-import com.recargapay.wallet.adapter.dtos.WalletDTO;
-import com.recargapay.wallet.adapter.dtos.DepositRequestDTO;
-import com.recargapay.wallet.adapter.dtos.WithdrawRequestDTO;
-import com.recargapay.wallet.adapter.dtos.TransactionDTO;
-import com.recargapay.wallet.core.domain.Wallet;
-import com.recargapay.wallet.core.domain.Transaction;
 import com.recargapay.wallet.adapter.converters.WalletMapper;
 import com.recargapay.wallet.adapter.converters.TransactionMapper;
+import com.recargapay.wallet.core.domain.Wallet;
+import java.util.UUID;
+
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,7 +18,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
+import com.recargapay.wallet.adapter.dtos.DepositRequestDTO;
+import com.recargapay.wallet.adapter.dtos.TransferRequestDTO;
+import com.recargapay.wallet.adapter.dtos.WithdrawRequestDTO;
+import com.recargapay.wallet.adapter.dtos.TransactionDTO;
 
 @RestController
 @RequestMapping("/api/v1/wallets")
@@ -47,6 +47,26 @@ public class WalletController {
         this.transactionMapper = transactionMapper;
     }
 
+    @Operation(summary = "Obter saldo atual da carteira", responses = {
+        @ApiResponse(responseCode = "200", description = "Saldo atual retornado com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Carteira não encontrada")
+    })
+    @GetMapping("/{walletId}/balance")
+    public ResponseEntity<WalletDTO> getBalance(@PathVariable UUID walletId) {
+        Wallet wallet = createWalletUseCase.findById(walletId);
+        return ResponseEntity.ok(walletMapper.toDTO(wallet));
+    }
+
+    @Operation(summary = "Obter saldo histórico da carteira", responses = {
+        @ApiResponse(responseCode = "200", description = "Saldo histórico retornado com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Carteira não encontrada")
+    })
+    @GetMapping("/{walletId}/balance/history")
+    public ResponseEntity<WalletDTO> getHistoricalBalance(@PathVariable UUID walletId, @RequestParam("at") String at) {
+        Wallet wallet = createWalletUseCase.findBalanceAt(walletId, at);
+        return ResponseEntity.ok(walletMapper.toDTO(wallet));
+    }
+
     @Operation(summary = "Transferir fundos entre carteiras", responses = {
         @ApiResponse(responseCode = "200", description = "Transferência realizada com sucesso"),
         @ApiResponse(responseCode = "400", description = "Erro de validação ou saldo insuficiente"),
@@ -63,10 +83,10 @@ public class WalletController {
         @ApiResponse(responseCode = "400", description = "Erro de validação")
     })
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public WalletDTO create(@Valid @RequestBody CreateWalletRequestDTO dto) {
+    public ResponseEntity<WalletDTO> create(@Valid @RequestBody CreateWalletRequestDTO dto) {
         Wallet wallet = walletMapper.toDomain(dto);
-        return walletMapper.toDTO(createWalletUseCase.create(wallet));
+        Wallet created = createWalletUseCase.create(wallet);
+        return ResponseEntity.status(HttpStatus.CREATED).body(walletMapper.toDTO(created));
     }
 
     @Operation(summary = "Depositar em carteira", responses = {
@@ -74,9 +94,9 @@ public class WalletController {
         @ApiResponse(responseCode = "400", description = "Erro de validação ou carteira não encontrada")
     })
     @PostMapping("/deposit")
-    public TransactionDTO deposit(@Valid @RequestBody DepositRequestDTO dto) {
+    public ResponseEntity<TransactionDTO> deposit(@Valid @RequestBody DepositRequestDTO dto) {
         Transaction transaction = depositUseCase.deposit(dto.getWalletId(), dto.getAmount());
-        return transactionMapper.toDTO(transaction);
+        return ResponseEntity.ok(transactionMapper.toDTO(transaction));
     }
 
     @Operation(summary = "Sacar da carteira", responses = {
@@ -84,8 +104,8 @@ public class WalletController {
         @ApiResponse(responseCode = "400", description = "Erro de validação, carteira não encontrada ou saldo insuficiente")
     })
     @PostMapping("/withdraw")
-    public TransactionDTO withdraw(@Valid @RequestBody WithdrawRequestDTO dto) {
+    public ResponseEntity<TransactionDTO> withdraw(@Valid @RequestBody WithdrawRequestDTO dto) {
         Transaction transaction = withdrawUseCase.withdraw(dto.getWalletId(), dto.getAmount());
-        return transactionMapper.toDTO(transaction);
+        return ResponseEntity.ok(transactionMapper.toDTO(transaction));
     }
 }

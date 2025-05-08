@@ -17,4 +17,33 @@ class WalletDTOTest {
         assertEquals(userId, dto.getUserId());
         assertEquals(balance, dto.getBalance());
     }
+
+    @Test
+    void builderShouldBuildCorrectly() {
+        UUID id = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        BigDecimal balance = new BigDecimal("50.00");
+        WalletDTO dto = WalletDTO.builder()
+                .id(id)
+                .userId(userId)
+                .balance(balance)
+                .build();
+        assertEquals(id, dto.getId());
+        assertEquals(userId, dto.getUserId());
+        assertEquals(balance, dto.getBalance());
+    }
+
+    @Test
+    void noArgsConstructorAndSetters() {
+        UUID id = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        BigDecimal balance = new BigDecimal("10.00");
+        WalletDTO dto = new WalletDTO();
+        dto.setId(id);
+        dto.setUserId(userId);
+        dto.setBalance(balance);
+        assertEquals(id, dto.getId());
+        assertEquals(userId, dto.getUserId());
+        assertEquals(balance, dto.getBalance());
+    }
 }

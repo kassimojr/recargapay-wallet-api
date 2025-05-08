@@ -40,7 +40,7 @@ public class WithdrawService implements WithdrawUseCase {
                 UUID.randomUUID(),
                 walletId,
                 amount.negate(),
-                TransactionType.WITHDRAWAL,
+                TransactionType.WITHDRAW,
                 LocalDateTime.now(),
                 wallet.getUserId()
         );
