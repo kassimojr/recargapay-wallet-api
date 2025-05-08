@@ -15,4 +15,27 @@ class WithdrawRequestDTOTest {
         assertEquals(walletId, dto.getWalletId());
         assertEquals(amount, dto.getAmount());
     }
+
+    @Test
+    void builderShouldBuildCorrectly() {
+        UUID walletId = UUID.randomUUID();
+        BigDecimal amount = new BigDecimal("15.00");
+        WithdrawRequestDTO dto = WithdrawRequestDTO.builder()
+                .walletId(walletId)
+                .amount(amount)
+                .build();
+        assertEquals(walletId, dto.getWalletId());
+        assertEquals(amount, dto.getAmount());
+    }
+
+    @Test
+    void noArgsConstructorAndSetters() {
+        UUID walletId = UUID.randomUUID();
+        BigDecimal amount = new BigDecimal("25.00");
+        WithdrawRequestDTO dto = new WithdrawRequestDTO();
+        dto.setWalletId(walletId);
+        dto.setAmount(amount);
+        assertEquals(walletId, dto.getWalletId());
+        assertEquals(amount, dto.getAmount());
+    }
 }

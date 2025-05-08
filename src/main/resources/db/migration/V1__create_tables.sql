@@ -37,5 +37,5 @@ INSERT INTO wallets (id, user_id, balance, created_at, updated_at) VALUES
 
 INSERT INTO transactions (id, wallet_id, amount, type, timestamp, related_user_id) VALUES
     ('aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaa1', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 50.00, 'DEPOSIT', NOW(), NULL),
-    ('bbbbbbb2-bbbb-bbbb-bbbb-bbbbbbbbbbb2', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 75.00, 'WITHDRAWAL', NOW(), NULL),
+    ('bbbbbbb2-bbbb-bbbb-bbbb-bbbbbbbbbbb2', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 75.00, 'WITHDRAW', NOW(), NULL),
     ('ccccccc3-cccc-cccc-cccc-ccccccccccc3', 'cccccccc-cccc-cccc-cccc-cccccccccccc', 120.00, 'TRANSFER', NOW(), '11111111-1111-1111-1111-111111111111');
