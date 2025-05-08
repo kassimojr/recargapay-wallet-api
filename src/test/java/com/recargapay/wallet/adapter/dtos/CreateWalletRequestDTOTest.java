@@ -11,4 +11,21 @@ class CreateWalletRequestDTOTest {
         CreateWalletRequestDTO dto = new CreateWalletRequestDTO(userId);
         assertEquals(userId, dto.getUserId());
     }
+
+    @Test
+    void builderShouldBuildCorrectly() {
+        UUID userId = UUID.randomUUID();
+        CreateWalletRequestDTO dto = CreateWalletRequestDTO.builder()
+                .userId(userId)
+                .build();
+        assertEquals(userId, dto.getUserId());
+    }
+
+    @Test
+    void noArgsConstructorAndSetters() {
+        UUID userId = UUID.randomUUID();
+        CreateWalletRequestDTO dto = new CreateWalletRequestDTO();
+        dto.setUserId(userId);
+        assertEquals(userId, dto.getUserId());
+    }
 }

@@ -3,6 +3,7 @@ package com.recargapay.wallet.infra.handler;
 import com.recargapay.wallet.core.exceptions.InsufficientBalanceException;
 import com.recargapay.wallet.core.exceptions.UserNotFoundException;
 import com.recargapay.wallet.core.exceptions.WalletNotFoundException;
+import com.recargapay.wallet.core.exceptions.WalletAlreadyExistsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -53,6 +54,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<Object> handleIllegalStateException(IllegalStateException ex) {
+        return new ResponseEntity<>(Map.of("error", ex.getMessage()), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(WalletAlreadyExistsException.class)
+    public ResponseEntity<Object> handleWalletAlreadyExistsException(WalletAlreadyExistsException ex) {
+        log.warn("Wallet already exists: {}", ex.getMessage());
         return new ResponseEntity<>(Map.of("error", ex.getMessage()), HttpStatus.CONFLICT);
     }
 

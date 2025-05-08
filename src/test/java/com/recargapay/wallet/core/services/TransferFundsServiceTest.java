@@ -35,8 +35,8 @@ class TransferFundsServiceTest {
         service = new TransferFundsService(walletRepository, transactionRepository);
         fromWalletId = UUID.randomUUID();
         toWalletId = UUID.randomUUID();
-        fromWallet = new Wallet(fromWalletId, UUID.randomUUID(), new BigDecimal("100.00"));
-        toWallet = new Wallet(toWalletId, UUID.randomUUID(), new BigDecimal("50.00"));
+        fromWallet = new Wallet(fromWalletId, UUID.randomUUID(), BigDecimal.valueOf(100.00));
+        toWallet = new Wallet(toWalletId, UUID.randomUUID(), BigDecimal.valueOf(50.00));
     }
 
     @Test
@@ -44,10 +44,10 @@ class TransferFundsServiceTest {
         when(walletRepository.findById(fromWalletId)).thenReturn(Optional.of(fromWallet));
         when(walletRepository.findById(toWalletId)).thenReturn(Optional.of(toWallet));
 
-        service.transfer(fromWalletId, toWalletId, new BigDecimal("30.00"));
+        service.transfer(fromWalletId, toWalletId, BigDecimal.valueOf(30.00));
 
-        assertEquals(new BigDecimal("70.00"), fromWallet.getBalance());
-        assertEquals(new BigDecimal("80.00"), toWallet.getBalance());
+        assertEquals(BigDecimal.valueOf(70.00), fromWallet.getBalance());
+        assertEquals(BigDecimal.valueOf(80.00), toWallet.getBalance());
         verify(walletRepository).update(fromWallet);
         verify(walletRepository).update(toWallet);
         verify(transactionRepository, times(2)).save(any());
@@ -58,7 +58,7 @@ class TransferFundsServiceTest {
         when(walletRepository.findById(fromWalletId)).thenReturn(Optional.empty());
         when(walletRepository.findById(toWalletId)).thenReturn(Optional.of(toWallet));
         WalletNotFoundException ex = assertThrows(WalletNotFoundException.class, () ->
-            service.transfer(fromWalletId, toWalletId, new BigDecimal("10.00"))
+            service.transfer(fromWalletId, toWalletId, BigDecimal.valueOf(10.00))
         );
         assertTrue(ex.getMessage().contains("Carteira de origem"));
     }
@@ -68,7 +68,7 @@ class TransferFundsServiceTest {
         when(walletRepository.findById(fromWalletId)).thenReturn(Optional.of(fromWallet));
         when(walletRepository.findById(toWalletId)).thenReturn(Optional.empty());
         WalletNotFoundException ex = assertThrows(WalletNotFoundException.class, () ->
-            service.transfer(fromWalletId, toWalletId, new BigDecimal("10.00"))
+            service.transfer(fromWalletId, toWalletId, BigDecimal.valueOf(10.00))
         );
         assertTrue(ex.getMessage().contains("Carteira de destino"));
     }
@@ -87,7 +87,7 @@ class TransferFundsServiceTest {
             service.transfer(fromWalletId, toWalletId, BigDecimal.ZERO)
         );
         IllegalArgumentException ex2 = assertThrows(IllegalArgumentException.class, () ->
-            service.transfer(fromWalletId, toWalletId, new BigDecimal("-5.00"))
+            service.transfer(fromWalletId, toWalletId, BigDecimal.valueOf(-5.00))
         );
         assertTrue(ex1.getMessage().contains("positivo"));
         assertTrue(ex2.getMessage().contains("positivo"));
@@ -96,7 +96,7 @@ class TransferFundsServiceTest {
     @Test
     void shouldThrowWhenSameWallet() {
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
-            service.transfer(fromWalletId, fromWalletId, new BigDecimal("10.00"))
+            service.transfer(fromWalletId, fromWalletId, BigDecimal.valueOf(10.00))
         );
         assertTrue(ex.getMessage().contains("mesma carteira"));
     }
@@ -106,7 +106,7 @@ class TransferFundsServiceTest {
         when(walletRepository.findById(fromWalletId)).thenReturn(Optional.of(fromWallet));
         when(walletRepository.findById(toWalletId)).thenReturn(Optional.of(toWallet));
         InsufficientBalanceException ex = assertThrows(InsufficientBalanceException.class, () ->
-            service.transfer(fromWalletId, toWalletId, new BigDecimal("150.00"))
+            service.transfer(fromWalletId, toWalletId, BigDecimal.valueOf(150.00))
         );
         assertTrue(ex.getMessage().contains("Saldo insuficiente"));
     }
