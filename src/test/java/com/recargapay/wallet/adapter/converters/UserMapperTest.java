@@ -1,5 +1,6 @@
 package com.recargapay.wallet.adapter.converters;
 
+import com.recargapay.wallet.adapter.dtos.CreateUserRequestDTO;
 import com.recargapay.wallet.adapter.dtos.UserDTO;
 import com.recargapay.wallet.adapter.entities.UserEntity;
 import com.recargapay.wallet.core.domain.User;
@@ -37,6 +38,12 @@ class UserMapperTest {
     }
 
     @Test
+    void toDomain_shouldReturnNullForNullEntity() {
+        User user = mapper.toDomain((UserEntity) null);
+        assertNull(user);
+    }
+
+    @Test
     void toEntity_shouldMapFields() {
         UUID id = UUID.randomUUID();
         String email = "test@example.com";
@@ -50,6 +57,12 @@ class UserMapperTest {
     }
 
     @Test
+    void toEntity_shouldReturnNullForNullDomain() {
+        UserEntity entity = mapper.toEntity(null);
+        assertNull(entity);
+    }
+
+    @Test
     void toDTO_shouldMapFields() {
         UUID id = UUID.randomUUID();
         String email = "test@example.com";
@@ -60,6 +73,12 @@ class UserMapperTest {
         assertEquals(id, dto.getId());
         assertEquals(email, dto.getEmail());
         assertEquals(name, dto.getName());
+    }
+
+    @Test
+    void toDTO_shouldReturnNullForNullDomain() {
+        UserDTO dto = mapper.toDTO(null);
+        assertNull(dto);
     }
 
     @Test
@@ -81,5 +100,31 @@ class UserMapperTest {
         List<UserDTO> dtos = mapper.toDTOList(null);
         assertNotNull(dtos);
         assertTrue(dtos.isEmpty());
+    }
+    
+    @Test
+    void toDomain_ShouldMapCreateRequestDTOToUser_WhenValidRequestProvided() {
+        // Arrange
+        String name = "Test User";
+        String email = "test@example.com";
+        CreateUserRequestDTO dto = new CreateUserRequestDTO(name, email);
+        
+        // Act
+        User user = mapper.toDomain(dto);
+        
+        // Assert
+        assertNotNull(user);
+        assertEquals(name, user.getName());
+        assertEquals(email, user.getEmail());
+        assertNull(user.getId()); // ID should be null as it's a new user
+    }
+    
+    @Test
+    void toDomain_ShouldReturnNull_WhenCreateRequestDTOIsNull() {
+        // Act
+        User user = mapper.toDomain((CreateUserRequestDTO) null);
+        
+        // Assert
+        assertNull(user);
     }
 }

@@ -18,15 +18,35 @@ public class TransactionMapper {
     }
 
     public Transaction toDomain(TransactionEntity entity) {
-        return MapperUtils.mapIfNotNull(entity, e -> mapper.map(e, Transaction.class));
-    }
+        if (entity == null) {
+            return null;
+        }
 
-    public TransactionEntity toEntity(Transaction domain) {
-        return MapperUtils.mapIfNotNull(domain, d -> mapper.map(d, TransactionEntity.class));
+        Transaction transaction = new Transaction();
+        transaction.setId(entity.getId());
+        transaction.setAmount(entity.getAmount());
+        transaction.setWalletId(entity.getWallet() != null ? entity.getWallet().getId() : null);
+        transaction.setType(entity.getType());
+        transaction.setTimestamp(entity.getTimestamp());
+        transaction.setRelatedUserId(entity.getRelatedUserId());
+        
+        return transaction;
     }
 
     public TransactionDTO toDTO(Transaction domain) {
-        return MapperUtils.mapIfNotNull(domain, d -> mapper.map(d, TransactionDTO.class));
+        if (domain == null) {
+            return null;
+        }
+        
+        TransactionDTO dto = new TransactionDTO();
+        dto.setId(domain.getId());
+        dto.setWalletId(domain.getWalletId());
+        dto.setAmount(domain.getAmount());
+        dto.setType(domain.getType() != null ? domain.getType().toString() : null);
+        dto.setTimestamp(domain.getTimestamp());
+        dto.setRelatedUserId(domain.getRelatedUserId());
+        
+        return dto;
     }
 
     public List<TransactionDTO> toDTOList(List<Transaction> domains) {

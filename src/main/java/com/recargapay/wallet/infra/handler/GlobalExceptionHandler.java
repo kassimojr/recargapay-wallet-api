@@ -1,5 +1,6 @@
 package com.recargapay.wallet.infra.handler;
 
+import com.recargapay.wallet.core.exceptions.DuplicatedResourceException;
 import com.recargapay.wallet.core.exceptions.InsufficientBalanceException;
 import com.recargapay.wallet.core.exceptions.UserNotFoundException;
 import com.recargapay.wallet.core.exceptions.WalletNotFoundException;
@@ -45,6 +46,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleUserNotFound(UserNotFoundException ex) {
         log.warn("User not found: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(DuplicatedResourceException.class)
+    public ResponseEntity<String> handleDuplicatedResource(DuplicatedResourceException ex) {
+        log.warn("Duplicated resource: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

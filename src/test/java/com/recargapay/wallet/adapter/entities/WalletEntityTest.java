@@ -76,4 +76,43 @@ class WalletEntityTest {
         assertNull(entity.getCreatedAt());
         assertNull(entity.getUpdatedAt());
     }
+    
+    @Test
+    void testPrePersistSetsCreatedAtAndUpdatedAt() {
+        // Arrange
+        WalletEntity entity = new WalletEntity();
+        assertNull(entity.getCreatedAt());
+        assertNull(entity.getUpdatedAt());
+        
+        // Act
+        entity.onCreate();
+        
+        // Assert
+        assertNotNull(entity.getCreatedAt());
+        assertNotNull(entity.getUpdatedAt());
+        // Ambos devem ser definidos com o mesmo timestamp ou próximos
+        assertTrue(entity.getUpdatedAt().equals(entity.getCreatedAt()) || 
+                   entity.getUpdatedAt().isAfter(entity.getCreatedAt()));
+    }
+    
+    @Test
+    void testPreUpdateSetsUpdatedAt() {
+        // Arrange
+        WalletEntity entity = new WalletEntity();
+        entity.onCreate(); // Preenche created_at e updated_at inicialmente
+        LocalDateTime originalCreatedAt = entity.getCreatedAt();
+        LocalDateTime originalUpdatedAt = entity.getUpdatedAt();
+        
+        // Forçar uma data de atualização anterior para simular passagem de tempo
+        LocalDateTime olderDate = originalUpdatedAt.minusSeconds(10);
+        entity.setUpdatedAt(olderDate);
+        
+        // Act
+        entity.onUpdate();
+        
+        // Assert
+        assertEquals(originalCreatedAt, entity.getCreatedAt()); // created_at não deve mudar
+        assertNotEquals(olderDate, entity.getUpdatedAt()); // updated_at deve mudar
+        assertTrue(entity.getUpdatedAt().isAfter(olderDate)); // novo updated_at deve ser após o original
+    }
 }
