@@ -1,5 +1,6 @@
 package com.recargapay.wallet.adapter.converters;
 
+import com.recargapay.wallet.adapter.dtos.CreateUserRequestDTO;
 import com.recargapay.wallet.adapter.dtos.UserDTO;
 import com.recargapay.wallet.adapter.entities.UserEntity;
 import com.recargapay.wallet.core.domain.User;
@@ -28,8 +29,17 @@ public class UserMapper {
     public UserDTO toDTO(User domain) {
         return MapperUtils.mapIfNotNull(domain, d -> mapper.map(d, UserDTO.class));
     }
-
+    
     public List<UserDTO> toDTOList(List<User> domains) {
         return Objects.requireNonNullElse(domains, List.<User>of()).stream().map(this::toDTO).toList();
+    }
+    
+    // Conversão de CreateUserRequestDTO para domínio User
+    public User toDomain(CreateUserRequestDTO dto) {
+        if (dto == null) return null;
+        User user = new User();
+        user.setName(dto.getName());
+        user.setEmail(dto.getEmail());
+        return user;
     }
 }

@@ -2,15 +2,22 @@ package com.recargapay.wallet.infra.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
 @Configuration
 @EnableMethodSecurity
@@ -27,29 +34,52 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
+            .authorizeHttpRequests(authz -> authz
                 .requestMatchers(
+                    "/v3/api-docs/**",
                     "/swagger-ui/**",
                     "/swagger-ui.html",
-                    "/v3/api-docs/**",
                     "/actuator/health",
-                    "/api/public/**"
+                    "/api/public/**",
+                    "/api/auth/login"
                 ).permitAll()
-                .requestMatchers("/api/private/**").authenticated()
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2
                 .jwt(Customizer.withDefaults())
-                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
             )
-            .httpBasic(httpBasic -> httpBasic
-                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-            );
+            .httpBasic(Customizer.withDefaults());
         return http.build();
     }
 
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
         return new JwtAuthenticationConverter();
+    }
+    
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+    
+    @Bean
+    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
+        UserDetails admin = User.builder()
+            .username("admin")
+            .password(passwordEncoder.encode("admin123"))
+            .roles("ADMIN")
+            .build();
+            
+        return new InMemoryUserDetailsManager(admin);
+    }
+    
+    @Bean
+    public AuthenticationManager authenticationManager(
+            UserDetailsService userDetailsService,
+            PasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder);
+        return new ProviderManager(authProvider);
     }
 }
