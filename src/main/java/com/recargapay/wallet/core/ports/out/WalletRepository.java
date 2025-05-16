@@ -7,6 +7,7 @@ import java.util.UUID;
 
 public interface WalletRepository {
     Optional<Wallet> findById(UUID walletId);
+    Optional<Wallet> findByUserId(UUID userId);
     void update(Wallet wallet);
     Wallet save(Wallet wallet);
     void delete(UUID walletId);
