@@ -72,6 +72,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGenericException(Exception ex, WebRequest request) {
-        return new ResponseEntity<>(Map.of("error", "Internal server error"), HttpStatus.INTERNAL_SERVER_ERROR);
+        log.error("Erro inesperado: {}", ex.getMessage(), ex);
+        Map<String, String> errorDetails = new HashMap<>();
+        errorDetails.put("error", "Internal server error");
+        errorDetails.put("message", ex.getMessage());
+        errorDetails.put("cause", ex.getCause() != null ? ex.getCause().getMessage() : "Unknown");
+        errorDetails.put("type", ex.getClass().getName());
+        return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

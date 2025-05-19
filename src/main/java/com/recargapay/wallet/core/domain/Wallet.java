@@ -1,12 +1,15 @@
 package com.recargapay.wallet.core.domain;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class Wallet {
     private UUID id;
     private UUID userId;
     private BigDecimal balance;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public Wallet(UUID id, UUID userId, BigDecimal balance) {
         this.id = id;
@@ -38,5 +41,21 @@ public class Wallet {
 
     public void setBalance(BigDecimal balance) {
         this.balance = balance;
+    }
+    
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }
