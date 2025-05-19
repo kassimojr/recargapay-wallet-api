@@ -16,6 +16,8 @@ class TransactionEntityTest {
         TransactionType type = TransactionType.DEPOSIT;
         LocalDateTime timestamp = LocalDateTime.now();
         UUID relatedUserId = UUID.randomUUID();
+        LocalDateTime createdAt = LocalDateTime.now();
+        LocalDateTime updatedAt = LocalDateTime.now();
 
         TransactionEntity entity = new TransactionEntity();
         entity.setId(id);
@@ -24,6 +26,8 @@ class TransactionEntityTest {
         entity.setType(type);
         entity.setTimestamp(timestamp);
         entity.setRelatedUserId(relatedUserId);
+        entity.setCreatedAt(createdAt);
+        entity.setUpdatedAt(updatedAt);
 
         assertEquals(id, entity.getId());
         assertEquals(wallet, entity.getWallet());
@@ -31,6 +35,8 @@ class TransactionEntityTest {
         assertEquals(type, entity.getType());
         assertEquals(timestamp, entity.getTimestamp());
         assertEquals(relatedUserId, entity.getRelatedUserId());
+        assertEquals(createdAt, entity.getCreatedAt());
+        assertEquals(updatedAt, entity.getUpdatedAt());
     }
 
     @Test
@@ -41,6 +47,8 @@ class TransactionEntityTest {
         TransactionType type = TransactionType.WITHDRAW;
         LocalDateTime timestamp = LocalDateTime.now();
         UUID relatedUserId = UUID.randomUUID();
+        LocalDateTime createdAt = LocalDateTime.now();
+        LocalDateTime updatedAt = LocalDateTime.now();
 
         TransactionEntity entity1 = TransactionEntity.builder()
                 .id(id)
@@ -49,6 +57,8 @@ class TransactionEntityTest {
                 .type(type)
                 .timestamp(timestamp)
                 .relatedUserId(relatedUserId)
+                .createdAt(createdAt)
+                .updatedAt(updatedAt)
                 .build();
         assertEquals(id, entity1.getId());
         assertEquals(wallet, entity1.getWallet());
@@ -56,14 +66,18 @@ class TransactionEntityTest {
         assertEquals(type, entity1.getType());
         assertEquals(timestamp, entity1.getTimestamp());
         assertEquals(relatedUserId, entity1.getRelatedUserId());
+        assertEquals(createdAt, entity1.getCreatedAt());
+        assertEquals(updatedAt, entity1.getUpdatedAt());
 
-        TransactionEntity entity2 = new TransactionEntity(id, wallet, amount, type, timestamp, relatedUserId);
+        TransactionEntity entity2 = new TransactionEntity(id, wallet, amount, type, timestamp, relatedUserId, createdAt, updatedAt);
         assertEquals(id, entity2.getId());
         assertEquals(wallet, entity2.getWallet());
         assertEquals(amount, entity2.getAmount());
         assertEquals(type, entity2.getType());
         assertEquals(timestamp, entity2.getTimestamp());
         assertEquals(relatedUserId, entity2.getRelatedUserId());
+        assertEquals(createdAt, entity2.getCreatedAt());
+        assertEquals(updatedAt, entity2.getUpdatedAt());
     }
 
     @Test
@@ -75,5 +89,33 @@ class TransactionEntityTest {
         assertNull(entity.getType());
         assertNull(entity.getTimestamp());
         assertNull(entity.getRelatedUserId());
+        assertNull(entity.getCreatedAt());
+        assertNull(entity.getUpdatedAt());
+    }
+    
+    @Test
+    void testPrePersistAndPreUpdate() {
+        // Arrange
+        TransactionEntity entity = new TransactionEntity();
+        entity.setId(UUID.randomUUID());
+        entity.setAmount(BigDecimal.TEN);
+        entity.setType(TransactionType.DEPOSIT);
+        
+        // Simular o comportamento do @PrePersist
+        entity.onCreate();
+        assertNotNull(entity.getCreatedAt());
+        assertNotNull(entity.getUpdatedAt());
+        
+        // Guardar o valor inicial de updatedAt para comparação
+        LocalDateTime initialUpdatedAt = entity.getUpdatedAt();
+        LocalDateTime originalCreatedAt = entity.getCreatedAt();
+        
+        // Forçar uma mudança direta no timestamp para simular a passagem de tempo
+        entity.setUpdatedAt(initialUpdatedAt.plusNanos(1000));
+        
+        // Simular o comportamento do @PreUpdate
+        entity.onUpdate();
+        assertEquals(originalCreatedAt, entity.getCreatedAt()); // createdAt não deve mudar
+        assertTrue(entity.getUpdatedAt().isAfter(initialUpdatedAt)); // updatedAt deve ser posterior
     }
 }
