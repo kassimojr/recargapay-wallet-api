@@ -5,6 +5,7 @@ import com.recargapay.wallet.adapter.converters.TransactionMapper;
 import com.recargapay.wallet.adapter.dtos.DepositRequestDTO;
 import com.recargapay.wallet.core.ports.in.CreateWalletUseCase;
 import com.recargapay.wallet.core.ports.in.DepositUseCase;
+import com.recargapay.wallet.core.ports.in.FindAllWalletsUseCase;
 import com.recargapay.wallet.core.ports.in.TransferFundsUseCase;
 import com.recargapay.wallet.core.ports.in.WithdrawUseCase;
 import com.recargapay.wallet.adapter.dtos.CreateWalletRequestDTO;
@@ -31,11 +32,16 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.web.servlet.MockMvc;
 import java.math.BigDecimal;
 import java.util.UUID;
+import java.util.Arrays;
+import java.util.List;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @WebMvcTest(WalletController.class)
@@ -71,6 +77,10 @@ class WalletControllerTest {
         public WalletMapper walletMapper() {
             return mock(WalletMapper.class);
         }
+        @Bean
+        public FindAllWalletsUseCase findAllWalletsUseCase() {
+            return mock(FindAllWalletsUseCase.class);
+        }
     }
 
     @Autowired
@@ -90,6 +100,9 @@ class WalletControllerTest {
 
     @Autowired
     private WalletMapper walletMapper;
+    
+    @Autowired
+    private FindAllWalletsUseCase findAllWalletsUseCase;
 
     // --- TESTES DE CRIAÇÃO DE CARTEIRA ---
 
@@ -496,6 +509,78 @@ class WalletControllerTest {
         String json = String.format("{\"walletId\":\"%s\",\"amount\":%s}", walletId, amount);
         mockMvc.perform(post("/api/v1/wallets/withdraw")
                 .content(json)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("Should return all wallets")
+    @WithMockUser(roles = {"ADMIN"})
+    void shouldReturnAllWallets() throws Exception {
+        // Arrange
+        UUID walletId1 = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        UUID userId1 = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+        Wallet wallet1 = new Wallet(walletId1, userId1, BigDecimal.valueOf(100));
+
+        UUID walletId2 = UUID.fromString("22222222-2222-2222-2222-222222222222");
+        UUID userId2 = UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+        Wallet wallet2 = new Wallet(walletId2, userId2, BigDecimal.valueOf(200));
+
+        List<Wallet> wallets = Arrays.asList(wallet1, wallet2);
+        
+        WalletDTO walletDTO1 = new WalletDTO();
+        walletDTO1.setId(walletId1);
+        walletDTO1.setUserId(userId1);
+        walletDTO1.setBalance(BigDecimal.valueOf(100));
+        
+        WalletDTO walletDTO2 = new WalletDTO();
+        walletDTO2.setId(walletId2);
+        walletDTO2.setUserId(userId2);
+        walletDTO2.setBalance(BigDecimal.valueOf(200));
+        
+        List<WalletDTO> walletDTOs = Arrays.asList(walletDTO1, walletDTO2);
+        
+        when(findAllWalletsUseCase.findAll()).thenReturn(wallets);
+        when(walletMapper.toDTOList(wallets)).thenReturn(walletDTOs);
+        
+        // Act and Assert
+        mockMvc.perform(get("/api/v1/wallets")
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].id").value(walletId1.toString()))
+                .andExpect(jsonPath("$[0].userId").value(userId1.toString()))
+                .andExpect(jsonPath("$[0].balance").value(100))
+                .andExpect(jsonPath("$[1].id").value(walletId2.toString()))
+                .andExpect(jsonPath("$[1].userId").value(userId2.toString()))
+                .andExpect(jsonPath("$[1].balance").value(200));
+    }
+    
+    @Test
+    @DisplayName("Should return empty list when no wallets")
+    @WithMockUser(roles = {"ADMIN"})
+    void shouldReturnEmptyListWhenNoWallets() throws Exception {
+        // Arrange
+        when(findAllWalletsUseCase.findAll()).thenReturn(List.of());
+        when(walletMapper.toDTOList(List.of())).thenReturn(List.of());
+        
+        // Act and Assert
+        mockMvc.perform(get("/api/v1/wallets")
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+    
+    @Test
+    @DisplayName("Should return 401 when not authenticated")
+    @WithAnonymousUser
+    void shouldReturnUnauthorizedWhenNotAuthenticated() throws Exception {
+        // Act and Assert
+        mockMvc.perform(get("/api/v1/wallets")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized());
     }

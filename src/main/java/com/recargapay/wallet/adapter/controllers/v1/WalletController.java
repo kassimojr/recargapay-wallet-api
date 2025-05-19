@@ -4,12 +4,14 @@ import com.recargapay.wallet.adapter.dtos.*;
 import com.recargapay.wallet.core.domain.Transaction;
 import com.recargapay.wallet.core.ports.in.CreateWalletUseCase;
 import com.recargapay.wallet.core.ports.in.DepositUseCase;
+import com.recargapay.wallet.core.ports.in.FindAllWalletsUseCase;
 import com.recargapay.wallet.core.ports.in.TransferFundsUseCase;
 import com.recargapay.wallet.core.ports.in.WithdrawUseCase;
 import com.recargapay.wallet.adapter.converters.WalletMapper;
 import com.recargapay.wallet.adapter.converters.TransactionMapper;
 import com.recargapay.wallet.core.domain.Wallet;
 import java.util.UUID;
+import java.util.List;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -32,19 +34,31 @@ public class WalletController {
     private final DepositUseCase depositUseCase;
     private final WithdrawUseCase withdrawUseCase;
     private final TransactionMapper transactionMapper;
+    private final FindAllWalletsUseCase findAllWalletsUseCase;
 
     public WalletController(TransferFundsUseCase transferFundsUseCase, 
             CreateWalletUseCase createWalletUseCase, 
             DepositUseCase depositUseCase, 
             WithdrawUseCase withdrawUseCase, 
             WalletMapper walletMapper,
-            TransactionMapper transactionMapper) {
+            TransactionMapper transactionMapper,
+            FindAllWalletsUseCase findAllWalletsUseCase) {
         this.transferFundsUseCase = transferFundsUseCase;
         this.createWalletUseCase = createWalletUseCase;
         this.depositUseCase = depositUseCase;
         this.withdrawUseCase = withdrawUseCase;
         this.walletMapper = walletMapper;
         this.transactionMapper = transactionMapper;
+        this.findAllWalletsUseCase = findAllWalletsUseCase;
+    }
+
+    @Operation(summary = "Listar todas as carteiras", responses = {
+        @ApiResponse(responseCode = "200", description = "Lista de carteiras retornada com sucesso")
+    })
+    @GetMapping
+    public ResponseEntity<List<WalletDTO>> findAll() {
+        List<Wallet> wallets = findAllWalletsUseCase.findAll();
+        return ResponseEntity.ok(walletMapper.toDTOList(wallets));
     }
 
     @Operation(summary = "Obter saldo atual da carteira", responses = {
