@@ -13,7 +13,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -32,6 +35,7 @@ class DepositServiceTest {
     @Mock
     private TransactionRepository transactionRepository;
 
+    @Spy
     @InjectMocks
     private DepositService depositService;
 
@@ -58,6 +62,9 @@ class DepositServiceTest {
         wallet.setId(walletId);
         wallet.setUserId(userId);
         wallet.setBalance(initialBalance);
+        
+        // Configurando o serviço para usar a si mesmo como self
+        ReflectionTestUtils.setField(depositService, "self", depositService);
     }
 
     @Test
@@ -65,16 +72,18 @@ class DepositServiceTest {
         // Arrange
         when(walletRepository.findById(walletId)).thenReturn(Optional.of(wallet));
         when(walletRepository.save(any(Wallet.class))).thenReturn(wallet);
-        
+
         Transaction savedTransaction = new Transaction();
         savedTransaction.setId(UUID.randomUUID());
         savedTransaction.setWalletId(walletId);
         savedTransaction.setAmount(depositAmount);
+        savedTransaction.setTimestamp(java.time.LocalDateTime.now());
         savedTransaction.setType(TransactionType.DEPOSIT);
         savedTransaction.setRelatedUserId(userId);
         
+        // Mock para o método saveAndReturn
         when(transactionRepository.saveAndReturn(any(Transaction.class))).thenReturn(savedTransaction);
-
+        
         // Act
         Transaction result = depositService.deposit(walletId, depositAmount);
 
@@ -119,10 +128,66 @@ class DepositServiceTest {
                 IllegalArgumentException.class,
                 () -> depositService.deposit(null, depositAmount)
         );
-
+        
         // Verify
         verify(walletRepository, never()).findById(any());
         verify(walletRepository, never()).save(any());
         verify(transactionRepository, never()).saveAndReturn(any());
+    }
+
+    @Test
+    void deposit_shouldRetryOnOptimisticLockingFailure() {
+        // Arrange
+        when(walletRepository.findById(walletId))
+                .thenReturn(Optional.of(wallet));
+        
+        // Simula falha de otimistic locking na primeira tentativa e sucesso na segunda
+        when(walletRepository.save(any(Wallet.class)))
+                .thenThrow(OptimisticLockingFailureException.class)
+                .thenReturn(wallet);
+        
+        // Mock para o método saveAndReturn
+        when(transactionRepository.saveAndReturn(any(Transaction.class))).thenAnswer(invocation -> {
+            Transaction tx = invocation.getArgument(0);
+            tx.setId(UUID.randomUUID());
+            return tx;
+        });
+        
+        // Act
+        Transaction result = depositService.deposit(walletId, depositAmount);
+        
+        // Assert
+        verify(walletRepository, times(2)).findById(walletId);
+        verify(walletRepository, times(2)).save(any(Wallet.class));
+        verify(transactionRepository).saveAndReturn(any(Transaction.class));
+        
+        assertNotNull(result);
+        assertEquals(walletId, result.getWalletId());
+        assertEquals(depositAmount, result.getAmount());
+        assertEquals(TransactionType.DEPOSIT, result.getType());
+    }
+
+    @Test
+    void deposit_shouldFailAfterMaxRetryAttempts() {
+        // Arrange
+        when(walletRepository.findById(walletId))
+                .thenReturn(Optional.of(wallet));
+        
+        // Simula falha contínua de otimistic locking
+        when(walletRepository.save(any(Wallet.class)))
+                .thenThrow(OptimisticLockingFailureException.class);
+        
+        // Act & Assert
+        OptimisticLockingFailureException exception = assertThrows(
+                OptimisticLockingFailureException.class, 
+                () -> {
+                    depositService.deposit(walletId, depositAmount);
+                }
+        );
+        
+        // Verify - deve tentar o número máximo de vezes (3)
+        verify(walletRepository, times(3)).findById(walletId);
+        verify(walletRepository, times(3)).save(any(Wallet.class));
+        verify(transactionRepository, never()).saveAndReturn(any(Transaction.class));
     }
 }

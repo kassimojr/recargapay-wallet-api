@@ -4,6 +4,7 @@ import com.recargapay.wallet.core.domain.User;
 import com.recargapay.wallet.core.domain.Wallet;
 import com.recargapay.wallet.core.exceptions.UserNotFoundException;
 import com.recargapay.wallet.core.exceptions.WalletAlreadyExistsException;
+import com.recargapay.wallet.core.exceptions.WalletNotFoundException;
 import com.recargapay.wallet.core.ports.out.UserRepository;
 import com.recargapay.wallet.core.ports.out.WalletRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -90,5 +91,71 @@ class CreateWalletServiceTest {
         verify(userRepository).findById(userId);
         verify(walletRepository).findByUserId(userId);
         verify(walletRepository, never()).save(any(Wallet.class));
+    }
+    
+    @Test
+    void findById_shouldReturnWalletWhenExists() {
+        // Arrange
+        UUID walletId = UUID.randomUUID();
+        Wallet wallet = new Wallet(walletId, UUID.randomUUID(), null);
+        
+        when(walletRepository.findById(walletId)).thenReturn(Optional.of(wallet));
+        
+        // Act
+        Wallet found = service.findById(walletId);
+        
+        // Assert
+        assertEquals(wallet, found);
+        verify(walletRepository).findById(walletId);
+    }
+    
+    @Test
+    void findById_shouldThrowExceptionWhenWalletNotFound() {
+        // Arrange
+        UUID walletId = UUID.randomUUID();
+        
+        when(walletRepository.findById(walletId)).thenReturn(Optional.empty());
+        
+        // Act & Assert
+        assertThrows(
+            WalletNotFoundException.class,
+            () -> service.findById(walletId)
+        );
+        
+        verify(walletRepository).findById(walletId);
+    }
+    
+    @Test
+    void findBalanceAt_shouldReturnWalletWhenExists() {
+        // Arrange
+        UUID walletId = UUID.randomUUID();
+        Wallet wallet = new Wallet(walletId, UUID.randomUUID(), null);
+        String timestamp = "2023-01-01T12:00:00";
+        
+        when(walletRepository.findById(walletId)).thenReturn(Optional.of(wallet));
+        
+        // Act
+        Wallet found = service.findBalanceAt(walletId, timestamp);
+        
+        // Assert
+        assertEquals(wallet, found);
+        verify(walletRepository).findById(walletId);
+    }
+    
+    @Test
+    void findBalanceAt_shouldThrowExceptionWhenWalletNotFound() {
+        // Arrange
+        UUID walletId = UUID.randomUUID();
+        String timestamp = "2023-01-01T12:00:00";
+        
+        when(walletRepository.findById(walletId)).thenReturn(Optional.empty());
+        
+        // Act & Assert
+        assertThrows(
+            WalletNotFoundException.class,
+            () -> service.findBalanceAt(walletId, timestamp)
+        );
+        
+        verify(walletRepository).findById(walletId);
     }
 }
