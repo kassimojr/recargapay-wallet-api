@@ -33,6 +33,9 @@ public class WalletEntity {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+    
+    @Version
+    private Long version = 0L; // Inicialização do campo de versão
 
     @PrePersist
     protected void onCreate() {
