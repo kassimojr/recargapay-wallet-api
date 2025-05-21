@@ -59,7 +59,7 @@ class WalletEntityTest {
         assertEquals(createdAt, entity1.getCreatedAt());
         assertEquals(updatedAt, entity1.getUpdatedAt());
 
-        WalletEntity entity2 = new WalletEntity(id, user, balance, createdAt, updatedAt);
+        WalletEntity entity2 = new WalletEntity(id, user, balance, createdAt, updatedAt, 0L);
         assertEquals(id, entity2.getId());
         assertEquals(user, entity2.getUser());
         assertEquals(balance, entity2.getBalance());
