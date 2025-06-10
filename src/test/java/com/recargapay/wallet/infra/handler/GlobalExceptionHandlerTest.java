@@ -25,7 +25,7 @@ class GlobalExceptionHandlerTest {
     private final GlobalExceptionHandler handler = new GlobalExceptionHandler();
 
     @Test
-    @DisplayName("Deve retornar BAD_REQUEST para MethodArgumentNotValidException")
+    @DisplayName("Should return BAD_REQUEST for MethodArgumentNotValidException")
     void testHandleValidationException() {
         // Arrange
         MethodArgumentNotValidException ex = mock(MethodArgumentNotValidException.class);
@@ -33,8 +33,8 @@ class GlobalExceptionHandlerTest {
         
         List<FieldError> fieldErrors = new ArrayList<>();
         FieldError error = mock(FieldError.class);
-        when(error.getField()).thenReturn("nome");
-        when(error.getDefaultMessage()).thenReturn("não pode ser vazio");
+        when(error.getField()).thenReturn("name");
+        when(error.getDefaultMessage()).thenReturn("cannot be empty");
         fieldErrors.add(error);
         
         when(bindingResult.getFieldErrors()).thenReturn(fieldErrors);
@@ -47,20 +47,20 @@ class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         ProblemDetail problem = response.getBody();
         assertNotNull(problem);
-        assertEquals("Dados de entrada inválidos", problem.getTitle());
-        assertEquals("Erro de validação dos dados de entrada", problem.getDetail());
+        assertEquals("Invalid input data", problem.getTitle());
+        assertEquals("Input data validation error", problem.getDetail());
         
         @SuppressWarnings("unchecked")
         Map<String, String> validationErrors = (Map<String, String>) problem.getProperties().get("validationErrors");
         assertNotNull(validationErrors);
-        assertEquals("não pode ser vazio", validationErrors.get("nome"));
+        assertEquals("cannot be empty", validationErrors.get("name"));
     }
 
     @Test
-    @DisplayName("Deve retornar BAD_REQUEST para IllegalArgumentException")
+    @DisplayName("Should return BAD_REQUEST for IllegalArgumentException")
     void testHandleIllegalArgumentException() {
         // Arrange
-        IllegalArgumentException ex = new IllegalArgumentException("Parâmetro inválido");
+        IllegalArgumentException ex = new IllegalArgumentException("Invalid parameter");
         
         // Act
         ResponseEntity<ProblemDetail> response = handler.handleIllegalArgumentException(ex);
@@ -69,15 +69,15 @@ class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         ProblemDetail problem = response.getBody();
         assertNotNull(problem);
-        assertEquals("Parâmetro inválido", problem.getTitle());
-        assertEquals("Parâmetro inválido", problem.getDetail());
+        assertEquals("Invalid parameter", problem.getTitle());
+        assertEquals("Invalid parameter", problem.getDetail());
     }
 
     @Test
-    @DisplayName("Deve retornar CONFLICT para IllegalStateException")
+    @DisplayName("Should return CONFLICT for IllegalStateException")
     void testHandleIllegalStateException() {
         // Arrange
-        IllegalStateException ex = new IllegalStateException("Estado inválido");
+        IllegalStateException ex = new IllegalStateException("Invalid state");
         
         // Act
         ResponseEntity<ProblemDetail> response = handler.handleIllegalStateException(ex);
@@ -86,15 +86,15 @@ class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
         ProblemDetail problem = response.getBody();
         assertNotNull(problem);
-        assertEquals("Estado de operação inválido", problem.getTitle());
-        assertEquals("Estado inválido", problem.getDetail());
+        assertEquals("Invalid operation state", problem.getTitle());
+        assertEquals("Invalid state", problem.getDetail());
     }
 
     @Test
-    @DisplayName("Deve retornar CONFLICT para WalletAlreadyExistsException")
+    @DisplayName("Should return CONFLICT for WalletAlreadyExistsException")
     void testHandleWalletAlreadyExistsException() {
         // Arrange
-        WalletAlreadyExistsException ex = new WalletAlreadyExistsException("Carteira já existe");
+        WalletAlreadyExistsException ex = new WalletAlreadyExistsException("Wallet already exists");
         
         // Act
         ResponseEntity<ProblemDetail> response = handler.handleWalletAlreadyExistsException(ex);
@@ -103,15 +103,15 @@ class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
         ProblemDetail problem = response.getBody();
         assertNotNull(problem);
-        assertEquals("Carteira já existe", problem.getTitle());
-        assertEquals("Carteira já existe", problem.getDetail());
+        assertEquals("Wallet already exists", problem.getTitle());
+        assertEquals("Wallet already exists", problem.getDetail());
     }
 
     @Test
-    @DisplayName("Deve retornar BAD_REQUEST para InsufficientBalanceException")
+    @DisplayName("Should return BAD_REQUEST for InsufficientBalanceException")
     void testHandleInsufficientBalance() {
         // Arrange
-        InsufficientBalanceException ex = new InsufficientBalanceException("Saldo insuficiente");
+        InsufficientBalanceException ex = new InsufficientBalanceException("Insufficient balance");
         
         // Act
         ResponseEntity<ProblemDetail> response = handler.handleInsufficientBalance(ex);
@@ -120,15 +120,15 @@ class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         ProblemDetail problem = response.getBody();
         assertNotNull(problem);
-        assertEquals("Saldo insuficiente", problem.getTitle());
-        assertEquals("Saldo insuficiente", problem.getDetail());
+        assertEquals("Insufficient balance", problem.getTitle());
+        assertEquals("Insufficient balance", problem.getDetail());
     }
 
     @Test
-    @DisplayName("Deve retornar NOT_FOUND para WalletNotFoundException")
+    @DisplayName("Should return NOT_FOUND for WalletNotFoundException")
     void testHandleWalletNotFound() {
         // Arrange
-        WalletNotFoundException ex = new WalletNotFoundException("Carteira não encontrada");
+        WalletNotFoundException ex = new WalletNotFoundException("Wallet not found");
         
         // Act
         ResponseEntity<ProblemDetail> response = handler.handleWalletNotFound(ex);
@@ -137,15 +137,15 @@ class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         ProblemDetail problem = response.getBody();
         assertNotNull(problem);
-        assertEquals("Carteira não encontrada", problem.getTitle());
-        assertEquals("Carteira não encontrada", problem.getDetail());
+        assertEquals("Wallet not found", problem.getTitle());
+        assertEquals("Wallet not found", problem.getDetail());
     }
 
     @Test
-    @DisplayName("Deve retornar NOT_FOUND para UserNotFoundException")
+    @DisplayName("Should return NOT_FOUND for UserNotFoundException")
     void testHandleUserNotFound() {
         // Arrange
-        UserNotFoundException ex = new UserNotFoundException("Usuário não encontrado");
+        UserNotFoundException ex = new UserNotFoundException("User not found");
         
         // Act
         ResponseEntity<ProblemDetail> response = handler.handleUserNotFound(ex);
@@ -154,15 +154,15 @@ class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         ProblemDetail problem = response.getBody();
         assertNotNull(problem);
-        assertEquals("Usuário não encontrado", problem.getTitle());
-        assertEquals("Usuário não encontrado", problem.getDetail());
+        assertEquals("User not found", problem.getTitle());
+        assertEquals("User not found", problem.getDetail());
     }
 
     @Test
-    @DisplayName("Deve retornar INTERNAL_SERVER_ERROR para Exception genérica")
+    @DisplayName("Should return INTERNAL_SERVER_ERROR for generic Exception")
     void testHandleGenericException() {
         // Arrange
-        Exception ex = new Exception("Erro interno");
+        Exception ex = new Exception("Internal error");
         WebRequest request = mock(WebRequest.class);
         
         // Act
@@ -172,13 +172,13 @@ class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         ProblemDetail problem = response.getBody();
         assertNotNull(problem);
-        assertEquals("Erro interno do servidor", problem.getTitle());
-        assertEquals("Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.", problem.getDetail());
+        assertEquals("Internal server error", problem.getTitle());
+        assertEquals("An unexpected error occurred. Please try again later.", problem.getDetail());
         assertEquals(Exception.class.getName(), problem.getProperties().get("exceptionType"));
     }
     
     @Test
-    @DisplayName("Deve retornar CONFLICT quando DataIntegrityViolationException contém erro de versão não inicializada")
+    @DisplayName("Should return CONFLICT when DataIntegrityViolationException contains uninitialized version error")
     void testHandleDataIntegrityViolation_WithVersionError() {
         // Arrange
         DataIntegrityViolationException ex = new DataIntegrityViolationException(
@@ -191,17 +191,16 @@ class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
         ProblemDetail problem = response.getBody();
         assertNotNull(problem);
-        assertEquals("Conflito de concorrência", problem.getTitle());
-        assertTrue(problem.getDetail().contains("Os dados da carteira foram modificados"));
+        assertEquals("Concurrency conflict", problem.getTitle());
+        assertTrue(problem.getDetail().contains("The wallet data has been modified"));
         assertNotNull(problem.getProperties().get("timestamp"));
     }
     
     @Test
-    @DisplayName("Deve retornar BAD_REQUEST para outros tipos de DataIntegrityViolationException")
+    @DisplayName("Should return BAD_REQUEST for other types of DataIntegrityViolationException")
     void testHandleDataIntegrityViolation_WithOtherError() {
         // Arrange
-        DataIntegrityViolationException ex = new DataIntegrityViolationException(
-            "Violação de chave única: constraint_name");
+        DataIntegrityViolationException ex = new DataIntegrityViolationException("Database constraint violation");
         
         // Act
         ResponseEntity<ProblemDetail> response = handler.handleDataIntegrityViolation(ex);
@@ -210,16 +209,16 @@ class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         ProblemDetail problem = response.getBody();
         assertNotNull(problem);
-        assertEquals("Erro de integridade de dados", problem.getTitle());
-        assertEquals("Violação de chave única: constraint_name", problem.getDetail());
+        assertEquals("Data integrity violation", problem.getTitle());
+        assertEquals("Database constraint violation", problem.getDetail());
     }
     
     @Test
-    @DisplayName("Deve retornar CONFLICT para OptimisticLockingFailureException")
+    @DisplayName("Should return CONFLICT for OptimisticLockingFailureException")
     void testHandleOptimisticLocking() {
         // Arrange
         OptimisticLockingFailureException ex = new OptimisticLockingFailureException(
-            "Outra transação modificou os mesmos dados");
+            "Another user has modified the data");
         
         // Act
         ResponseEntity<ProblemDetail> response = handler.handleOptimisticLocking(ex);
@@ -228,8 +227,8 @@ class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
         ProblemDetail problem = response.getBody();
         assertNotNull(problem);
-        assertEquals("Conflito de concorrência", problem.getTitle());
-        assertTrue(problem.getDetail().contains("Os dados foram alterados por outro processo"));
+        assertEquals("Concurrency conflict", problem.getTitle());
+        assertTrue(problem.getDetail().contains("Another user has modified the data"));
         assertNotNull(problem.getProperties().get("cause"));
     }
 }

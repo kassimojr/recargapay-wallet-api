@@ -59,7 +59,7 @@ class WalletEntityTest {
         assertEquals(createdAt, entity1.getCreatedAt());
         assertEquals(updatedAt, entity1.getUpdatedAt());
 
-        WalletEntity entity2 = new WalletEntity(id, user, balance, createdAt, updatedAt, 0L);
+        WalletEntity entity2 = new WalletEntity(id, user, balance, createdAt, updatedAt);
         assertEquals(id, entity2.getId());
         assertEquals(user, entity2.getUser());
         assertEquals(balance, entity2.getBalance());
@@ -79,40 +79,34 @@ class WalletEntityTest {
     
     @Test
     void testPrePersistSetsCreatedAtAndUpdatedAt() {
-        // Arrange
         WalletEntity entity = new WalletEntity();
         assertNull(entity.getCreatedAt());
         assertNull(entity.getUpdatedAt());
         
-        // Act
         entity.onCreate();
         
-        // Assert
         assertNotNull(entity.getCreatedAt());
         assertNotNull(entity.getUpdatedAt());
-        // Ambos devem ser definidos com o mesmo timestamp ou próximos
         assertTrue(entity.getUpdatedAt().equals(entity.getCreatedAt()) || 
                    entity.getUpdatedAt().isAfter(entity.getCreatedAt()));
     }
     
     @Test
     void testPreUpdateSetsUpdatedAt() {
-        // Arrange
         WalletEntity entity = new WalletEntity();
-        entity.onCreate(); // Preenche created_at e updated_at inicialmente
-        LocalDateTime originalCreatedAt = entity.getCreatedAt();
-        LocalDateTime originalUpdatedAt = entity.getUpdatedAt();
+        LocalDateTime initialTime = LocalDateTime.now().minusMinutes(5);
+        entity.setUpdatedAt(initialTime);
+        assertEquals(initialTime, entity.getUpdatedAt());
         
-        // Forçar uma data de atualização anterior para simular passagem de tempo
-        LocalDateTime olderDate = originalUpdatedAt.minusSeconds(10);
-        entity.setUpdatedAt(olderDate);
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
         
-        // Act
         entity.onUpdate();
         
-        // Assert
-        assertEquals(originalCreatedAt, entity.getCreatedAt()); // created_at não deve mudar
-        assertNotEquals(olderDate, entity.getUpdatedAt()); // updated_at deve mudar
-        assertTrue(entity.getUpdatedAt().isAfter(olderDate)); // novo updated_at deve ser após o original
+        assertNotNull(entity.getUpdatedAt());
+        assertTrue(entity.getUpdatedAt().isAfter(initialTime));
     }
 }

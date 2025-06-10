@@ -2,6 +2,8 @@ package com.recargapay.wallet.infra.handler;
 
 import com.recargapay.wallet.core.exceptions.DuplicatedResourceException;
 import com.recargapay.wallet.core.exceptions.InsufficientBalanceException;
+import com.recargapay.wallet.core.exceptions.InsufficientFundsException;
+import com.recargapay.wallet.core.exceptions.InvalidDateFormatException;
 import com.recargapay.wallet.core.exceptions.UserNotFoundException;
 import com.recargapay.wallet.core.exceptions.WalletNotFoundException;
 import com.recargapay.wallet.core.exceptions.WalletAlreadyExistsException;
@@ -24,27 +26,27 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Tratador global de exceções para a API que implementa o padrão RFC 7807 (Problem Details)
- * para respostas de erro consistentes.
+ * Global exception handler for the API that implements RFC 7807 (Problem Details)
+ * standard for consistent error responses.
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     
-    // Base URI para tipos de erro
+    // Base URI for error types
     private static final String ERROR_TYPE_BASE = "https://api.recargapay.com/errors/";
     private static final String CAUSE_PROPERTY = "cause";
     private static final String TIMESTAMP_PROPERTY = "timestamp";
     
     /**
-     * Cria um objeto ProblemDetail com as informações básicas preenchidas
+     * Creates a ProblemDetail object with basic information filled in
      *
-     * @param status código HTTP de status da resposta
-     * @param title título do problema
-     * @param detail detalhes do problema
-     * @param typeKey identificador do tipo de problema
-     * @return objeto ProblemDetail configurado
+     * @param status HTTP status code for the response
+     * @param title problem title
+     * @param detail problem details
+     * @param typeKey problem type identifier
+     * @return configured ProblemDetail object
      */
     private ProblemDetail createProblem(HttpStatus status, String title, String detail, String typeKey) {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, detail);
@@ -55,7 +57,7 @@ public class GlobalExceptionHandler {
     }
     
     /**
-     * Manipula erros de validação de entrada
+     * Handles input validation errors
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ProblemDetail> handleValidationException(MethodArgumentNotValidException ex) {
@@ -64,15 +66,15 @@ public class GlobalExceptionHandler {
             .stream()
             .collect(Collectors.toMap(
                 FieldError::getField,
-                fieldError -> fieldError.getDefaultMessage() == null ? "Valor inválido" : fieldError.getDefaultMessage()
+                fieldError -> fieldError.getDefaultMessage() == null ? "Invalid value" : fieldError.getDefaultMessage()
             ));
         
-        log.warn("Erro de validação: {}", validationErrors);
+        log.warn("Validation error: {}", validationErrors);
         
         ProblemDetail problem = createProblem(
             HttpStatus.BAD_REQUEST, 
-            "Dados de entrada inválidos",
-            "Erro de validação dos dados de entrada",
+            "Invalid input data",
+            "Input data validation error",
             "validation-error"
         );
         
@@ -82,15 +84,15 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Manipula exceção de carteira não encontrada
+     * Handles wallet not found exception
      */
     @ExceptionHandler(WalletNotFoundException.class)
     public ResponseEntity<ProblemDetail> handleWalletNotFound(WalletNotFoundException ex) {
-        log.warn("Carteira não encontrada: {}", ex.getMessage());
+        log.warn("Wallet not found: {}", ex.getMessage());
         
         ProblemDetail problem = createProblem(
             HttpStatus.NOT_FOUND,
-            "Carteira não encontrada",
+            "Wallet not found",
             ex.getMessage(),
             "wallet-not-found"
         );
@@ -99,15 +101,15 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Manipula exceção de saldo insuficiente
+     * Handles insufficient balance exception
      */
     @ExceptionHandler(InsufficientBalanceException.class)
     public ResponseEntity<ProblemDetail> handleInsufficientBalance(InsufficientBalanceException ex) {
-        log.warn("Saldo insuficiente: {}", ex.getMessage());
+        log.warn("Insufficient balance: {}", ex.getMessage());
         
         ProblemDetail problem = createProblem(
             HttpStatus.BAD_REQUEST,
-            "Saldo insuficiente",
+            "Insufficient balance",
             ex.getMessage(),
             "insufficient-balance"
         );
@@ -116,15 +118,35 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Manipula exceção de usuário não encontrado
+     * Handles insufficient funds exception
+     */
+    @ExceptionHandler(InsufficientFundsException.class)
+    public ResponseEntity<ProblemDetail> handleInsufficientFunds(InsufficientFundsException ex) {
+        log.warn("Insufficient funds: {}", ex.getMessage());
+        
+        ProblemDetail problem = createProblem(
+            HttpStatus.BAD_REQUEST,
+            "Insufficient balance to complete the operation",
+            ex.getMessage(),
+            "insufficient-funds"
+        );
+        
+        // Add extra details that may be useful for the client
+        problem.setProperty("code", "INSUFFICIENT_FUNDS");
+        
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
+    }
+
+    /**
+     * Handles user not found exception
      */
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ProblemDetail> handleUserNotFound(UserNotFoundException ex) {
-        log.warn("Usuário não encontrado: {}", ex.getMessage());
+        log.warn("User not found: {}", ex.getMessage());
         
         ProblemDetail problem = createProblem(
             HttpStatus.NOT_FOUND,
-            "Usuário não encontrado",
+            "User not found",
             ex.getMessage(),
             "user-not-found"
         );
@@ -133,15 +155,15 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Manipula exceção de recurso duplicado
+     * Handles duplicated resource exception
      */
     @ExceptionHandler(DuplicatedResourceException.class)
     public ResponseEntity<ProblemDetail> handleDuplicatedResource(DuplicatedResourceException ex) {
-        log.warn("Recurso duplicado: {}", ex.getMessage());
+        log.warn("Duplicated resource: {}", ex.getMessage());
         
         ProblemDetail problem = createProblem(
             HttpStatus.CONFLICT,
-            "Recurso já existe",
+            "Resource already exists",
             ex.getMessage(),
             "resource-exists"
         );
@@ -150,15 +172,15 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Manipula exceção de argumento ilegal
+     * Handles illegal argument exception
      */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ProblemDetail> handleIllegalArgumentException(IllegalArgumentException ex) {
-        log.warn("Argumento ilegal: {}", ex.getMessage());
+        log.warn("Illegal argument: {}", ex.getMessage());
         
         ProblemDetail problem = createProblem(
             HttpStatus.BAD_REQUEST,
-            "Parâmetro inválido",
+            "Invalid parameter",
             ex.getMessage(),
             "invalid-parameter"
         );
@@ -167,15 +189,15 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Manipula exceção de estado ilegal
+     * Handles illegal state exception
      */
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ProblemDetail> handleIllegalStateException(IllegalStateException ex) {
-        log.warn("Estado ilegal: {}", ex.getMessage());
+        log.warn("Illegal state: {}", ex.getMessage());
         
         ProblemDetail problem = createProblem(
             HttpStatus.CONFLICT,
-            "Estado de operação inválido",
+            "Invalid operation state",
             ex.getMessage(),
             "invalid-state"
         );
@@ -184,15 +206,39 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Manipula exceção de carteira já existente
+     * Handles invalid date format exception
+     */
+    @ExceptionHandler(InvalidDateFormatException.class)
+    public ResponseEntity<ProblemDetail> handleInvalidDateFormat(InvalidDateFormatException ex) {
+        log.warn("Invalid date format: {}", ex.getMessage());
+        
+        ProblemDetail problem = createProblem(
+            HttpStatus.BAD_REQUEST,
+            "Invalid date format",
+            ex.getMessage(),
+            "invalid-date-format"
+        );
+        
+        // Add extra details that may be useful for the client
+        problem.setProperty("code", "INVALID_DATE_FORMAT");
+        problem.setProperty("expectedFormats", new String[] {
+            "ISO (2023-01-01T12:00:00Z)", 
+            "Simple (2023-01-01 12:00:00)"
+        });
+        
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
+    }
+
+    /**
+     * Handles wallet already exists exception
      */
     @ExceptionHandler(WalletAlreadyExistsException.class)
     public ResponseEntity<ProblemDetail> handleWalletAlreadyExistsException(WalletAlreadyExistsException ex) {
-        log.warn("Carteira já existe: {}", ex.getMessage());
+        log.warn("Wallet already exists: {}", ex.getMessage());
         
         ProblemDetail problem = createProblem(
             HttpStatus.CONFLICT,
-            "Carteira já existe",
+            "Wallet already exists",
             ex.getMessage(),
             "wallet-exists"
         );
@@ -201,18 +247,18 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Manipula exceções de integridade de dados, incluindo problemas com campos de versão
+     * Handles data integrity exceptions, including issues with version fields
      */
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ProblemDetail> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
-        log.error("Erro de integridade de dados: {}", ex.getMessage(), ex);
+        log.error("Data integrity error: {}", ex.getMessage(), ex);
         
-        // Verifica se é o erro específico de versão não inicializada
+        // Check if it's the specific uninitialized version value error
         if (ex.getMessage() != null && ex.getMessage().contains("uninitialized version value")) {
             ProblemDetail problem = createProblem(
                 HttpStatus.CONFLICT,
-                "Conflito de concorrência",
-                "Os dados da carteira foram modificados por outro processo. Por favor, tente novamente.",
+                "Concurrency conflict",
+                "The wallet data was modified by another process. Please try again.",
                 "optimistic-lock"
             );
             
@@ -221,10 +267,10 @@ public class GlobalExceptionHandler {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
         }
         
-        // Outros erros de integridade
+        // Other integrity errors
         ProblemDetail problem = createProblem(
             HttpStatus.BAD_REQUEST,
-            "Erro de integridade de dados",
+            "Data integrity error",
             ex.getMessage(),
             "data-integrity"
         );
@@ -233,16 +279,16 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Manipula exceções de bloqueio otimista (versão concorrente desatualizada)
+     * Handles optimistic locking exceptions (outdated concurrent version)
      */
     @ExceptionHandler(OptimisticLockingFailureException.class)
     public ResponseEntity<ProblemDetail> handleOptimisticLocking(OptimisticLockingFailureException ex) {
-        log.error("Erro de bloqueio otimista: {}", ex.getMessage(), ex);
+        log.error("Optimistic locking error: {}", ex.getMessage(), ex);
         
         ProblemDetail problem = createProblem(
             HttpStatus.CONFLICT,
-            "Conflito de concorrência",
-            "Os dados foram alterados por outro processo durante a operação. Por favor, tente novamente.",
+            "Concurrency conflict",
+            "The data was modified by another process during the operation. Please try again.",
             "concurrent-modification"
         );
         
@@ -252,16 +298,16 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Manipula exceções genéricas não tratadas
+     * Handles generic unhandled exceptions
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ProblemDetail> handleGenericException(Exception ex, WebRequest request) {
-        log.error("Erro inesperado: {}", ex.getMessage(), ex);
+        log.error("Unexpected error: {}", ex.getMessage(), ex);
         
         ProblemDetail problem = createProblem(
             HttpStatus.INTERNAL_SERVER_ERROR,
-            "Erro interno do servidor",
-            "Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.",
+            "Internal server error",
+            "An unexpected error occurred. Please try again later.",
             "server-error"
         );
         

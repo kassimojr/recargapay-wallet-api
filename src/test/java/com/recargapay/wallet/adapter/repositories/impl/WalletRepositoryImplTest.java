@@ -7,6 +7,7 @@ import com.recargapay.wallet.adapter.repositories.UserJpaRepository;
 import com.recargapay.wallet.core.domain.Wallet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -27,19 +28,37 @@ class WalletRepositoryImplTest {
 
     @InjectMocks
     private WalletRepositoryImpl walletRepository;
+    
+    private Wallet wallet;
+    private WalletEntity savedEntity;
+    private UUID walletId;
+    private UUID userId;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        
+        walletId = UUID.randomUUID();
+        userId = UUID.randomUUID();
+        wallet = new Wallet(walletId, userId, BigDecimal.ONE);
+        savedEntity = new WalletEntity();
+        savedEntity.setId(walletId);
+        savedEntity.setBalance(BigDecimal.ONE);
+        
+        // Mock para toEntity (usado pelo método original)
+        when(walletMapper.toEntity(any(Wallet.class))).thenReturn(new WalletEntity());
+        
+        // Mock para toDomain
+        when(walletMapper.toDomain(any(WalletEntity.class))).thenReturn(wallet);
+        
+        // Mock para save
+        when(jpaRepository.save(any(WalletEntity.class))).thenReturn(savedEntity);
     }
 
     @Test
     void findById_shouldReturnWallet() {
-        UUID walletId = UUID.randomUUID();
         WalletEntity entity = new WalletEntity();
-        Wallet wallet = new Wallet(walletId, UUID.randomUUID(), BigDecimal.TEN);
         when(jpaRepository.findById(walletId)).thenReturn(Optional.of(entity));
-        when(walletMapper.toDomain(entity)).thenReturn(wallet);
         Optional<Wallet> result = walletRepository.findById(walletId);
         assertTrue(result.isPresent());
         assertEquals(wallet, result.get());
@@ -47,7 +66,6 @@ class WalletRepositoryImplTest {
 
     @Test
     void findById_shouldReturnEmpty() {
-        UUID walletId = UUID.randomUUID();
         when(jpaRepository.findById(walletId)).thenReturn(Optional.empty());
         Optional<Wallet> result = walletRepository.findById(walletId);
         assertFalse(result.isPresent());
@@ -55,29 +73,41 @@ class WalletRepositoryImplTest {
 
     @Test
     void save_shouldReturnWallet() {
-        Wallet wallet = new Wallet(UUID.randomUUID(), UUID.randomUUID(), BigDecimal.ONE);
-        WalletEntity entity = new WalletEntity();
-        WalletEntity savedEntity = new WalletEntity();
-        Wallet expected = new Wallet(wallet.getId(), wallet.getUserId(), wallet.getBalance());
-        when(walletMapper.toEntity(wallet)).thenReturn(entity);
-        when(jpaRepository.save(entity)).thenReturn(savedEntity);
-        when(walletMapper.toDomain(savedEntity)).thenReturn(expected);
+        // Captura o argumento passado para save para verificar se os campos foram definidos corretamente
+        ArgumentCaptor<WalletEntity> entityCaptor = ArgumentCaptor.forClass(WalletEntity.class);
+        
         Wallet result = walletRepository.save(wallet);
-        assertEquals(expected, result);
+        
+        // Verifica que save foi chamado com algum argumento do tipo WalletEntity
+        verify(jpaRepository).save(entityCaptor.capture());
+        
+        // Verifica que os campos importantes foram definidos corretamente
+        WalletEntity capturedEntity = entityCaptor.getValue();
+        assertEquals(walletId, capturedEntity.getId());
+        assertEquals(BigDecimal.ONE, capturedEntity.getBalance());
+        
+        // Verifica que o resultado é o esperado
+        assertEquals(wallet, result);
     }
 
     @Test
     void update_shouldCallSave() {
-        Wallet wallet = new Wallet(UUID.randomUUID(), UUID.randomUUID(), BigDecimal.ONE);
-        WalletEntity entity = new WalletEntity();
-        when(walletMapper.toEntity(wallet)).thenReturn(entity);
+        // Captura o argumento passado para save para verificar se os campos foram definidos corretamente
+        ArgumentCaptor<WalletEntity> entityCaptor = ArgumentCaptor.forClass(WalletEntity.class);
+        
         walletRepository.update(wallet);
-        verify(jpaRepository, times(1)).save(entity);
+        
+        // Verifica que save foi chamado
+        verify(jpaRepository).save(entityCaptor.capture());
+        
+        // Verifica que os campos importantes foram definidos corretamente
+        WalletEntity capturedEntity = entityCaptor.getValue();
+        assertEquals(walletId, capturedEntity.getId());
+        assertEquals(BigDecimal.ONE, capturedEntity.getBalance());
     }
 
     @Test
     void delete_shouldCallDeleteById() {
-        UUID walletId = UUID.randomUUID();
         walletRepository.delete(walletId);
         verify(jpaRepository, times(1)).deleteById(walletId);
     }
@@ -85,9 +115,7 @@ class WalletRepositoryImplTest {
     @Test
     void findAll_shouldReturnWalletList() {
         WalletEntity entity = new WalletEntity();
-        Wallet wallet = new Wallet(UUID.randomUUID(), UUID.randomUUID(), BigDecimal.ONE);
         when(jpaRepository.findAll()).thenReturn(List.of(entity));
-        when(walletMapper.toDomain(entity)).thenReturn(wallet);
         List<Wallet> result = walletRepository.findAll();
         assertEquals(1, result.size());
         assertEquals(wallet, result.get(0));

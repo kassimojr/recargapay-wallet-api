@@ -5,9 +5,9 @@ import java.util.List;
 
 public interface FindAllWalletsUseCase {
     /**
-     * Encontra todas as carteiras no sistema
+     * Finds all wallets in the system
      * 
-     * @return Lista de carteiras encontradas
+     * @return List of found wallets
      */
     List<Wallet> findAll();
 }

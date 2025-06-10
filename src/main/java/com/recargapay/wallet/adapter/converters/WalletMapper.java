@@ -7,17 +7,26 @@ import com.recargapay.wallet.adapter.dtos.WithdrawRequestDTO;
 
 import com.recargapay.wallet.adapter.entities.WalletEntity;
 import com.recargapay.wallet.adapter.entities.UserEntity;
+import com.recargapay.wallet.core.domain.User;
 import com.recargapay.wallet.core.domain.Wallet;
+import com.recargapay.wallet.core.ports.out.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
 @Component
 public class WalletMapper {
+    
+    private final UserRepository userRepository;
+    private static final Logger logger = LoggerFactory.getLogger(WalletMapper.class);
 
-    public WalletMapper() {
-        // Construtor default
+    public WalletMapper(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     public Wallet toDomain(WalletEntity entity) {
@@ -43,7 +52,7 @@ public class WalletMapper {
         WalletEntity entity = new WalletEntity();
         entity.setId(domain.getId());
         
-        // Para manter apenas o ID do usuário, precisamos criar uma UserEntity com o ID
+        // To maintain only the user ID, we need to create a UserEntity with the ID
         if (domain.getUserId() != null) {
             UserEntity userEntity = new UserEntity();
             userEntity.setId(domain.getUserId());
@@ -67,6 +76,17 @@ public class WalletMapper {
         dto.setUserId(domain.getUserId());
         dto.setBalance(domain.getBalance());
         
+        // Fetch and add the wallet owner's username
+        if (domain.getUserId() != null) {
+            try {
+                Optional<User> user = userRepository.findById(domain.getUserId());
+                user.ifPresent(u -> dto.setUserName(u.getName()));
+            } catch (Exception e) {
+                logger.warn("Error fetching user information: {}", e.getMessage());
+                // In case of error, we continue without the username
+            }
+        }
+        
         return dto;
     }
 
@@ -74,16 +94,16 @@ public class WalletMapper {
         return Objects.requireNonNullElse(domains, List.<Wallet>of()).stream().map(this::toDTO).toList();
     }
 
-    // Conversão de CreateWalletRequestDTO para domínio Wallet
+    // Convert CreateWalletRequestDTO to Wallet domain
     public Wallet toDomain(CreateWalletRequestDTO dto) {
         if (dto == null) return null;
         Wallet wallet = new Wallet();
         wallet.setUserId(dto.getUserId());
-        wallet.setBalance(java.math.BigDecimal.ZERO); // Saldo inicial padrão
+        wallet.setBalance(java.math.BigDecimal.ZERO); // Default initial balance
         return wallet;
     }
 
-    // Conversão de DepositRequestDTO para domínio Wallet (apenas walletId)
+    // Convert DepositRequestDTO to Wallet domain (walletId only)
     public Wallet toDomain(DepositRequestDTO dto) {
         if (dto == null) return null;
         Wallet wallet = new Wallet();
@@ -91,11 +111,30 @@ public class WalletMapper {
         return wallet;
     }
 
-    // Conversão de WithdrawRequestDTO para domínio Wallet (apenas walletId)
+    // Convert WithdrawRequestDTO to Wallet domain (walletId only)
     public Wallet toDomain(WithdrawRequestDTO dto) {
         if (dto == null) return null;
         Wallet wallet = new Wallet();
         wallet.setId(dto.getWalletId());
         return wallet;
+    }
+    
+    /**
+     * Returns the username by ID
+     * @param userId User ID
+     * @return Username or empty string if not found
+     */
+    public String getUserName(UUID userId) {
+        if (userId == null) {
+            return "";
+        }
+        
+        try {
+            Optional<User> user = userRepository.findById(userId);
+            return user.map(User::getName).orElse("");
+        } catch (Exception e) {
+            logger.warn("Error fetching user information: {}", e.getMessage());
+            return "";
+        }
     }
 }

@@ -6,12 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 
 /**
- * Testes para a classe de exceção WalletTransactionException.
+ * Tests for the WalletTransactionException class.
  */
 class WalletTransactionExceptionTest {
 
-    private static final String TEST_MESSAGE = "Mensagem de teste";
-    private static final Exception TEST_CAUSE = new RuntimeException("Causa de teste");
+    private static final String TEST_MESSAGE = "Test message";
+    private static final Exception TEST_CAUSE = new RuntimeException("Test cause");
 
     @Test
     void testConstructorWithMessage() {
