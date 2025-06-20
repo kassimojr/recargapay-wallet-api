@@ -13,6 +13,6 @@ import java.util.UUID;
 public class WalletDTO {
     private UUID id;
     private UUID userId;
+    private String userName;
     private BigDecimal balance;
 }
-

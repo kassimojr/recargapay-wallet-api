@@ -18,4 +18,5 @@ public class TransactionDTO {
     private String type;
     private LocalDateTime timestamp;
     private UUID relatedUserId;
+    private String relatedUserName;
 }

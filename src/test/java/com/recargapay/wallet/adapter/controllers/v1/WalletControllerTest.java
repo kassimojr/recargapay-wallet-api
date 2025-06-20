@@ -104,11 +104,11 @@ class WalletControllerTest {
     @Autowired
     private FindAllWalletsUseCase findAllWalletsUseCase;
 
-    // --- TESTES DE CRIAÇÃO DE CARTEIRA ---
+    // --- WALLET CREATION TESTS ---
 
     @Test
     @WithMockUser
-    @DisplayName("Deve retornar 201 ao criar carteira com sucesso")
+    @DisplayName("Should return 201 when wallet is created successfully")
     void shouldReturn201OnCreateWalletSuccess() throws Exception {
         UUID userId = UUID.randomUUID();
         Wallet wallet = new Wallet();
@@ -132,9 +132,9 @@ class WalletControllerTest {
 
     @Test
     @WithMockUser
-    @DisplayName("Deve retornar 400 ao criar carteira com payload inválido")
+    @DisplayName("Should return 400 when creating wallet with invalid payload")
     void shouldReturn400OnCreateWalletInvalidPayload() throws Exception {
-        String json = "{}"; // userId ausente
+        String json = "{}"; // missing userId
         mockMvc.perform(post("/api/v1/wallets")
                 .content(json)
                 .with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -144,14 +144,14 @@ class WalletControllerTest {
 
     @Test
     @WithMockUser
-    @DisplayName("Deve retornar 409 ao criar carteira para usuário que já possui uma")
+    @DisplayName("Should return 409 when creating wallet for user that already has one")
     void shouldReturn409OnCreateWalletForExistingUser() throws Exception {
         UUID userId = UUID.randomUUID();
         Wallet wallet = new Wallet();
         wallet.setUserId(userId);
         Mockito.when(walletMapper.toDomain(any(CreateWalletRequestDTO.class))).thenReturn(wallet);
         Mockito.when(createWalletUseCase.create(any(Wallet.class)))
-                .thenThrow(new WalletAlreadyExistsException("Usuário já possui carteira"));
+                .thenThrow(new WalletAlreadyExistsException("User already has a wallet"));
         String json = "{\"userId\":\"" + userId + "\"}";
         mockMvc.perform(post("/api/v1/wallets")
                 .content(json)
@@ -162,7 +162,7 @@ class WalletControllerTest {
 
     @Test
     @WithAnonymousUser
-    @DisplayName("Deve exigir autenticação para criar carteira")
+    @DisplayName("Should require authentication to create wallet")
     void shouldRequireAuthenticationToCreateWallet() throws Exception {
         UUID userId = UUID.randomUUID();
         String json = "{\"userId\":\"" + userId + "\"}";
@@ -174,14 +174,14 @@ class WalletControllerTest {
 
     @Test
     @WithMockUser
-    @DisplayName("Deve retornar 500 para erro inesperado ao criar carteira")
+    @DisplayName("Should return 500 for unexpected error when creating wallet")
     void shouldReturn500OnUnexpectedError() throws Exception {
         UUID userId = UUID.randomUUID();
         Wallet wallet = new Wallet();
         wallet.setUserId(userId);
         Mockito.when(walletMapper.toDomain(any(CreateWalletRequestDTO.class))).thenReturn(wallet);
         Mockito.when(createWalletUseCase.create(any(Wallet.class)))
-                .thenThrow(new RuntimeException("Erro inesperado"));
+                .thenThrow(new RuntimeException("Unexpected error"));
         String json = "{\"userId\":\"" + userId + "\"}";
         mockMvc.perform(post("/api/v1/wallets")
                 .content(json)
@@ -190,11 +190,11 @@ class WalletControllerTest {
                 .andExpect(status().isInternalServerError());
     }
 
-    // --- TESTES DE TRANSFERÊNCIA ---
+    // --- TRANSFER TESTS ---
 
     @Test
     @WithMockUser
-    @DisplayName("Deve retornar 200 para transferência bem-sucedida")
+    @DisplayName("Should return 200 for successful transfer")
     void shouldReturn200OnSuccess() throws Exception {
         Mockito.doNothing().when(transferFundsUseCase)
                 .transfer(any(UUID.class), any(UUID.class), any(BigDecimal.class));
@@ -212,9 +212,9 @@ class WalletControllerTest {
 
     @Test
     @WithMockUser
-    @DisplayName("Deve retornar 400 para valor inválido")
+    @DisplayName("Should return 400 for invalid value")
     void shouldReturn400OnInvalidValue() throws Exception {
-        Mockito.doThrow(new IllegalArgumentException("O valor da transferência deve ser positivo"))
+        Mockito.doThrow(new IllegalArgumentException("Transfer amount must be positive"))
                 .when(transferFundsUseCase)
                 .transfer(any(UUID.class), any(UUID.class), any(BigDecimal.class));
 
@@ -231,9 +231,9 @@ class WalletControllerTest {
 
     @Test
     @WithMockUser
-    @DisplayName("Deve retornar 404 para carteira não encontrada")
+    @DisplayName("Should return 404 for wallet not found")
     void shouldReturn404OnWalletNotFound() throws Exception {
-        Mockito.doThrow(new WalletNotFoundException("Carteira não encontrada"))
+        Mockito.doThrow(new WalletNotFoundException("Wallet not found"))
                 .when(transferFundsUseCase)
                 .transfer(any(UUID.class), any(UUID.class), any(BigDecimal.class));
 
@@ -250,7 +250,7 @@ class WalletControllerTest {
 
     @Test
     @WithAnonymousUser
-    @DisplayName("Deve exigir autenticação para transferir")
+    @DisplayName("Should require authentication for transfer")
     void shouldRequireAuthentication() throws Exception {
         mockMvc.perform(post("/api/v1/wallets/transfer")
                 .param("fromWalletId", UUID.randomUUID().toString())
@@ -262,7 +262,7 @@ class WalletControllerTest {
 
     @Test
     @WithMockUser
-    @DisplayName("Deve retornar 200 ao consultar saldo atual da carteira")
+    @DisplayName("Should return 200 when getting current balance")
     void shouldReturn200OnGetBalance() throws Exception {
         UUID walletId = UUID.randomUUID();
         Wallet wallet = new Wallet();
@@ -280,7 +280,7 @@ class WalletControllerTest {
 
     @Test
     @WithMockUser
-    @DisplayName("Deve retornar 200 ao consultar saldo histórico da carteira")
+    @DisplayName("Should return 200 when getting historical balance")
     void shouldReturn200OnGetHistoricalBalance() throws Exception {
         UUID walletId = UUID.randomUUID();
         String at = "2024-05-07T00:00:00Z";
@@ -298,10 +298,10 @@ class WalletControllerTest {
                 .andExpect(status().isOk());
     }
 
-    // --- TESTES DE SALDO ATUAL ---
+    // --- CURRENT BALANCE TESTS ---
     @Test
     @WithMockUser
-    @DisplayName("Deve retornar 200 e saldo atual quando a carteira existe")
+    @DisplayName("Should return 200 with balance when wallet exists")
     void shouldReturn200WithBalanceWhenWalletExists() throws Exception {
         UUID walletId = UUID.randomUUID();
         Wallet wallet = new Wallet();
@@ -316,27 +316,27 @@ class WalletControllerTest {
 
     @Test
     @WithMockUser
-    @DisplayName("Deve retornar 404 quando a carteira não existe ao consultar saldo atual")
+    @DisplayName("Should return 404 when wallet not found on balance")
     void shouldReturn404WhenWalletNotFoundOnBalance() throws Exception {
         UUID walletId = UUID.randomUUID();
-        Mockito.when(createWalletUseCase.findById(walletId)).thenThrow(new WalletNotFoundException("Carteira não encontrada"));
+        Mockito.when(createWalletUseCase.findById(walletId)).thenThrow(new WalletNotFoundException("Wallet not found"));
         mockMvc.perform(get("/api/v1/wallets/" + walletId + "/balance"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     @WithAnonymousUser
-    @DisplayName("Deve exigir autenticação para consultar saldo atual")
+    @DisplayName("Should require authentication for get balance")
     void shouldRequireAuthForGetBalance() throws Exception {
         UUID walletId = UUID.randomUUID();
         mockMvc.perform(get("/api/v1/wallets/" + walletId + "/balance"))
                 .andExpect(status().isUnauthorized());
     }
 
-    // --- TESTES DE SALDO HISTÓRICO ---
+    // --- HISTORICAL BALANCE TESTS ---
     @Test
     @WithMockUser
-    @DisplayName("Deve retornar 200 e saldo histórico quando a carteira existe e data é válida")
+    @DisplayName("Should return 200 with historical balance")
     void shouldReturn200WithHistoricalBalance() throws Exception {
         UUID walletId = UUID.randomUUID();
         String at = "2024-01-01T00:00:00";
@@ -352,18 +352,18 @@ class WalletControllerTest {
 
     @Test
     @WithMockUser
-    @DisplayName("Deve retornar 404 quando a carteira não existe ao consultar saldo histórico")
+    @DisplayName("Should return 404 when wallet not found on historical balance")
     void shouldReturn404WhenWalletNotFoundOnHistoricalBalance() throws Exception {
         UUID walletId = UUID.randomUUID();
         String at = "2024-01-01T00:00:00";
-        Mockito.when(createWalletUseCase.findBalanceAt(walletId, at)).thenThrow(new WalletNotFoundException("Carteira não encontrada"));
+        Mockito.when(createWalletUseCase.findBalanceAt(walletId, at)).thenThrow(new WalletNotFoundException("Wallet not found"));
         mockMvc.perform(get("/api/v1/wallets/" + walletId + "/balance/history?at=" + at))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     @WithAnonymousUser
-    @DisplayName("Deve exigir autenticação para consultar saldo histórico")
+    @DisplayName("Should require authentication for get historical balance")
     void shouldRequireAuthForGetHistoricalBalance() throws Exception {
         UUID walletId = UUID.randomUUID();
         String at = "2024-01-01T00:00:00";
@@ -371,10 +371,10 @@ class WalletControllerTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    // --- TESTES DE DEPÓSITO ---
+    // --- DEPOSIT TESTS ---
     @Test
     @WithMockUser
-    @DisplayName("Deve retornar 200 ao depositar com sucesso")
+    @DisplayName("Should return 200 on deposit success")
     void shouldReturn200OnDepositSuccess() throws Exception {
         UUID walletId = UUID.randomUUID();
         BigDecimal amount = BigDecimal.valueOf(100);
@@ -395,14 +395,14 @@ class WalletControllerTest {
 
     @Test
     @WithMockUser
-    @DisplayName("Deve retornar 404 ao tentar depositar em carteira inexistente")
+    @DisplayName("Should return 404 on deposit wallet not found")
     void shouldReturn404OnDepositWalletNotFound() throws Exception {
         UUID walletId = UUID.randomUUID();
         BigDecimal amount = BigDecimal.valueOf(100);
         DepositRequestDTO dto = new DepositRequestDTO();
         dto.setWalletId(walletId);
         dto.setAmount(amount);
-        Mockito.when(depositUseCase.deposit(walletId, amount)).thenThrow(new WalletNotFoundException("Carteira não encontrada"));
+        Mockito.when(depositUseCase.deposit(walletId, amount)).thenThrow(new WalletNotFoundException("Wallet not found"));
         String json = String.format("{\"walletId\":\"%s\",\"amount\":%s}", walletId, amount);
         mockMvc.perform(post("/api/v1/wallets/deposit")
                 .content(json)
@@ -413,14 +413,14 @@ class WalletControllerTest {
 
     @Test
     @WithMockUser
-    @DisplayName("Deve retornar 400 ao tentar depositar valor inválido")
+    @DisplayName("Should return 400 on deposit invalid amount")
     void shouldReturn400OnDepositInvalidAmount() throws Exception {
         UUID walletId = UUID.randomUUID();
         BigDecimal amount = BigDecimal.valueOf(-10);
         DepositRequestDTO dto = new DepositRequestDTO();
         dto.setWalletId(walletId);
         dto.setAmount(amount);
-        Mockito.when(depositUseCase.deposit(walletId, amount)).thenThrow(new IllegalArgumentException("Valor inválido"));
+        Mockito.when(depositUseCase.deposit(walletId, amount)).thenThrow(new IllegalArgumentException("Invalid amount"));
         String json = String.format("{\"walletId\":\"%s\",\"amount\":%s}", walletId, amount);
         mockMvc.perform(post("/api/v1/wallets/deposit")
                 .content(json)
@@ -431,7 +431,7 @@ class WalletControllerTest {
 
     @Test
     @WithAnonymousUser
-    @DisplayName("Deve exigir autenticação para depositar")
+    @DisplayName("Should require authentication to deposit")
     void shouldRequireAuthenticationToDeposit() throws Exception {
         UUID walletId = UUID.randomUUID();
         BigDecimal amount = BigDecimal.valueOf(100);
@@ -442,10 +442,10 @@ class WalletControllerTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    // --- TESTES DE SAQUE ---
+    // --- WITHDRAWAL TESTS ---
     @Test
     @WithMockUser
-    @DisplayName("Deve retornar 200 ao sacar com sucesso")
+    @DisplayName("Should return 200 on withdrawal success")
     void shouldReturn200OnWithdrawSuccess() throws Exception {
         UUID walletId = UUID.randomUUID();
         BigDecimal amount = BigDecimal.valueOf(50);
@@ -466,14 +466,14 @@ class WalletControllerTest {
 
     @Test
     @WithMockUser
-    @DisplayName("Deve retornar 404 ao tentar sacar de carteira inexistente")
+    @DisplayName("Should return 404 on withdrawal wallet not found")
     void shouldReturn404OnWithdrawWalletNotFound() throws Exception {
         UUID walletId = UUID.randomUUID();
         BigDecimal amount = BigDecimal.valueOf(50);
         WithdrawRequestDTO dto = new WithdrawRequestDTO();
         dto.setWalletId(walletId);
         dto.setAmount(amount);
-        Mockito.when(withdrawUseCase.withdraw(walletId, amount)).thenThrow(new WalletNotFoundException("Carteira não encontrada"));
+        Mockito.when(withdrawUseCase.withdraw(walletId, amount)).thenThrow(new WalletNotFoundException("Wallet not found"));
         String json = String.format("{\"walletId\":\"%s\",\"amount\":%s}", walletId, amount);
         mockMvc.perform(post("/api/v1/wallets/withdraw")
                 .content(json)
@@ -484,14 +484,14 @@ class WalletControllerTest {
 
     @Test
     @WithMockUser
-    @DisplayName("Deve retornar 400 ao tentar sacar valor inválido")
+    @DisplayName("Should return 400 on withdrawal invalid amount")
     void shouldReturn400OnWithdrawInvalidAmount() throws Exception {
         UUID walletId = UUID.randomUUID();
         BigDecimal amount = BigDecimal.valueOf(-10);
         WithdrawRequestDTO dto = new WithdrawRequestDTO();
         dto.setWalletId(walletId);
         dto.setAmount(amount);
-        Mockito.when(withdrawUseCase.withdraw(walletId, amount)).thenThrow(new IllegalArgumentException("Valor inválido"));
+        Mockito.when(withdrawUseCase.withdraw(walletId, amount)).thenThrow(new IllegalArgumentException("Invalid amount"));
         String json = String.format("{\"walletId\":\"%s\",\"amount\":%s}", walletId, amount);
         mockMvc.perform(post("/api/v1/wallets/withdraw")
                 .content(json)
@@ -502,7 +502,7 @@ class WalletControllerTest {
 
     @Test
     @WithAnonymousUser
-    @DisplayName("Deve exigir autenticação para sacar")
+    @DisplayName("Should require authentication to withdraw")
     void shouldRequireAuthenticationToWithdraw() throws Exception {
         UUID walletId = UUID.randomUUID();
         BigDecimal amount = BigDecimal.valueOf(50);

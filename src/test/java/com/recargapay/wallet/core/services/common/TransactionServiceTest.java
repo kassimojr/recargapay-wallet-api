@@ -10,10 +10,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class TransactionServiceTest {
 
-    // Constante duplicada para testes, o valor deve ser o mesmo da classe TransactionService
+    // Duplicated constant for tests, the value must be the same as in TransactionService class
     private static final int MAX_RETRY_ATTEMPTS = 3;
 
-    // Implementação concreta para testes
+    // Concrete implementation for tests
     private static class TestTransactionService extends TransactionService {
         public <T> T executeWithRetryPublic(Supplier<T> operation, String operationName) {
             return executeWithRetry(operation, operationName);
@@ -67,7 +67,7 @@ class TransactionServiceTest {
             }, "test")
         );
         
-        assertEquals(MAX_RETRY_ATTEMPTS, attempts.get()); // Número correto de tentativas
+        assertEquals(MAX_RETRY_ATTEMPTS, attempts.get()); // Correct number of attempts
     }
     
     @Test
@@ -76,7 +76,7 @@ class TransactionServiceTest {
         TestTransactionService service = new TestTransactionService();
         AtomicInteger attempts = new AtomicInteger(0);
         
-        // Mock para simular uma interrupção
+        // Mock to simulate an interruption
         Thread.currentThread().interrupt();
         
         // Act & Assert
@@ -90,42 +90,42 @@ class TransactionServiceTest {
             }, "test")
         );
         
-        // Verificar mensagem de erro e limpar a flag de interrupção
-        assertTrue(exception.getMessage().contains("interrompida"));
+        // Verify error message and clear the interruption flag
+        assertTrue(exception.getMessage().contains("interrupted"));
         assertTrue(Thread.interrupted());
     }
     
     @Test
     void executeWithRetry_testCodeCoverage() {
-        // Este é um teste artificial para cobrir o código "inalcançável" no final do método
-        // Criamos uma sub-classe de teste que permite testar esse trecho
+        // This is an artificial test to cover the "unreachable" code at the end of the method
+        // We create a test subclass that allows testing this section
         TransactionService service = new TransactionService() {
             @Override
             protected <T> T executeWithRetry(Supplier<T> operation, String operationName) {
-                // Saltamos direto para o código "inalcançável" para fins de cobertura
-                String mensagemErro = String.format("Código inalcançável alcançado: não foi possível completar a operação de %s após %d tentativas", 
+                // We jump directly to the "unreachable" code for coverage purposes
+                String errorMessage = String.format("Unreachable code reached: could not complete the %s operation after %d attempts", 
                         operationName, MAX_RETRY_ATTEMPTS);
-                logger.error(mensagemErro);
-                throw new OptimisticLockingFailureException(mensagemErro);
+                logger.error(errorMessage);
+                throw new OptimisticLockingFailureException(errorMessage);
             }
         };
         
         // Act & Assert
         OptimisticLockingFailureException exception = assertThrows(
             OptimisticLockingFailureException.class,
-            () -> invokeExecuteWithRetry(service) // Extraímos o código do lambda para um método auxiliar
+            () -> invokeExecuteWithRetry(service) // We extract the lambda code to a helper method
         );
         
-        assertTrue(exception.getMessage().contains("Código inalcançável alcançado"));
+        assertTrue(exception.getMessage().contains("Unreachable code reached"));
     }
     
     /**
-     * Método auxiliar para invocar o método executeWithRetry via reflection.
-     * Extraído para resolver o problema do SonarQube com múltiplos pontos de exceção no lambda.
+     * Helper method to invoke the executeWithRetry method via reflection.
+     * Extracted to solve the SonarQube problem with multiple exception points in the lambda.
      * 
-     * @param service O serviço de transação a ser usado
-     * @throws OptimisticLockingFailureException Se a operação lançar esta exceção
-     * @throws RuntimeException Para qualquer outro erro durante a invocação
+     * @param service The transaction service to be used
+     * @throws OptimisticLockingFailureException If the operation throws this exception
+     * @throws RuntimeException For any other error during invocation
      */
     private void invokeExecuteWithRetry(TransactionService service) {
         try {
