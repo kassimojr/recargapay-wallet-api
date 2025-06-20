@@ -6,6 +6,8 @@ import com.recargapay.wallet.core.domain.Wallet;
 import com.recargapay.wallet.core.exceptions.WalletNotFoundException;
 import com.recargapay.wallet.core.ports.in.DepositUseCase;
 import com.recargapay.wallet.core.ports.out.TransactionalWalletRepository;
+import com.recargapay.wallet.infra.metrics.MetricsService;
+import com.recargapay.wallet.infra.tracing.Traced;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -23,15 +25,18 @@ import java.util.UUID;
 public class DepositService implements DepositUseCase {
 
     private final TransactionalWalletRepository walletRepository;
+    private final MetricsService metricsService;
     private final Logger logger = LoggerFactory.getLogger(DepositService.class);
 
     /**
      * Constructor
      * 
      * @param walletRepository wallet repository with support for transactional operations
+     * @param metricsService service for recording wallet metrics
      */
-    public DepositService(TransactionalWalletRepository walletRepository) {
+    public DepositService(TransactionalWalletRepository walletRepository, MetricsService metricsService) {
         this.walletRepository = walletRepository;
+        this.metricsService = metricsService;
     }
 
     /**
@@ -45,6 +50,7 @@ public class DepositService implements DepositUseCase {
      */
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Traced(operation = "deposit")
     public Transaction deposit(UUID walletId, BigDecimal amount) {
         validateDepositParams(walletId, amount);
         logger.info("Starting deposit operation for wallet {} with amount {}", walletId, amount);
@@ -68,6 +74,10 @@ public class DepositService implements DepositUseCase {
             walletId, amount, TransactionType.DEPOSIT, wallet.getUserId(), now
         );
         
+        // Get updated wallet to record new balance in metrics
+        BigDecimal newBalance = wallet.getBalance().add(amount);
+        metricsService.recordWalletBalance(walletId.toString(), newBalance);
+        
         logger.info("Deposit successfully completed for wallet {}: {}", walletId, transaction);
         
         return transaction;
@@ -83,6 +93,10 @@ public class DepositService implements DepositUseCase {
     private void validateDepositParams(UUID walletId, BigDecimal amount) {
         if (walletId == null) {
             throw new IllegalArgumentException("Wallet ID cannot be null");
+        }
+        
+        if (walletId.equals(UUID.fromString("00000000-0000-0000-0000-000000000000"))) {
+            throw new IllegalArgumentException("Invalid wallet ID: cannot use nil UUID");
         }
 
         if (amount == null) {

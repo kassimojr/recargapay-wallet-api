@@ -39,15 +39,15 @@ public class SecurityConfig {
                     "/v3/api-docs/**",
                     "/swagger-ui/**",
                     "/swagger-ui.html",
-                    "/actuator/health",
+                    "/actuator/**",
                     "/api/public/**",
                     "/api/auth/login",
-                    "/*.html",                // Permite acesso a arquivos HTML na raiz
-                    "/*.js",                  // Permite acesso a arquivos JS na raiz
-                    "/*.css",                 // Permite acesso a arquivos CSS na raiz
-                    "/*.ico",                 // Permite acesso a favicon
-                    "/static/**",             // Permite acesso a todos arquivos na pasta static
-                    "/resources/**"           // Permite acesso a todos arquivos na pasta resources
+                    "/*.html",
+                    "/*.js",
+                    "/*.css",
+                    "/*.ico",
+                    "/static/**",
+                    "/resources/**"
                 ).permitAll()
                 .anyRequest().authenticated()
             )

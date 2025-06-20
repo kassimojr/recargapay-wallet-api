@@ -196,8 +196,9 @@ class WalletControllerTest {
     @WithMockUser
     @DisplayName("Should return 200 for successful transfer")
     void shouldReturn200OnSuccess() throws Exception {
-        Mockito.doNothing().when(transferFundsUseCase)
-                .transfer(any(UUID.class), any(UUID.class), any(BigDecimal.class));
+        Mockito.when(transferFundsUseCase
+                .transfer(any(UUID.class), any(UUID.class), any(BigDecimal.class)))
+                .thenReturn(List.of(new Transaction(), new Transaction()));
 
         String fromWalletId = UUID.randomUUID().toString();
         String toWalletId = UUID.randomUUID().toString();
@@ -268,32 +269,10 @@ class WalletControllerTest {
         Wallet wallet = new Wallet();
         wallet.setId(walletId);
         wallet.setBalance(BigDecimal.TEN);
-        WalletDTO walletDTO = new WalletDTO();
-        walletDTO.setId(walletId);
-        walletDTO.setBalance(BigDecimal.TEN);
+        WalletDTO walletDTO = new WalletDTO(walletId, UUID.randomUUID(), "Test User", BigDecimal.TEN);
         Mockito.when(createWalletUseCase.findById(walletId)).thenReturn(wallet);
         Mockito.when(walletMapper.toDTO(any(Wallet.class))).thenReturn(walletDTO);
         mockMvc.perform(get("/api/v1/wallets/" + walletId + "/balance")
-                .with(SecurityMockMvcRequestPostProcessors.csrf()))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @WithMockUser
-    @DisplayName("Should return 200 when getting historical balance")
-    void shouldReturn200OnGetHistoricalBalance() throws Exception {
-        UUID walletId = UUID.randomUUID();
-        String at = "2024-05-07T00:00:00Z";
-        Wallet wallet = new Wallet();
-        wallet.setId(walletId);
-        wallet.setBalance(BigDecimal.ONE);
-        WalletDTO walletDTO = new WalletDTO();
-        walletDTO.setId(walletId);
-        walletDTO.setBalance(BigDecimal.ONE);
-        Mockito.when(createWalletUseCase.findBalanceAt(walletId, at)).thenReturn(wallet);
-        Mockito.when(walletMapper.toDTO(wallet)).thenReturn(walletDTO);
-        mockMvc.perform(get("/api/v1/wallets/" + walletId + "/balance/history")
-                .param("at", at)
                 .with(SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isOk());
     }
@@ -307,7 +286,7 @@ class WalletControllerTest {
         Wallet wallet = new Wallet();
         wallet.setId(walletId);
         wallet.setBalance(BigDecimal.TEN);
-        WalletDTO walletDTO = new WalletDTO(walletId, UUID.randomUUID(), BigDecimal.TEN);
+        WalletDTO walletDTO = new WalletDTO(walletId, UUID.randomUUID(), "Test User", BigDecimal.TEN);
         Mockito.when(createWalletUseCase.findById(walletId)).thenReturn(wallet);
         Mockito.when(walletMapper.toDTO(wallet)).thenReturn(walletDTO);
         mockMvc.perform(get("/api/v1/wallets/" + walletId + "/balance"))
@@ -330,44 +309,6 @@ class WalletControllerTest {
     void shouldRequireAuthForGetBalance() throws Exception {
         UUID walletId = UUID.randomUUID();
         mockMvc.perform(get("/api/v1/wallets/" + walletId + "/balance"))
-                .andExpect(status().isUnauthorized());
-    }
-
-    // --- HISTORICAL BALANCE TESTS ---
-    @Test
-    @WithMockUser
-    @DisplayName("Should return 200 with historical balance")
-    void shouldReturn200WithHistoricalBalance() throws Exception {
-        UUID walletId = UUID.randomUUID();
-        String at = "2024-01-01T00:00:00";
-        Wallet wallet = new Wallet();
-        wallet.setId(walletId);
-        wallet.setBalance(BigDecimal.TEN);
-        WalletDTO walletDTO = new WalletDTO(walletId, UUID.randomUUID(), BigDecimal.TEN);
-        Mockito.when(createWalletUseCase.findBalanceAt(walletId, at)).thenReturn(wallet);
-        Mockito.when(walletMapper.toDTO(wallet)).thenReturn(walletDTO);
-        mockMvc.perform(get("/api/v1/wallets/" + walletId + "/balance/history?at=" + at))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @WithMockUser
-    @DisplayName("Should return 404 when wallet not found on historical balance")
-    void shouldReturn404WhenWalletNotFoundOnHistoricalBalance() throws Exception {
-        UUID walletId = UUID.randomUUID();
-        String at = "2024-01-01T00:00:00";
-        Mockito.when(createWalletUseCase.findBalanceAt(walletId, at)).thenThrow(new WalletNotFoundException("Wallet not found"));
-        mockMvc.perform(get("/api/v1/wallets/" + walletId + "/balance/history?at=" + at))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    @WithAnonymousUser
-    @DisplayName("Should require authentication for get historical balance")
-    void shouldRequireAuthForGetHistoricalBalance() throws Exception {
-        UUID walletId = UUID.randomUUID();
-        String at = "2024-01-01T00:00:00";
-        mockMvc.perform(get("/api/v1/wallets/" + walletId + "/balance/history?at=" + at))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -528,15 +469,8 @@ class WalletControllerTest {
 
         List<Wallet> wallets = Arrays.asList(wallet1, wallet2);
         
-        WalletDTO walletDTO1 = new WalletDTO();
-        walletDTO1.setId(walletId1);
-        walletDTO1.setUserId(userId1);
-        walletDTO1.setBalance(BigDecimal.valueOf(100));
-        
-        WalletDTO walletDTO2 = new WalletDTO();
-        walletDTO2.setId(walletId2);
-        walletDTO2.setUserId(userId2);
-        walletDTO2.setBalance(BigDecimal.valueOf(200));
+        WalletDTO walletDTO1 = new WalletDTO(walletId1, userId1, "Test User", BigDecimal.valueOf(100));
+        WalletDTO walletDTO2 = new WalletDTO(walletId2, userId2, "Test User", BigDecimal.valueOf(200));
         
         List<WalletDTO> walletDTOs = Arrays.asList(walletDTO1, walletDTO2);
         

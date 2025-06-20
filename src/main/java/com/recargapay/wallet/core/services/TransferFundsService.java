@@ -8,6 +8,8 @@ import com.recargapay.wallet.core.exceptions.SameWalletTransferException;
 import com.recargapay.wallet.core.exceptions.WalletNotFoundException;
 import com.recargapay.wallet.core.ports.in.TransferFundsUseCase;
 import com.recargapay.wallet.core.ports.out.TransactionalWalletRepository;
+import com.recargapay.wallet.infra.metrics.MetricsService;
+import com.recargapay.wallet.infra.tracing.Traced;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -27,15 +29,18 @@ import java.util.UUID;
 public class TransferFundsService implements TransferFundsUseCase {
 
     private final TransactionalWalletRepository walletRepository;
+    private final MetricsService metricsService;
     private final Logger logger = LoggerFactory.getLogger(TransferFundsService.class);
 
     /**
      * Constructor
      *
      * @param walletRepository wallet repository with support for transactional operations
+     * @param metricsService service for recording wallet metrics
      */
-    public TransferFundsService(TransactionalWalletRepository walletRepository) {
+    public TransferFundsService(TransactionalWalletRepository walletRepository, MetricsService metricsService) {
         this.walletRepository = walletRepository;
+        this.metricsService = metricsService;
     }
 
     /**
@@ -51,6 +56,7 @@ public class TransferFundsService implements TransferFundsUseCase {
      */
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Traced(operation = "transfer")
     public List<Transaction> transfer(UUID fromWalletId, UUID toWalletId, BigDecimal amount) {
         validateTransferParams(fromWalletId, toWalletId, amount);
         logger.info("Starting transfer of {} from wallet {} to {}", amount, fromWalletId, toWalletId);
@@ -103,6 +109,13 @@ public class TransferFundsService implements TransferFundsUseCase {
             toWalletId, amount, TransactionType.TRANSFER_IN, fromWallet.getUserId(), now
         );
         transactions.add(inTransaction);
+
+        // Record updated wallet balances in metrics
+        BigDecimal fromWalletNewBalance = fromWallet.getBalance().subtract(amount);
+        BigDecimal toWalletNewBalance = toWallet.getBalance().add(amount);
+        
+        metricsService.recordWalletBalance(fromWalletId.toString(), fromWalletNewBalance);
+        metricsService.recordWalletBalance(toWalletId.toString(), toWalletNewBalance);
 
         logger.info("Transfer successfully completed. Source: {}, Destination: {}, Amount: {}", 
                 fromWalletId, toWalletId, amount);

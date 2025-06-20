@@ -7,6 +7,8 @@ import com.recargapay.wallet.core.exceptions.InsufficientFundsException;
 import com.recargapay.wallet.core.exceptions.WalletNotFoundException;
 import com.recargapay.wallet.core.ports.in.WithdrawUseCase;
 import com.recargapay.wallet.core.ports.out.TransactionalWalletRepository;
+import com.recargapay.wallet.infra.metrics.MetricsService;
+import com.recargapay.wallet.infra.tracing.Traced;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -24,15 +26,18 @@ import java.util.UUID;
 public class WithdrawService implements WithdrawUseCase {
 
     private final TransactionalWalletRepository walletRepository;
+    private final MetricsService metricsService;
     private final Logger logger = LoggerFactory.getLogger(WithdrawService.class);
 
     /**
      * Constructor
      * 
      * @param walletRepository wallet repository with support for transactional operations
+     * @param metricsService service for recording wallet metrics
      */
-    public WithdrawService(TransactionalWalletRepository walletRepository) {
+    public WithdrawService(TransactionalWalletRepository walletRepository, MetricsService metricsService) {
         this.walletRepository = walletRepository;
+        this.metricsService = metricsService;
     }
 
     /**
@@ -47,6 +52,7 @@ public class WithdrawService implements WithdrawUseCase {
      */
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Traced(operation = "withdraw")
     public Transaction withdraw(UUID walletId, BigDecimal amount) {
         validateWithdrawParams(walletId, amount);
         logger.info("Starting withdrawal operation for wallet {} in the amount of {}", walletId, amount);
@@ -77,6 +83,10 @@ public class WithdrawService implements WithdrawUseCase {
         Transaction transaction = walletRepository.createTransaction(
             walletId, amount, TransactionType.WITHDRAW, wallet.getUserId(), now
         );
+        
+        // Get updated wallet to record new balance in metrics
+        BigDecimal newBalance = wallet.getBalance().subtract(amount);
+        metricsService.recordWalletBalance(walletId.toString(), newBalance);
         
         logger.info("Withdrawal successfully completed for wallet {}: {}", walletId, transaction);
         

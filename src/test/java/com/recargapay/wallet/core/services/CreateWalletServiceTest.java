@@ -140,7 +140,8 @@ class CreateWalletServiceTest {
     void findBalanceAt_shouldReturnWalletWhenExists() {
         // Arrange
         UUID walletId = UUID.randomUUID();
-        Wallet wallet = new Wallet(walletId, UUID.randomUUID(), null);
+        UUID userId = UUID.randomUUID();
+        Wallet wallet = new Wallet(walletId, userId, null);
         String timestamp = "2023-01-01T12:00:00";
         
         when(walletRepository.findById(walletId)).thenReturn(Optional.of(wallet));
@@ -149,7 +150,9 @@ class CreateWalletServiceTest {
         Wallet found = service.findBalanceAt(walletId, timestamp);
         
         // Assert
-        assertEquals(wallet, found);
+        assertNotNull(found);
+        assertEquals(walletId, found.getId());
+        assertEquals(userId, found.getUserId());
         verify(walletRepository).findById(walletId);
     }
     

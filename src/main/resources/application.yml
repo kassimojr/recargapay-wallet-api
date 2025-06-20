@@ -1,0 +1,92 @@
+spring:
+  application:
+    name: recargapay-wallet-api
+  
+  # PostgreSQL
+  datasource:
+    url: jdbc:postgresql://localhost:5432/walletdb
+    username: admin
+    password: admin
+    driver-class-name: org.postgresql.Driver
+  
+  # JPA/Hibernate
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          batch_versioned_data: false
+        event:
+          merge:
+            entity_copy_observer: allow
+  
+  # Flyway configuration
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    baseline-version: 0
+    validate-on-migrate: true
+    placeholder-replacement: true
+    schemas: public
+    sql-migration-prefix: V
+    repeatable-sql-migration-prefix: R
+    sql-migration-separator: __
+    sql-migration-suffixes: .sql
+  
+  # JWT secret manually used via JwtDecoderConfig for local/dev environment
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          secret: Q4!z8@pW#r2$Lm9^X7eF%uS6bT1&cV0*Y3jH
+
+# SpringDoc settings for OpenAPI documentation
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+    doc-expansion: none
+    disable-swagger-default-url: true
+  cache:
+    disabled: true
+  show-actuator: true
+  packages-to-scan: com.recargapay.wallet.adapter.controllers
+  paths-to-match: /api/**
+
+# Logging configuration
+logging:
+  level:
+    org:
+      springframework:
+        web:
+          servlet:
+            resource:
+              ResourceHttpRequestHandler: WARN
+
+# Actuator endpoints configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics,loggers,env
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+      show-components: always
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true

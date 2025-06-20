@@ -4,51 +4,46 @@ import com.recargapay.wallet.core.domain.Transaction;
 import com.recargapay.wallet.core.domain.TransactionType;
 import com.recargapay.wallet.core.domain.Wallet;
 import com.recargapay.wallet.core.exceptions.WalletNotFoundException;
-import com.recargapay.wallet.core.ports.out.TransactionRepository;
-import com.recargapay.wallet.core.ports.out.WalletRepository;
+import com.recargapay.wallet.core.ports.out.TransactionalWalletRepository;
+import com.recargapay.wallet.infra.metrics.MetricsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.OptimisticLockingFailureException;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class DepositServiceTest {
 
     @Mock
-    private WalletRepository walletRepository;
-
+    private TransactionalWalletRepository walletRepository;
+    
     @Mock
-    private TransactionRepository transactionRepository;
-
-    @Spy
-    @InjectMocks
-    private DepositService depositService;
-
-    @Captor
-    private ArgumentCaptor<Wallet> walletCaptor;
-
+    private MetricsService metricsService;
+    
     @Captor
     private ArgumentCaptor<Transaction> transactionCaptor;
+
+    private DepositService depositService;
 
     private UUID walletId;
     private UUID userId;
     private BigDecimal initialBalance;
     private BigDecimal depositAmount;
+
     private Wallet wallet;
 
     @BeforeEach
@@ -63,131 +58,137 @@ class DepositServiceTest {
         wallet.setUserId(userId);
         wallet.setBalance(initialBalance);
         
-        // Configurando o serviço para usar a si mesmo como self
-        ReflectionTestUtils.setField(depositService, "self", depositService);
-    }
-
-    @Test
-    void deposit_shouldIncreaseBalanceAndCreateTransaction() {
-        // Arrange
+        // Creating the service with the new constructor signature
+        depositService = new DepositService(walletRepository, metricsService);
+        
+        // Configure wallet repository to return our test wallet
         when(walletRepository.findById(walletId)).thenReturn(Optional.of(wallet));
-        when(walletRepository.save(any(Wallet.class))).thenReturn(wallet);
+        when(walletRepository.updateWalletBalance(walletId, depositAmount, false)).thenReturn(true);
+        
+        Transaction mockTransaction = new Transaction();
+        mockTransaction.setId(UUID.randomUUID());
+        mockTransaction.setAmount(depositAmount);
+        mockTransaction.setType(TransactionType.DEPOSIT);
+        mockTransaction.setWalletId(walletId);
+        
+        when(walletRepository.createTransaction(eq(walletId), eq(depositAmount), eq(TransactionType.DEPOSIT), any(UUID.class), any()))
+            .thenReturn(mockTransaction);
+    }
 
-        Transaction savedTransaction = new Transaction();
-        savedTransaction.setId(UUID.randomUUID());
-        savedTransaction.setWalletId(walletId);
-        savedTransaction.setAmount(depositAmount);
-        savedTransaction.setTimestamp(java.time.LocalDateTime.now());
-        savedTransaction.setType(TransactionType.DEPOSIT);
-        savedTransaction.setRelatedUserId(userId);
-        
-        // Mock para o método saveAndReturn
-        when(transactionRepository.saveAndReturn(any(Transaction.class))).thenReturn(savedTransaction);
-        
+    @Test
+    void deposit_shouldUpdateWalletBalance_andCreateTransaction() {
         // Act
         Transaction result = depositService.deposit(walletId, depositAmount);
 
         // Assert
-        verify(walletRepository).findById(walletId);
-        verify(walletRepository).save(walletCaptor.capture());
-        verify(transactionRepository).saveAndReturn(transactionCaptor.capture());
-
-        Wallet capturedWallet = walletCaptor.getValue();
-        Transaction capturedTransaction = transactionCaptor.getValue();
-
-        assertEquals(initialBalance.add(depositAmount), capturedWallet.getBalance());
-        assertEquals(walletId, capturedTransaction.getWalletId());
-        assertEquals(depositAmount, capturedTransaction.getAmount());
-        assertEquals(TransactionType.DEPOSIT, capturedTransaction.getType());
-        assertEquals(userId, capturedTransaction.getRelatedUserId());
         assertNotNull(result);
-    }
-
-    @Test
-    void deposit_whenWalletNotFound_shouldThrowException() {
-        // Arrange
-        when(walletRepository.findById(walletId)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        WalletNotFoundException exception = assertThrows(
-                WalletNotFoundException.class,
-                () -> depositService.deposit(walletId, depositAmount)
-        );
-
-        // Verify
-        verify(walletRepository).findById(walletId);
-        verify(walletRepository, never()).save(any());
-        verify(transactionRepository, never()).saveAndReturn(any());
-        assertTrue(exception.getMessage().contains(walletId.toString()));
-    }
-
-    @Test
-    void deposit_shouldHandleNullWalletId() {
-        // Act & Assert
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> depositService.deposit(null, depositAmount)
-        );
-        
-        // Verify
-        verify(walletRepository, never()).findById(any());
-        verify(walletRepository, never()).save(any());
-        verify(transactionRepository, never()).saveAndReturn(any());
-    }
-
-    @Test
-    void deposit_shouldRetryOnOptimisticLockingFailure() {
-        // Arrange
-        when(walletRepository.findById(walletId))
-                .thenReturn(Optional.of(wallet));
-        
-        // Simula falha de otimistic locking na primeira tentativa e sucesso na segunda
-        when(walletRepository.save(any(Wallet.class)))
-                .thenThrow(OptimisticLockingFailureException.class)
-                .thenReturn(wallet);
-        
-        // Mock para o método saveAndReturn
-        when(transactionRepository.saveAndReturn(any(Transaction.class))).thenAnswer(invocation -> {
-            Transaction tx = invocation.getArgument(0);
-            tx.setId(UUID.randomUUID());
-            return tx;
-        });
-        
-        // Act
-        Transaction result = depositService.deposit(walletId, depositAmount);
-        
-        // Assert
-        verify(walletRepository, times(2)).findById(walletId);
-        verify(walletRepository, times(2)).save(any(Wallet.class));
-        verify(transactionRepository).saveAndReturn(any(Transaction.class));
-        
-        assertNotNull(result);
-        assertEquals(walletId, result.getWalletId());
         assertEquals(depositAmount, result.getAmount());
         assertEquals(TransactionType.DEPOSIT, result.getType());
+        
+        // Verify repository calls
+        verify(walletRepository).findById(walletId);
+        verify(walletRepository).updateWalletBalance(walletId, depositAmount, false);
+        verify(walletRepository).createTransaction(eq(walletId), eq(depositAmount), eq(TransactionType.DEPOSIT), any(UUID.class), any());
+        verify(metricsService).recordWalletBalance(walletId.toString(), wallet.getBalance().add(depositAmount));
     }
 
     @Test
-    void deposit_shouldFailAfterMaxRetryAttempts() {
+    void deposit_shouldThrowWalletNotFoundException_whenWalletNotFound() {
         // Arrange
-        when(walletRepository.findById(walletId))
-                .thenReturn(Optional.of(wallet));
-        
-        // Simula falha contínua de otimistic locking
-        when(walletRepository.save(any(Wallet.class)))
-                .thenThrow(OptimisticLockingFailureException.class);
+        when(walletRepository.findById(walletId)).thenReturn(Optional.empty());
         
         // Act & Assert
-        OptimisticLockingFailureException exception = assertThrows(
-                OptimisticLockingFailureException.class, 
-                () -> {
-                    depositService.deposit(walletId, depositAmount);
-                }
-        );
+        assertThrows(WalletNotFoundException.class, () -> {
+            depositService.deposit(walletId, depositAmount);
+        });
         
-        // Verify - deve tentar o número máximo de vezes (3)
-        verify(walletRepository, times(3)).findById(walletId);
-        verify(walletRepository, times(3)).save(any(Wallet.class));
-        verify(transactionRepository, never()).saveAndReturn(any(Transaction.class));
+        // Verify repository call
+        verify(walletRepository).findById(walletId);
+        verify(walletRepository, never()).updateWalletBalance(any(), any(), anyBoolean());
+        verify(walletRepository, never()).createTransaction(any(), any(), any(), any(), any());
+        verify(metricsService, never()).recordWalletBalance(any(), any());
+    }
+
+    @Test
+    void deposit_shouldThrowWalletNotFoundException_whenUpdateFails() {
+        // Arrange
+        when(walletRepository.findById(walletId)).thenReturn(Optional.of(wallet));
+        when(walletRepository.updateWalletBalance(walletId, depositAmount, false)).thenReturn(false);
+        
+        // Act & Assert
+        assertThrows(WalletNotFoundException.class, () -> {
+            depositService.deposit(walletId, depositAmount);
+        });
+        
+        // Verify repository calls
+        verify(walletRepository).findById(walletId);
+        verify(walletRepository).updateWalletBalance(walletId, depositAmount, false);
+        verify(walletRepository, never()).createTransaction(any(), any(), any(), any(), any());
+        verify(metricsService, never()).recordWalletBalance(any(), any());
+    }
+
+    @Test
+    void deposit_shouldThrowException_whenWalletIdIsNull() {
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> {
+            depositService.deposit(null, depositAmount);
+        });
+        
+        // Verify no repository calls
+        verify(walletRepository, never()).findById(any());
+        verify(walletRepository, never()).updateWalletBalance(any(), any(), anyBoolean());
+        verify(walletRepository, never()).createTransaction(any(), any(), any(), any(), any());
+    }
+    
+    @Test
+    void deposit_shouldThrowException_whenDepositAmountIsNull() {
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> {
+            depositService.deposit(walletId, null);
+        });
+        
+        // Verify no repository calls
+        verify(walletRepository, never()).findById(any());
+        verify(walletRepository, never()).updateWalletBalance(any(), any(), anyBoolean());
+        verify(walletRepository, never()).createTransaction(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void deposit_shouldThrowException_whenWalletIdIsZero() {
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> {
+            depositService.deposit(UUID.fromString("00000000-0000-0000-0000-000000000000"), depositAmount);
+        });
+        
+        // Verify no repository calls
+        verify(walletRepository, never()).findById(any());
+        verify(walletRepository, never()).updateWalletBalance(any(), any(), anyBoolean());
+        verify(walletRepository, never()).createTransaction(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void deposit_shouldThrowException_whenDepositAmountIsZero() {
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> {
+            depositService.deposit(walletId, BigDecimal.ZERO);
+        });
+        
+        // Verify no repository calls
+        verify(walletRepository, never()).findById(any());
+        verify(walletRepository, never()).updateWalletBalance(any(), any(), anyBoolean());
+        verify(walletRepository, never()).createTransaction(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void deposit_shouldThrowException_whenDepositAmountIsNegative() {
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> {
+            depositService.deposit(walletId, BigDecimal.valueOf(-10));
+        });
+        
+        // Verify no repository calls
+        verify(walletRepository, never()).findById(any());
+        verify(walletRepository, never()).updateWalletBalance(any(), any(), anyBoolean());
+        verify(walletRepository, never()).createTransaction(any(), any(), any(), any(), any());
     }
 }

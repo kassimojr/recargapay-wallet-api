@@ -10,6 +10,8 @@ import com.recargapay.wallet.core.ports.in.WithdrawUseCase;
 import com.recargapay.wallet.adapter.converters.WalletMapper;
 import com.recargapay.wallet.adapter.converters.TransactionMapper;
 import com.recargapay.wallet.core.domain.Wallet;
+import com.recargapay.wallet.infra.metrics.MetricsConstants;
+import io.micrometer.core.annotation.Timed;
 import java.util.UUID;
 import java.util.List;
 
@@ -73,6 +75,9 @@ public class WalletController {
             )
         }
     )
+    @Timed(value = MetricsConstants.HTTP_REQUEST_DURATION, 
+           extraTags = {MetricsConstants.TAG_ENDPOINT, "list-all-wallets"}, 
+           description = "Timer for list all wallets endpoint")
     @GetMapping
     public ResponseEntity<List<WalletDTO>> findAll() {
         List<Wallet> wallets = findAllWalletsUseCase.findAll();
@@ -100,6 +105,9 @@ public class WalletController {
             )
         }
     )
+    @Timed(value = MetricsConstants.HTTP_REQUEST_DURATION, 
+           extraTags = {MetricsConstants.TAG_ENDPOINT, "get-wallet-balance"}, 
+           description = "Timer for get wallet balance endpoint")
     @GetMapping("/{walletId}/balance")
     public ResponseEntity<WalletDTO> getBalance(
             @Parameter(description = "Wallet ID", required = true)
@@ -135,6 +143,9 @@ public class WalletController {
             )
         }
     )
+    @Timed(value = MetricsConstants.HTTP_REQUEST_DURATION, 
+           extraTags = {MetricsConstants.TAG_ENDPOINT, "transfer-funds"}, 
+           description = "Timer for transfer funds endpoint")
     @PostMapping("/transfer")
     public ResponseEntity<Void> transfer(
             @Parameter(description = "Transfer data", required = true)
@@ -164,6 +175,9 @@ public class WalletController {
             )
         }
     )
+    @Timed(value = MetricsConstants.HTTP_REQUEST_DURATION, 
+           extraTags = {MetricsConstants.TAG_ENDPOINT, "create-wallet"}, 
+           description = "Timer for create wallet endpoint")
     @PostMapping
     public ResponseEntity<WalletDTO> create(
             @Parameter(description = "New wallet data", required = true)
@@ -194,6 +208,9 @@ public class WalletController {
             )
         }
     )
+    @Timed(value = MetricsConstants.HTTP_REQUEST_DURATION, 
+           extraTags = {MetricsConstants.TAG_ENDPOINT, "deposit-to-wallet"}, 
+           description = "Timer for deposit to wallet endpoint")
     @PostMapping("/deposit")
     public ResponseEntity<TransactionDTO> deposit(
             @Parameter(description = "Deposit data", required = true)
@@ -223,6 +240,9 @@ public class WalletController {
             )
         }
     )
+    @Timed(value = MetricsConstants.HTTP_REQUEST_DURATION, 
+           extraTags = {MetricsConstants.TAG_ENDPOINT, "withdraw-from-wallet"}, 
+           description = "Timer for withdraw from wallet endpoint")
     @PostMapping("/withdraw")
     public ResponseEntity<TransactionDTO> withdraw(
             @Parameter(description = "Withdrawal data", required = true)
