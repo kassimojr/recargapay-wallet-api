@@ -95,27 +95,22 @@ class TransactionEntityTest {
     
     @Test
     void testPrePersistAndPreUpdate() {
-        // Arrange
         TransactionEntity entity = new TransactionEntity();
         entity.setId(UUID.randomUUID());
         entity.setAmount(BigDecimal.TEN);
         entity.setType(TransactionType.DEPOSIT);
         
-        // Simular o comportamento do @PrePersist
         entity.onCreate();
         assertNotNull(entity.getCreatedAt());
         assertNotNull(entity.getUpdatedAt());
         
-        // Guardar o valor inicial de updatedAt para comparação
         LocalDateTime initialUpdatedAt = entity.getUpdatedAt();
         LocalDateTime originalCreatedAt = entity.getCreatedAt();
         
-        // Forçar uma mudança direta no timestamp para simular a passagem de tempo
         entity.setUpdatedAt(initialUpdatedAt.plusNanos(1000));
         
-        // Simular o comportamento do @PreUpdate
         entity.onUpdate();
-        assertEquals(originalCreatedAt, entity.getCreatedAt()); // createdAt não deve mudar
-        assertTrue(entity.getUpdatedAt().isAfter(initialUpdatedAt)); // updatedAt deve ser posterior
+        assertEquals(originalCreatedAt, entity.getCreatedAt()); 
+        assertTrue(entity.getUpdatedAt().isAfter(initialUpdatedAt)); 
     }
 }

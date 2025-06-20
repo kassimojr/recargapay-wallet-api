@@ -10,9 +10,9 @@ import org.springframework.dao.OptimisticLockingFailureException;
 import com.recargapay.wallet.core.exceptions.WalletTransactionException;
 
 /**
- * Classe abstrata para operações de transação com retry para tratar falhas de bloqueio otimista.
- * Fornece mecanismo de reexecução de operações que podem falhar devido a conflitos de concorrência,
- * seguindo o padrão de bloqueio otimista da JPA.
+ * Abstract class for transaction operations with retry mechanism to handle optimistic locking failures.
+ * Provides a mechanism for re-executing operations that may fail due to concurrency conflicts,
+ * following the JPA optimistic locking pattern.
  */
 public abstract class TransactionService {
     protected static final int MAX_RETRY_ATTEMPTS = 3;
@@ -20,73 +20,75 @@ public abstract class TransactionService {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
-     * Executa uma operação com retry em caso de falha de bloqueio otimista.
+     * Executes an operation with retry in case of optimistic locking failure.
      *
-     * @param operation     A operação a ser executada
-     * @param operationName Nome da operação para logging
-     * @return O resultado da operação
-     * @throws OptimisticLockingFailureException Se a operação falhar após o número máximo de tentativas
-     * @throws WalletTransactionException Se ocorrer uma interrupção durante a espera entre tentativas
+     * @param operation     The operation to be executed
+     * @param operationName Operation name for logging
+     * @return The result of the operation
+     * @throws OptimisticLockingFailureException If the operation fails after the maximum number of attempts
+     * @throws WalletTransactionException If an interruption occurs during the wait between attempts
      */
     protected <T> T executeWithRetry(Supplier<T> operation, String operationName) {
         int attempt = 1;
         
         while (attempt <= MAX_RETRY_ATTEMPTS) {
             try {
-                // Execução da operação isolada em um método separado para atender à regra do SonarQube
+                // Execution of the isolated operation in a separate method to comply with SonarQube rule
                 return executeSingleAttempt(operation);
             } catch (OptimisticLockingFailureException e) {
-                // Se atingiu o número máximo de tentativas, relança a exceção com mais contexto
+                // If the maximum number of attempts has been reached, rethrow the exception with more context
                 if (attempt == MAX_RETRY_ATTEMPTS) {
-                    String mensagemErro = String.format("Não foi possível completar a operação de %s após %d tentativas devido a conflitos de concorrência", 
+                    String errorMessage = String.format("Could not complete the %s operation after %d attempts due to concurrency conflicts", 
                             operationName, MAX_RETRY_ATTEMPTS);
-                    logger.error(mensagemErro, e);
-                    throw new OptimisticLockingFailureException(mensagemErro, e);
+                    logger.error(errorMessage, e);
+                    throw new OptimisticLockingFailureException(errorMessage, e);
                 }
                 
-                // Log da tentativa e incremento do contador
-                logger.warn("Falha de bloqueio otimista na operação de {}, tentativa {} de {}. Tentando novamente...", 
+                // Log the attempt and increment the counter
+                logger.warn("Optimistic locking failure in {} operation, attempt {} of {}. Retrying...", 
                         operationName, attempt, MAX_RETRY_ATTEMPTS);
                 attempt++;
                 
-                // Aguarda antes de tentar novamente (com backoff exponencial)
+                // Wait before trying again (with exponential backoff)
                 backoffWait(attempt, operationName);
             }
         }
         
-        // Este trecho nunca deveria ser executado em condições normais.
-        // Se esta exceção for lançada, indica um bug na lógica de controle do loop acima.
+        // This code should never be executed under normal conditions.
+        // If this exception is thrown, it indicates a bug in the control logic of the above loop.
         throw new WalletTransactionException(
-                String.format("Estado inconsistente detectado na operação '%s': o controle deveria ter sido encerrado no loop. Este é um bug que deve ser reportado.", 
+                String.format("Inconsistent state detected in operation '%s': control should have been terminated in the loop. This is a bug that should be reported.", 
                         operationName));
     }
     
     /**
-     * Executa uma única tentativa da operação.
+     * Executes a single attempt of the operation.
      * 
-     * @param operation A operação a ser executada
-     * @return O resultado da operação
-     * @throws OptimisticLockingFailureException Se ocorrer uma falha de bloqueio otimista
+     * @param operation The operation to be executed
+     * @return The result of the operation
+     * @throws OptimisticLockingFailureException If an optimistic locking failure occurs
      */
     private <T> T executeSingleAttempt(Supplier<T> operation) {
-        // Isolamos a chamada do lambda em um único ponto de potencial falha
+        // We isolate the lambda call at a single point of potential failure
         return operation.get();
     }
     
     /**
-     * Implementa a espera com backoff exponencial entre tentativas.
+     * Implements exponential backoff wait between attempts.
      * 
-     * @param attempt Número da tentativa atual
-     * @param operationName Nome da operação para mensagens de log
-     * @throws WalletTransactionException Se a thread for interrompida durante a espera
+     * @param attempt Current attempt number
+     * @param operationName Operation name for log messages
+     * @throws WalletTransactionException If the thread is interrupted during the wait
      */
     private void backoffWait(int attempt, String operationName) {
+        long waitTime = DELAY_FACTOR_MS * (long) Math.pow(2, attempt - 1);
         try {
-            TimeUnit.MILLISECONDS.sleep(DELAY_FACTOR_MS * attempt);
-        } catch (InterruptedException ie) {
-            // Restaura a flag de interrupção e encerra a operação
+            logger.debug("Waiting for {} ms before attempt {} of {}", waitTime, attempt, MAX_RETRY_ATTEMPTS);
+            TimeUnit.MILLISECONDS.sleep(waitTime);
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new WalletTransactionException("Operação de " + operationName + " foi interrompida durante o retry", ie);
+            throw new WalletTransactionException(
+                    String.format("Operation '%s' was interrupted during backoff wait between attempts", operationName), e);
         }
     }
 }

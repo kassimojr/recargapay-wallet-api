@@ -3,5 +3,6 @@ package com.recargapay.wallet.core.domain;
 public enum TransactionType {
     DEPOSIT,
     WITHDRAW,
-    TRANSFER
+    TRANSFER_IN,
+    TRANSFER_OUT
 }

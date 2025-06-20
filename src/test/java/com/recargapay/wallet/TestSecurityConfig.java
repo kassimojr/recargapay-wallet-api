@@ -10,9 +10,9 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
 /**
- * Configuração de segurança específica para o ambiente de teste.
- * Utiliza apenas HTTP Basic Authentication para garantir testes previsíveis com MockMvc.
- * Garante que endpoints autenticados retornem 401 Unauthorized para requisições não autenticadas.
+ * Security configuration specific for the test environment.
+ * Uses only HTTP Basic Authentication to ensure predictable tests with MockMvc.
+ * Ensures that authenticated endpoints return 401 Unauthorized for unauthenticated requests.
  */
 @Configuration
 @Profile("test")

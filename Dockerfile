@@ -3,14 +3,14 @@ FROM eclipse-temurin:21-jdk-alpine AS build
 
 WORKDIR /app
 
-# Copie o wrapper e o pom
+# Copy the wrapper and pom
 COPY mvnw .
 COPY .mvn .mvn
 COPY pom.xml .
-# Copie o restante do código
+# Copy the rest of the code
 COPY src src
 
-# Build do projeto (gera o JAR no diretório target)
+# Build the project (generates the JAR in the target directory)
 RUN ./mvnw -B clean package -DskipTests
 
 # ---- Run Stage ----
@@ -18,14 +18,14 @@ FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 
-# Copie o JAR construído
+# Copy the built JAR
 COPY --from=build /app/target/*.jar app.jar
 
-# Exponha a porta padrão do Spring Boot
+# Expose default Spring Boot port
 EXPOSE 8080
 
-# Variável de ambiente para profile (pode ser sobreposta)
+# Environment variable for profile (can be overridden)
 ENV SPRING_PROFILES_ACTIVE=prod
 
-# Comando de inicialização
+# Startup command
 ENTRYPOINT ["java","-jar","app.jar"]
