@@ -1,0 +1,35 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: wallet-api
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: wallet-api
+          app: recargapay-wallet-api
+          __path__: /Users/kassimojr/Development/branches/recargapay-wallet-api/logs/wallet-api.*.json
+    
+    pipeline_stages:
+      # Extrai o JSON
+      - json:
+      
+      # Extrai timestamp para ordenação correta
+      - timestamp:
+          source: timestamp
+          format: RFC3339Nano
+      
+      # Adiciona labels com base nos campos JSON
+      - labels:
+          operation:
+          walletId:
+          traceId:
+          spanId:

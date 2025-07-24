@@ -45,6 +45,10 @@ spring:
         jwt:
           secret: Q4!z8@pW#r2$Lm9^X7eF%uS6bT1&cV0*Y3jH
 
+# Server configuration
+server:
+  # port: 8081  # Using 8081 instead of default 8080 to avoid conflicts
+
 # SpringDoc settings for OpenAPI documentation
 springdoc:
   api-docs:
@@ -62,15 +66,43 @@ springdoc:
   packages-to-scan: com.recargapay.wallet.adapter.controllers
   paths-to-match: /api/**
 
+# OpenTelemetry Configuration
+otel:
+  sdk:
+    disabled: true  # Disable OpenTelemetry SDK auto-configuration
+  spring:
+    enabled: false  # Disable Spring integration auto-configuration
+    webmvc:
+      enabled: false # Disable automatic WebMVC instrumentation since we have our own TraceContextFilter
+  service:
+    name: recargapay-wallet-api
+    version: 1.0.0
+  resource:
+    attributes:
+      service.name: recargapay-wallet-api
+      service.version: 1.0.0
+  # Removed OTLP exporter configuration to prevent connection errors
+  propagators: tracecontext,baggage
+  metrics:
+    exporter: none
+  logs:
+    exporter: none
+
 # Logging configuration
 logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [${spring.application.name:-wallet-api}] [%X{traceId:-},%X{spanId:-}] [%thread] %-5level %logger{36} - %msg%n"
   level:
+    root: INFO
+    com.recargapay.wallet: DEBUG
     org:
       springframework:
         web:
           servlet:
             resource:
               ResourceHttpRequestHandler: WARN
+    # Reduzir ruído de logs
+    org.springframework.web.servlet.PageNotFound: ERROR
 
 # Actuator endpoints configuration
 management:

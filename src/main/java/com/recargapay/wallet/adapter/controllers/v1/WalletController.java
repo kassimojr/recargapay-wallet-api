@@ -31,6 +31,7 @@ import com.recargapay.wallet.adapter.dtos.DepositRequestDTO;
 import com.recargapay.wallet.adapter.dtos.TransferRequestDTO;
 import com.recargapay.wallet.adapter.dtos.WithdrawRequestDTO;
 import com.recargapay.wallet.adapter.dtos.TransactionDTO;
+import com.recargapay.wallet.adapter.dtos.TransferResponseDTO;
 
 @RestController
 @RequestMapping("/api/v1/wallets")
@@ -124,7 +125,8 @@ public class WalletController {
                 responseCode = "200", 
                 description = "Transfer successfully completed",
                 content = @Content(
-                    mediaType = "application/json"
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = TransferResponseDTO.class)
                 )
             ),
             @ApiResponse(
@@ -147,11 +149,26 @@ public class WalletController {
            extraTags = {MetricsConstants.TAG_ENDPOINT, "transfer-funds"}, 
            description = "Timer for transfer funds endpoint")
     @PostMapping("/transfer")
-    public ResponseEntity<Void> transfer(
+    public ResponseEntity<TransferResponseDTO> transfer(
             @Parameter(description = "Transfer data", required = true)
             @Valid @RequestBody TransferRequestDTO request) {
-        transferFundsUseCase.transfer(request.getFromWalletId(), request.getToWalletId(), request.getAmount());
-        return ResponseEntity.ok().build();
+        List<Transaction> transactions = transferFundsUseCase.transfer(
+            request.getFromWalletId(), 
+            request.getToWalletId(), 
+            request.getAmount()
+        );
+        
+        // Convert transactions to DTOs
+        TransactionDTO sourceTransaction = transactionMapper.toDTO(transactions.get(0));
+        TransactionDTO destinationTransaction = transactionMapper.toDTO(transactions.get(1));
+        
+        // Build response
+        TransferResponseDTO response = TransferResponseDTO.builder()
+            .sourceTransaction(sourceTransaction)
+            .destinationTransaction(destinationTransaction)
+            .build();
+        
+        return ResponseEntity.ok(response);
     }
 
     @Operation(

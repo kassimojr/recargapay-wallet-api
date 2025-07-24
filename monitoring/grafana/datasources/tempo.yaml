@@ -1,0 +1,25 @@
+apiVersion: 1
+
+datasources:
+- name: Tempo
+  type: tempo
+  uid: tempo
+  access: proxy
+  url: http://tempo:3200
+  isDefault: false
+  version: 1
+  editable: true
+  # This enables trace-to-logs correlation by specifying a Loki datasource
+  jsonData:
+    httpMethod: GET
+    tracesToLogs:
+      datasourceUid: loki
+      tags: []
+      mappedTags: [{key: 'service', value: 'service'}]
+      mapTagNamesEnabled: false
+      spanStartTimeShift: '-1h'
+      spanEndTimeShift: '1h'
+      filterByTraceID: true
+      filterBySpanID: false
+    lokiSearch:
+      datasourceUid: loki

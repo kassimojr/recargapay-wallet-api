@@ -6,11 +6,11 @@ import com.recargapay.wallet.core.domain.Wallet;
 import com.recargapay.wallet.core.exceptions.InsufficientFundsException;
 import com.recargapay.wallet.core.exceptions.WalletNotFoundException;
 import com.recargapay.wallet.core.ports.in.WithdrawUseCase;
+import com.recargapay.wallet.core.ports.out.DomainLogger;
 import com.recargapay.wallet.core.ports.out.TransactionalWalletRepository;
 import com.recargapay.wallet.infra.metrics.MetricsService;
 import com.recargapay.wallet.infra.tracing.Traced;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,17 +27,21 @@ public class WithdrawService implements WithdrawUseCase {
 
     private final TransactionalWalletRepository walletRepository;
     private final MetricsService metricsService;
-    private final Logger logger = LoggerFactory.getLogger(WithdrawService.class);
+    private final DomainLogger logger;
 
     /**
      * Constructor
      * 
      * @param walletRepository wallet repository with support for transactional operations
      * @param metricsService service for recording wallet metrics
+     * @param logger domain logger for structured logging
      */
-    public WithdrawService(TransactionalWalletRepository walletRepository, MetricsService metricsService) {
+    public WithdrawService(TransactionalWalletRepository walletRepository, 
+                         MetricsService metricsService, 
+                         @Qualifier("withdrawLogger") DomainLogger logger) {
         this.walletRepository = walletRepository;
         this.metricsService = metricsService;
+        this.logger = logger;
     }
 
     /**
@@ -55,26 +59,25 @@ public class WithdrawService implements WithdrawUseCase {
     @Traced(operation = "withdraw")
     public Transaction withdraw(UUID walletId, BigDecimal amount) {
         validateWithdrawParams(walletId, amount);
-        logger.info("Starting withdrawal operation for wallet {} in the amount of {}", walletId, amount);
+        logger.logOperationStart("WITHDRAW", walletId.toString(), amount.toString());
         
         Wallet wallet = walletRepository.findById(walletId)
                 .orElseThrow(() -> {
-                    logger.error("Wallet not found: {}", walletId);
+                    logger.logOperationError("WITHDRAW", walletId.toString(), "WALLET_NOT_FOUND", "Wallet not found: " + walletId);
                     return new WalletNotFoundException("Wallet not found: " + walletId);
                 });
-        
-        logger.debug("Wallet found: {} with current balance: {}", walletId, wallet.getBalance());
         
         // Checking if there is sufficient balance
         if (wallet.getBalance().compareTo(amount) < 0) {
             String errorMsg = String.format("Insufficient balance for withdrawal. Wallet: %s, Balance: %s, Withdrawal amount: %s", 
                     walletId, wallet.getBalance(), amount);
-            logger.error(errorMsg);
+            logger.logOperationError("WITHDRAW", walletId.toString(), "INSUFFICIENT_FUNDS", errorMsg);
             throw new InsufficientFundsException(errorMsg);
         }
         
         // Update wallet balance
         if (!walletRepository.updateWalletBalance(walletId, amount, true)) {
+            logger.logOperationError("WITHDRAW", walletId.toString(), "UPDATE_FAILED", "Wallet not found or could not be updated: " + walletId);
             throw new WalletNotFoundException("Wallet not found or could not be updated: " + walletId);
         }
         
@@ -88,7 +91,7 @@ public class WithdrawService implements WithdrawUseCase {
         BigDecimal newBalance = wallet.getBalance().subtract(amount);
         metricsService.recordWalletBalance(walletId.toString(), newBalance);
         
-        logger.info("Withdrawal successfully completed for wallet {}: {}", walletId, transaction);
+        logger.logOperationSuccess("WITHDRAW", walletId.toString(), amount.toString(), transaction.getId().toString());
         
         return transaction;
     }

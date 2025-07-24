@@ -6,6 +6,7 @@ import com.recargapay.wallet.core.domain.Wallet;
 import com.recargapay.wallet.core.exceptions.InsufficientFundsException;
 import com.recargapay.wallet.core.exceptions.SameWalletTransferException;
 import com.recargapay.wallet.core.exceptions.WalletNotFoundException;
+import com.recargapay.wallet.core.ports.out.DomainLogger;
 import com.recargapay.wallet.core.ports.out.TransactionalWalletRepository;
 import com.recargapay.wallet.infra.metrics.MetricsService;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,6 +38,9 @@ class TransferFundsServiceTest {
 
     @Mock
     private MetricsService metricsService;
+    
+    @Mock
+    private DomainLogger logger;
 
     private TransferFundsService transferFundsService;
     private UUID fromWalletId;
@@ -47,7 +51,7 @@ class TransferFundsServiceTest {
 
     @BeforeEach
     void setUp() {
-        transferFundsService = new TransferFundsService(walletRepository, metricsService);
+        transferFundsService = new TransferFundsService(walletRepository, metricsService, logger);
         
         // Initialize test data
         fromWalletId = UUID.randomUUID();
@@ -111,6 +115,10 @@ class TransferFundsServiceTest {
         // Verify metrics recording
         verify(metricsService).recordWalletBalance(eq(fromWalletId.toString()), eq(new BigDecimal("50.00")));
         verify(metricsService).recordWalletBalance(eq(toWalletId.toString()), eq(new BigDecimal("70.00")));
+        
+        // Verify logger calls
+        verify(logger).logTransferStart("TRANSFER", fromWalletId.toString(), toWalletId.toString(), transferAmount.toString());
+        verify(logger).logTransferSuccess("TRANSFER", fromWalletId.toString(), toWalletId.toString(), transferAmount.toString(), outTransaction.getId().toString());
     }
 
     @Test
@@ -128,6 +136,10 @@ class TransferFundsServiceTest {
         verify(walletRepository, never()).findById(toWalletId);
         verify(walletRepository, never()).updateWalletBalance(any(), any(), anyBoolean());
         verify(walletRepository, never()).createTransaction(any(), any(), any(), any(), any());
+        
+        // Verify logger calls
+        verify(logger).logTransferStart("TRANSFER", fromWalletId.toString(), toWalletId.toString(), transferAmount.toString());
+        verify(logger).logOperationError("TRANSFER", fromWalletId.toString(), "SOURCE_WALLET_NOT_FOUND", "Source wallet not found: " + fromWalletId);
     }
     
     @Test
@@ -146,6 +158,10 @@ class TransferFundsServiceTest {
         verify(walletRepository).findById(toWalletId);
         verify(walletRepository, never()).updateWalletBalance(any(), any(), anyBoolean());
         verify(walletRepository, never()).createTransaction(any(), any(), any(), any(), any());
+        
+        // Verify logger calls
+        verify(logger).logTransferStart("TRANSFER", fromWalletId.toString(), toWalletId.toString(), transferAmount.toString());
+        verify(logger).logOperationError("TRANSFER", fromWalletId.toString(), "DESTINATION_WALLET_NOT_FOUND", "Destination wallet not found: " + toWalletId);
     }
     
     @Test
@@ -153,7 +169,8 @@ class TransferFundsServiceTest {
         // Arrange
         Wallet lowBalanceWallet = new Wallet();
         lowBalanceWallet.setId(fromWalletId);
-        lowBalanceWallet.setBalance(new BigDecimal("10.00"));
+        lowBalanceWallet.setUserId(UUID.randomUUID());
+        lowBalanceWallet.setBalance(new BigDecimal("30.00")); // Less than transfer amount
         
         when(walletRepository.findById(fromWalletId)).thenReturn(Optional.of(lowBalanceWallet));
         when(walletRepository.findById(toWalletId)).thenReturn(Optional.of(toWallet));
@@ -168,6 +185,12 @@ class TransferFundsServiceTest {
         verify(walletRepository).findById(toWalletId);
         verify(walletRepository, never()).updateWalletBalance(any(), any(), anyBoolean());
         verify(walletRepository, never()).createTransaction(any(), any(), any(), any(), any());
+        
+        // Verify logger calls
+        verify(logger).logTransferStart("TRANSFER", fromWalletId.toString(), toWalletId.toString(), transferAmount.toString());
+        String expectedMessage = String.format("Insufficient balance. Wallet: %s, Balance: %s, Amount: %s",
+                fromWalletId, lowBalanceWallet.getBalance(), transferAmount);
+        verify(logger).logOperationError("TRANSFER", fromWalletId.toString(), "INSUFFICIENT_FUNDS", expectedMessage);
     }
     
     @Test
@@ -188,6 +211,11 @@ class TransferFundsServiceTest {
         verify(walletRepository).updateWalletBalance(fromWalletId, transferAmount, true);
         verify(walletRepository, never()).updateWalletBalance(toWalletId, transferAmount, false);
         verify(walletRepository, never()).createTransaction(any(), any(), any(), any(), any());
+        
+        // Verify logger calls
+        verify(logger).logTransferStart("TRANSFER", fromWalletId.toString(), toWalletId.toString(), transferAmount.toString());
+        String expectedMessage = "Source wallet not found or could not be updated: " + fromWalletId;
+        verify(logger).logOperationError("TRANSFER", fromWalletId.toString(), "SOURCE_UPDATE_FAILED", expectedMessage);
     }
     
     @Test
@@ -208,26 +236,38 @@ class TransferFundsServiceTest {
         verify(walletRepository).findById(toWalletId);
         verify(walletRepository).updateWalletBalance(fromWalletId, transferAmount, true);
         verify(walletRepository).updateWalletBalance(toWalletId, transferAmount, false);
+        
         // Verify the rollback operation occurred
         verify(walletRepository).updateWalletBalance(fromWalletId, transferAmount, false);
         verify(walletRepository, never()).createTransaction(any(), any(), any(), any(), any());
+        
+        // Verify logger calls
+        verify(logger).logTransferStart("TRANSFER", fromWalletId.toString(), toWalletId.toString(), transferAmount.toString());
+        String expectedMessage = "Destination wallet not found or could not be updated: " + toWalletId;
+        verify(logger).logOperationError("TRANSFER", fromWalletId.toString(), "DESTINATION_UPDATE_FAILED", expectedMessage);
     }
     
     @Test
     void transferFunds_shouldThrowSameWalletTransferException_whenWalletIdsAreEqual() {
+        // Arrange
         // Act & Assert
         assertThrows(SameWalletTransferException.class, () -> 
             transferFundsService.transfer(fromWalletId, fromWalletId, transferAmount)
         );
         
-        // Verify no repository calls
+        // Verify no repository calls happened
         verify(walletRepository, never()).findById(any());
         verify(walletRepository, never()).updateWalletBalance(any(), any(), anyBoolean());
         verify(walletRepository, never()).createTransaction(any(), any(), any(), any(), any());
+        
+        // Verify logger calls - não temos log para esta exceção pois ela é lançada na validação inicial
+        verify(logger, never()).logTransferStart(anyString(), anyString(), anyString(), anyString());
+        verify(logger, never()).logOperationError(anyString(), anyString(), anyString(), anyString());
     }
     
     @Test
     void transferFunds_shouldThrowException_whenSourceWalletIdIsNull() {
+        // Arrange
         // Act & Assert
         assertThrows(IllegalArgumentException.class, () -> 
             transferFundsService.transfer(null, toWalletId, transferAmount)
@@ -237,10 +277,15 @@ class TransferFundsServiceTest {
         verify(walletRepository, never()).findById(any());
         verify(walletRepository, never()).updateWalletBalance(any(), any(), anyBoolean());
         verify(walletRepository, never()).createTransaction(any(), any(), any(), any(), any());
+        
+        // Verify logger calls - the exception is thrown in validation before any logging occurs
+        verify(logger, never()).logTransferStart(anyString(), anyString(), anyString(), anyString());
+        verify(logger, never()).logOperationError(anyString(), anyString(), anyString(), anyString());
     }
     
     @Test
     void transferFunds_shouldThrowException_whenDestinationWalletIdIsNull() {
+        // Arrange
         // Act & Assert
         assertThrows(IllegalArgumentException.class, () -> 
             transferFundsService.transfer(fromWalletId, null, transferAmount)
@@ -250,10 +295,15 @@ class TransferFundsServiceTest {
         verify(walletRepository, never()).findById(any());
         verify(walletRepository, never()).updateWalletBalance(any(), any(), anyBoolean());
         verify(walletRepository, never()).createTransaction(any(), any(), any(), any(), any());
+        
+        // Verify logger calls - the exception is thrown in validation before any logging occurs
+        verify(logger, never()).logTransferStart(anyString(), anyString(), anyString(), anyString());
+        verify(logger, never()).logOperationError(anyString(), anyString(), anyString(), anyString());
     }
     
     @Test
     void transferFunds_shouldThrowException_whenAmountIsNull() {
+        // Arrange
         // Act & Assert
         assertThrows(IllegalArgumentException.class, () -> 
             transferFundsService.transfer(fromWalletId, toWalletId, null)
@@ -263,10 +313,15 @@ class TransferFundsServiceTest {
         verify(walletRepository, never()).findById(any());
         verify(walletRepository, never()).updateWalletBalance(any(), any(), anyBoolean());
         verify(walletRepository, never()).createTransaction(any(), any(), any(), any(), any());
+        
+        // Verify logger calls - the exception is thrown in validation before any logging occurs
+        verify(logger, never()).logTransferStart(anyString(), anyString(), anyString(), anyString());
+        verify(logger, never()).logOperationError(anyString(), anyString(), anyString(), anyString());
     }
     
     @Test
     void transferFunds_shouldThrowException_whenAmountIsZero() {
+        // Arrange
         // Act & Assert
         assertThrows(IllegalArgumentException.class, () -> 
             transferFundsService.transfer(fromWalletId, toWalletId, BigDecimal.ZERO)
@@ -276,18 +331,27 @@ class TransferFundsServiceTest {
         verify(walletRepository, never()).findById(any());
         verify(walletRepository, never()).updateWalletBalance(any(), any(), anyBoolean());
         verify(walletRepository, never()).createTransaction(any(), any(), any(), any(), any());
+        
+        // Verify logger calls - the exception is thrown in validation before any logging occurs
+        verify(logger, never()).logTransferStart(anyString(), anyString(), anyString(), anyString());
+        verify(logger, never()).logOperationError(anyString(), anyString(), anyString(), anyString());
     }
     
     @Test
     void transferFunds_shouldThrowException_whenAmountIsNegative() {
+        // Arrange
         // Act & Assert
         assertThrows(IllegalArgumentException.class, () -> 
-            transferFundsService.transfer(fromWalletId, toWalletId, BigDecimal.valueOf(-10))
+            transferFundsService.transfer(fromWalletId, toWalletId, new BigDecimal("-10.00"))
         );
         
         // Verify no repository calls
         verify(walletRepository, never()).findById(any());
         verify(walletRepository, never()).updateWalletBalance(any(), any(), anyBoolean());
         verify(walletRepository, never()).createTransaction(any(), any(), any(), any(), any());
+        
+        // Verify logger calls - the exception is thrown in validation before any logging occurs
+        verify(logger, never()).logTransferStart(anyString(), anyString(), anyString(), anyString());
+        verify(logger, never()).logOperationError(anyString(), anyString(), anyString(), anyString());
     }
 }

@@ -7,11 +7,11 @@ import com.recargapay.wallet.core.exceptions.InsufficientFundsException;
 import com.recargapay.wallet.core.exceptions.SameWalletTransferException;
 import com.recargapay.wallet.core.exceptions.WalletNotFoundException;
 import com.recargapay.wallet.core.ports.in.TransferFundsUseCase;
+import com.recargapay.wallet.core.ports.out.DomainLogger;
 import com.recargapay.wallet.core.ports.out.TransactionalWalletRepository;
 import com.recargapay.wallet.infra.metrics.MetricsService;
 import com.recargapay.wallet.infra.tracing.Traced;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,17 +30,21 @@ public class TransferFundsService implements TransferFundsUseCase {
 
     private final TransactionalWalletRepository walletRepository;
     private final MetricsService metricsService;
-    private final Logger logger = LoggerFactory.getLogger(TransferFundsService.class);
+    private final DomainLogger logger;
 
     /**
      * Constructor
      *
      * @param walletRepository wallet repository with support for transactional operations
      * @param metricsService service for recording wallet metrics
+     * @param logger domain logger for structured logging
      */
-    public TransferFundsService(TransactionalWalletRepository walletRepository, MetricsService metricsService) {
+    public TransferFundsService(TransactionalWalletRepository walletRepository, 
+                              MetricsService metricsService, 
+                              @Qualifier("transferLogger") DomainLogger logger) {
         this.walletRepository = walletRepository;
         this.metricsService = metricsService;
+        this.logger = logger;
     }
 
     /**
@@ -59,18 +63,18 @@ public class TransferFundsService implements TransferFundsUseCase {
     @Traced(operation = "transfer")
     public List<Transaction> transfer(UUID fromWalletId, UUID toWalletId, BigDecimal amount) {
         validateTransferParams(fromWalletId, toWalletId, amount);
-        logger.info("Starting transfer of {} from wallet {} to {}", amount, fromWalletId, toWalletId);
+        logger.logTransferStart("TRANSFER", fromWalletId.toString(), toWalletId.toString(), amount.toString());
 
         // Fetch wallets without pessimistic locking
         Wallet fromWallet = walletRepository.findById(fromWalletId)
                 .orElseThrow(() -> {
-                    logger.error("Source wallet not found: {}", fromWalletId);
+                    logger.logOperationError("TRANSFER", fromWalletId.toString(), "SOURCE_WALLET_NOT_FOUND", "Source wallet not found: " + fromWalletId);
                     return new WalletNotFoundException("Source wallet not found: " + fromWalletId);
                 });
 
         Wallet toWallet = walletRepository.findById(toWalletId)
                 .orElseThrow(() -> {
-                    logger.error("Destination wallet not found: {}", toWalletId);
+                    logger.logOperationError("TRANSFER", fromWalletId.toString(), "DESTINATION_WALLET_NOT_FOUND", "Destination wallet not found: " + toWalletId);
                     return new WalletNotFoundException("Destination wallet not found: " + toWalletId);
                 });
 
@@ -78,12 +82,13 @@ public class TransferFundsService implements TransferFundsUseCase {
         if (fromWallet.getBalance().compareTo(amount) < 0) {
             String message = String.format("Insufficient balance. Wallet: %s, Balance: %s, Amount: %s",
                     fromWalletId, fromWallet.getBalance(), amount);
-            logger.error(message);
+            logger.logOperationError("TRANSFER", fromWalletId.toString(), "INSUFFICIENT_FUNDS", message);
             throw new InsufficientFundsException(message);
         }
 
         // Update source wallet balance
         if (!walletRepository.updateWalletBalance(fromWalletId, amount, true)) {
+            logger.logOperationError("TRANSFER", fromWalletId.toString(), "SOURCE_UPDATE_FAILED", "Source wallet not found or could not be updated: " + fromWalletId);
             throw new WalletNotFoundException("Source wallet not found or could not be updated: " + fromWalletId);
         }
         
@@ -91,6 +96,7 @@ public class TransferFundsService implements TransferFundsUseCase {
         if (!walletRepository.updateWalletBalance(toWalletId, amount, false)) {
             // Revert the previous operation
             walletRepository.updateWalletBalance(fromWalletId, amount, false);
+            logger.logOperationError("TRANSFER", fromWalletId.toString(), "DESTINATION_UPDATE_FAILED", "Destination wallet not found or could not be updated: " + toWalletId);
             throw new WalletNotFoundException("Destination wallet not found or could not be updated: " + toWalletId);
         }
         
@@ -117,8 +123,7 @@ public class TransferFundsService implements TransferFundsUseCase {
         metricsService.recordWalletBalance(fromWalletId.toString(), fromWalletNewBalance);
         metricsService.recordWalletBalance(toWalletId.toString(), toWalletNewBalance);
 
-        logger.info("Transfer successfully completed. Source: {}, Destination: {}, Amount: {}", 
-                fromWalletId, toWalletId, amount);
+        logger.logTransferSuccess("TRANSFER", fromWalletId.toString(), toWalletId.toString(), amount.toString(), outTransaction.getId().toString());
                 
         return transactions;
     }
