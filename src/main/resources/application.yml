@@ -2,11 +2,13 @@ spring:
   application:
     name: recargapay-wallet-api
   
-  # PostgreSQL
+  config:
+    import: optional:file:.env[.properties]
+  
   datasource:
-    url: jdbc:postgresql://localhost:5432/walletdb
-    username: admin
-    password: admin
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:walletdb}
+    username: ${DB_USERNAME:admin}
+    password: ${DB_PASSWORD:admin}
     driver-class-name: org.postgresql.Driver
   
   # JPA/Hibernate
@@ -43,11 +45,11 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          secret: Q4!z8@pW#r2$Lm9^X7eF%uS6bT1&cV0*Y3jH
+          secret: ${JWT_SECRET:Q4!z8@pW#r2$Lm9^X7eF%uS6bT1&cV0*Y3jH}
 
 # Server configuration
 server:
-  # port: 8081  # Using 8081 instead of default 8080 to avoid conflicts
+  port: ${SERVER_PORT:8080}
 
 # SpringDoc settings for OpenAPI documentation
 springdoc:
@@ -65,6 +67,12 @@ springdoc:
   show-actuator: true
   packages-to-scan: com.recargapay.wallet.adapter.controllers
   paths-to-match: /api/**
+
+# Application user configuration
+app:
+  user:
+    username: ${USER_NAME}
+    password: ${USER_PASSWORD}
 
 # OpenTelemetry Configuration
 otel:

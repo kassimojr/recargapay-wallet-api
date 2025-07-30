@@ -65,11 +65,11 @@ class AuthControllerTest {
     void login_withValidCredentials_returnsToken() throws Exception {
         // Arrange
         Map<String, String> credentials = new HashMap<>();
-        credentials.put("username", "admin");
-        credentials.put("password", "admin123");
+        credentials.put("username", "test_user");
+        credentials.put("password", "test_password");
         
         Authentication auth = new UsernamePasswordAuthenticationToken(
-            "admin", 
+            "test_user", 
             null, 
             Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN"))
         );
@@ -125,8 +125,8 @@ class AuthControllerTest {
     void login_withGenericException_returns500() throws Exception {
         // Arrange
         Map<String, String> credentials = new HashMap<>();
-        credentials.put("username", "admin");
-        credentials.put("password", "admin123");
+        credentials.put("username", "test_user");
+        credentials.put("password", "test_password");
         
         // Uma exceção genérica que não é de autenticação
         when(authenticationManager.authenticate(any()))
