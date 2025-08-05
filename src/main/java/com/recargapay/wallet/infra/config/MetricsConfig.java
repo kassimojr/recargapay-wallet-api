@@ -1,4 +1,4 @@
-package com.recargapay.wallet.config;
+package com.recargapay.wallet.infra.config;
 
 import io.micrometer.core.aop.TimedAspect;
 import io.micrometer.core.instrument.MeterRegistry;

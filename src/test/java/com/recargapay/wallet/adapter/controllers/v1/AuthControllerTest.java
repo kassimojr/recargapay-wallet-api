@@ -1,4 +1,4 @@
-package com.recargapay.wallet.adapter.controllers;
+package com.recargapay.wallet.adapter.controllers.v1;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -77,7 +77,7 @@ class AuthControllerTest {
         when(authenticationManager.authenticate(any())).thenReturn(auth);
         
         // Act & Assert
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(post("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(credentials)))
             .andExpect(status().isOk())
@@ -95,7 +95,7 @@ class AuthControllerTest {
             .thenThrow(new BadCredentialsException("Bad credentials"));
         
         // Act & Assert
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(post("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(credentials)))
             .andExpect(status().isUnauthorized())
@@ -114,7 +114,7 @@ class AuthControllerTest {
             .thenThrow(new TestAuthenticationException("Account locked"));
         
         // Act & Assert
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(post("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(credentials)))
             .andExpect(status().isUnauthorized())
@@ -133,7 +133,7 @@ class AuthControllerTest {
             .thenThrow(new RuntimeException("Internal server error"));
         
         // Act & Assert
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(post("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(credentials)))
             .andExpect(status().isInternalServerError())
@@ -147,7 +147,7 @@ class AuthControllerTest {
         // Não incluindo username e password
         
         // Act & Assert
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(post("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(credentials)))
             .andExpect(status().isUnauthorized())

@@ -1,4 +1,4 @@
-package com.recargapay.wallet.adapter.controllers;
+package com.recargapay.wallet.adapter.controllers.v1;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -33,7 +33,7 @@ import lombok.RequiredArgsConstructor;
  * This controller offers endpoints for login and access token generation.
  */
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/v1/auth")
 @Tag(name = "Authentication", description = "API for authentication and JWT token generation")
 @RequiredArgsConstructor
 public class AuthController {

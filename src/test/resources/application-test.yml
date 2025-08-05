@@ -1,4 +1,7 @@
 spring:
+  application:
+    name: recargapay-wallet-api
+  
   # H2 Database Configuration
   datasource:
     url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
@@ -21,4 +24,17 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          secret: Q4!z8@pW#r2$Lm9^X7eF%uS6bT1&cV0*Y3jH
+          secret: ${JWT_SECRET}
+
+# Application Cache Configuration for Tests
+app:
+  cache:
+    version: v1
+    ttl:
+      # TTL values for tests (shorter for faster test execution)
+      default: ${CACHE_TTL_DEFAULT_MINUTES:1}
+      wallet-list: ${CACHE_TTL_WALLET_LIST_MINUTES:1}
+      wallet-single: ${CACHE_TTL_WALLET_SINGLE_MINUTES:1}
+      wallet-balance: ${CACHE_TTL_WALLET_BALANCE_SECONDS:10}
+      wallet-transactions: ${CACHE_TTL_WALLET_TRANSACTIONS_MINUTES:2}
+      user-profile: ${CACHE_TTL_USER_PROFILE_MINUTES:2}

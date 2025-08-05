@@ -1,10 +1,13 @@
 package com.recargapay.wallet.core.domain;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public class Wallet {
+public class Wallet implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     private UUID id;
     private UUID userId;
     private BigDecimal balance;

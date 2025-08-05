@@ -44,7 +44,7 @@ public class SecurityConfig {
                     "/swagger-ui.html",
                     "/actuator/**",
                     "/api/public/**",
-                    "/api/auth/login",
+                    "/api/v1/auth/login",
                     "/*.html",
                     "/*.js",
                     "/*.css",

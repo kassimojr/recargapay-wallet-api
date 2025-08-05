@@ -11,6 +11,9 @@ import com.recargapay.wallet.core.ports.in.CreateWalletUseCase;
 import com.recargapay.wallet.core.ports.out.TransactionRepository;
 import com.recargapay.wallet.core.ports.out.UserRepository;
 import com.recargapay.wallet.core.ports.out.WalletRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +44,10 @@ public class CreateWalletService implements CreateWalletUseCase {
 
     @Override
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = "wallet-list", key = "'all'"),
+        @CacheEvict(value = "wallet-single", key = "#result.id", condition = "#result != null")
+    })
     public Wallet create(Wallet wallet) {
         // Validate if the user exists before creating the wallet
         if (!userRepository.findById(wallet.getUserId()).isPresent()) {
@@ -56,6 +63,7 @@ public class CreateWalletService implements CreateWalletUseCase {
     }
 
     @Override
+    @Cacheable(value = "wallet-single", key = "#walletId")
     public Wallet findById(UUID walletId) {
         return walletRepository.findById(walletId)
             .orElseThrow(() -> new WalletNotFoundException("Wallet not found: " + walletId));

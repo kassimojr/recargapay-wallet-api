@@ -18,6 +18,22 @@ services:
       timeout: 5s
       retries: 5
 
+  # Redis for distributed caching
+  redis:
+    image: redis:7-alpine
+    container_name: wallet-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   sonarqube:
     image: sonarqube:10.4-community
     container_name: sonarqube
@@ -126,3 +142,4 @@ volumes:
   loki_data:
   loki_wal:
   tempo_data:
+  redis_data:
