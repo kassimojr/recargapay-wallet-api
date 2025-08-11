@@ -1,0 +1,60 @@
+# Homologation Profile Configuration
+spring:
+  # JPA/Hibernate settings for homologation
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: validate
+      format_sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  
+  # Flyway settings for homologation
+  flyway:
+    baseline-on-migrate: true
+    enabled: true
+    validate-on-migrate: true
+
+# Homologation-specific logging (less verbose than dev)
+logging:
+  level:
+    root: ${LOGGING_LEVEL_ROOT}
+    com.recargapay.wallet: ${LOGGING_LEVEL_APP}
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql.BasicBinder: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [${spring.application.name:-wallet-api}] [%X{traceId:-},%X{spanId:-}] [%thread] %-5level %logger{36} - %msg%n"
+
+# Homologation configuration
+app:
+  user:
+    username: ${ADMIN_USERNAME}
+    password: ${ADMIN_PASSWORD}
+  
+  # Cache configuration for homologation (production-like settings)
+  cache:
+    version: ${APP_CACHE_VERSION}
+    ttl:
+      # TTL values in minutes following financial industry standards
+      default: ${CACHE_TTL_DEFAULT_MINUTES}           # Conservative default: 2 minutes
+      wallet-list: ${CACHE_TTL_WALLET_LIST_MINUTES}   # Wallet collection: 3 minutes  
+      wallet-single: ${CACHE_TTL_WALLET_SINGLE_MINUTES} # Individual wallet: 1 minute
+      wallet-balance: ${CACHE_TTL_WALLET_BALANCE_SECONDS} # Critical financial data: 30 seconds
+      wallet-transactions: ${CACHE_TTL_WALLET_TRANSACTIONS_MINUTES} # Historical data: 10 minutes
+      user-profile: ${CACHE_TTL_USER_PROFILE_MINUTES} # User data: 15 minutes
+
+# Homologation actuator settings (restricted for security)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+    configprops:
+      show-values: never
+    env:
+      show-values: never

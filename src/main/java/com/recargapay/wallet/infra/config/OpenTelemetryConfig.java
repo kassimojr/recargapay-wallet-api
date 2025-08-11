@@ -1,4 +1,4 @@
-package com.recargapay.wallet.config;
+package com.recargapay.wallet.infra.config;
 
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.common.Attributes;

@@ -1,4 +1,4 @@
-package com.recargapay.wallet.config;
+package com.recargapay.wallet.infra.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
