@@ -42,14 +42,14 @@ public class WalletRepositoryImpl implements WalletRepository {
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void update(Wallet wallet) {
-        // Usa o método que força a criação de uma nova entidade
+        // Use the method that forces creation of a new entity
         jpaRepository.save(createNewEntity(wallet));
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public Wallet save(Wallet wallet) {
-        // Usa o método que força a criação de uma nova entidade
+        // Use the method that forces creation of a new entity
         WalletEntity entity = createNewEntity(wallet);
         WalletEntity saved = jpaRepository.save(entity);
         return walletMapper.toDomain(saved);
@@ -65,7 +65,7 @@ public class WalletRepositoryImpl implements WalletRepository {
         return jpaRepository.findAll().stream().map(walletMapper::toDomain).toList();
     }
 
-    // Conversão usando ModelMapper + UserJpaRepository para garantir o relacionamento correto
+    // Conversion using ModelMapper + UserJpaRepository to ensure correct relationship
     private WalletEntity toEntity(Wallet wallet) {
         if (wallet == null) return null;
         WalletEntity entity = walletMapper.toEntity(wallet);
@@ -75,11 +75,11 @@ public class WalletRepositoryImpl implements WalletRepository {
         return entity;
     }
     
-    // Método que sempre cria uma nova entidade para evitar problemas de versão
+    // Method that always creates a new entity to avoid version problems
     private WalletEntity createNewEntity(Wallet wallet) {
         if (wallet == null) return null;
         
-        // Criamos uma nova entidade e preenchemos manualmente
+        // We create a new entity and fill it manually
         WalletEntity entity = new WalletEntity();
         entity.setId(wallet.getId());
         entity.setBalance(wallet.getBalance());

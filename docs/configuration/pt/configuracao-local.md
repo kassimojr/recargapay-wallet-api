@@ -1,0 +1,301 @@
+# 🚀 Configuração de Desenvolvimento Local
+
+Este guia ajuda você a configurar a RecargaPay Wallet API para desenvolvimento local com configuração de ambiente adequada e práticas de segurança.
+
+## 📋 Visão Geral
+
+O projeto usa variáveis de ambiente para gerenciamento de configuração, eliminando credenciais hardcoded e tornando o desenvolvimento local mais seguro e flexível.
+
+## ⚡ Setup Rápido
+
+### 1. Configuração do Ambiente
+
+Copie o template de ambiente e configure seus valores locais:
+
+```bash
+cp .env.template .env
+```
+
+Edite o arquivo `.env` com sua configuração local:
+
+```bash
+# Configuração do Banco de Dados
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=recargapay_wallet
+DB_USERNAME=seu_usuario_banco
+DB_PASSWORD=sua_senha_banco
+
+# Configuração JWT (mínimo 32 caracteres)
+JWT_SECRET=sua_chave_jwt_secreta_com_pelo_menos_32_caracteres
+
+# Configuração do Usuário Admin
+ADMIN_USERNAME=seu_usuario_admin
+ADMIN_PASSWORD=sua_senha_admin
+
+# Configuração do Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=sua_senha_redis
+
+# Configuração do Cache
+APP_CACHE_VERSION=v1
+CACHE_TTL_DEFAULT_MINUTES=2
+CACHE_TTL_WALLET_LIST_MINUTES=3
+CACHE_TTL_WALLET_SINGLE_MINUTES=1
+CACHE_TTL_WALLET_BALANCE_SECONDS=30
+CACHE_TTL_WALLET_TRANSACTIONS_MINUTES=10
+CACHE_TTL_USER_PROFILE_MINUTES=15
+
+# Configuração da Aplicação
+SERVER_PORT=8080
+SPRING_PROFILES_ACTIVE=dev
+
+# Configuração de Logging
+LOGGING_LEVEL_ROOT=DEBUG
+LOGGING_LEVEL_APP=DEBUG
+```
+
+### 2. Iniciar Serviços
+
+Inicie todos os serviços necessários usando Docker Compose:
+
+```bash
+docker-compose up -d
+```
+
+Isso iniciará:
+- **PostgreSQL** banco de dados na porta 5432
+- **Redis** cache na porta 6379
+- **Grafana** monitoramento na porta 3000
+- **Loki** agregação de logs
+- **Promtail** coleta de logs
+
+### 3. Iniciar a Aplicação
+
+```bash
+./mvnw spring-boot:run
+```
+
+A aplicação carregará automaticamente as variáveis de ambiente do arquivo `.env`.
+
+### 4. Verificar Setup
+
+Verifique se tudo está funcionando:
+
+```bash
+# Verificar saúde da aplicação
+curl http://localhost:8080/actuator/health
+
+# Testar autenticação
+curl -X POST http://localhost:8080/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"seu_usuario_admin","password":"sua_senha_admin"}'
+```
+
+## 🔧 Métodos Alternativos de Configuração
+
+### Opção 1: Variáveis de Ambiente do Sistema
+
+Defina variáveis de ambiente diretamente no seu sistema:
+
+```bash
+export DB_USERNAME=seu_usuario_banco
+export DB_PASSWORD=sua_senha_banco
+export JWT_SECRET=sua_chave_jwt_secreta_com_pelo_menos_32_caracteres
+export ADMIN_USERNAME=seu_usuario_admin
+export ADMIN_PASSWORD=sua_senha_admin
+```
+
+### Opção 2: Configuração da IDE
+
+Configure variáveis de ambiente na sua IDE:
+
+#### IntelliJ IDEA
+1. Vá para **Run/Debug Configurations**
+2. Selecione sua configuração Spring Boot
+3. Adicione variáveis de ambiente na seção **Environment Variables**
+
+#### VS Code
+1. Crie `.vscode/launch.json`
+2. Adicione variáveis de ambiente na configuração:
+
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Spring Boot-WalletApiApplication",
+      "request": "launch",
+      "mainClass": "com.recargapay.wallet.WalletApiApplication",
+      "env": {
+        "DB_USERNAME": "seu_usuario_banco",
+        "DB_PASSWORD": "sua_senha_banco",
+        "JWT_SECRET": "sua_chave_jwt_secreta_com_pelo_menos_32_caracteres",
+        "ADMIN_USERNAME": "seu_usuario_admin",
+        "ADMIN_PASSWORD": "sua_senha_admin"
+      }
+    }
+  ]
+}
+```
+
+## 🐳 Desenvolvimento com Docker
+
+### Setup Completo com Docker
+
+Execute toda a stack da aplicação com Docker:
+
+```bash
+# Construir a aplicação
+./mvnw clean package -DskipTests
+
+# Iniciar todos os serviços incluindo a aplicação
+docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d
+```
+
+### Apenas Banco de Dados
+
+Se preferir executar apenas o banco de dados no Docker:
+
+```bash
+docker-compose up -d postgres redis
+```
+
+Então execute a aplicação localmente:
+
+```bash
+./mvnw spring-boot:run
+```
+
+## 🔍 Solução de Problemas
+
+### Problemas Comuns
+
+#### 1. Aplicação Não Inicia
+
+**Problema**: Variáveis de ambiente ausentes
+```bash
+# Verificar se todas as variáveis necessárias estão definidas
+env | grep -E "(DB_|JWT_|ADMIN_|REDIS_|CACHE_)"
+```
+
+**Solução**: Garantir que todas as variáveis necessárias estejam definidas no `.env` ou ambiente do sistema
+
+#### 2. Problemas de Conexão com Banco
+
+**Problema**: Não consegue conectar ao PostgreSQL
+```bash
+# Testar conexão com banco
+psql -h localhost -p 5432 -U seu_usuario -d recargapay_wallet
+```
+
+**Soluções**:
+- Garantir que PostgreSQL esteja rodando: `docker-compose up -d postgres`
+- Verificar credenciais do banco no `.env`
+- Verificar nome do banco e porta
+
+#### 3. Problemas de Conexão com Redis
+
+**Problema**: Não consegue conectar ao Redis
+```bash
+# Testar conexão Redis
+redis-cli -h localhost -p 6379 -a sua_senha_redis ping
+```
+
+**Soluções**:
+- Garantir que Redis esteja rodando: `docker-compose up -d redis`
+- Verificar senha do Redis no `.env`
+- Verificar host e porta do Redis
+
+#### 4. Problemas de Autenticação
+
+**Problema**: Login falha
+```bash
+# Verificar comprimento do segredo JWT
+echo -n "$JWT_SECRET" | wc -c  # Deve ser >= 32
+```
+
+**Soluções**:
+- Garantir que segredo JWT tenha pelo menos 32 caracteres
+- Verificar credenciais de admin no `.env`
+- Verificar se endpoint de autenticação está acessível
+
+## 📊 Ferramentas de Desenvolvimento
+
+### Testes de API
+
+Importe as coleções fornecidas:
+- **Postman**: [Coleção](../../api/postman/)
+- **Insomnia**: [Coleção](../../api/insomnia/)
+
+### Acesso ao Banco de Dados
+
+Conecte ao PostgreSQL:
+```bash
+# Linha de comando
+psql -h localhost -p 5432 -U seu_usuario -d recargapay_wallet
+
+# Ou use uma ferramenta GUI como pgAdmin, DBeaver, etc.
+```
+
+### Monitoramento do Cache
+
+Monitore o cache Redis:
+```bash
+# Redis CLI
+redis-cli -h localhost -p 6379 -a sua_senha_redis
+
+# Monitorar operações do cache
+redis-cli -h localhost -p 6379 -a sua_senha_redis MONITOR
+```
+
+### Observabilidade
+
+Acesse ferramentas de monitoramento:
+- **Grafana**: http://localhost:3000 (admin/admin)
+- **Logs da Aplicação**: Verificar saída do console ou `logs/wallet-api.json`
+
+## 🔒 Notas de Segurança
+
+### Segurança do Arquivo de Ambiente
+
+- ✅ **Nunca commitar arquivos `.env`** no controle de versão
+- ✅ **Usar senhas fortes** (mínimo 12 caracteres)
+- ✅ **Usar segredos JWT únicos** (mínimo 32 caracteres)
+- ✅ **Rotacionar credenciais regularmente**
+
+### Desenvolvimento vs Produção
+
+- **Desenvolvimento**: Usa arquivo `.env` por conveniência
+- **Produção**: Usa variáveis de ambiente do sistema
+- **Segredos diferentes**: Cada ambiente deve ter credenciais únicas
+
+## 📚 Próximos Passos
+
+Após setup local bem-sucedido:
+
+1. **Explorar a API**: [Documentação da API](../../../README.md#api-reference)
+2. **Entender Arquitetura**: [Guia de Arquitetura](../../../README.md#architecture)
+3. **Executar Testes**: `./mvnw test`
+4. **Verificar Cobertura**: `./mvnw jacoco:report`
+5. **Onboarding do Time**: [Checklist Completo](../../onboarding/pt/integracao-time.md)
+
+## 🔗 Documentação Relacionada
+
+- **🏠 Documentação Principal**: [README do Projeto](../../../README.md)
+- **⚙️ Setup de Ambiente**: [Guia Completo de Configuração](configuracao-ambiente.md)
+- **🔒 Segurança**: [Configuração de Segurança](../../security/pt/configuracao-seguranca.md)
+- **🚀 Onboarding do Time**: [Guia de Integração](../../onboarding/pt/)
+
+---
+
+## 🌍 Versões de Idioma
+
+- 🇧🇷 **Português**: Você está aqui!
+- 🇺🇸 **English**: [Local Setup in English](../en/local-setup.md)
+
+---
+
+*Para mais informações, consulte a [documentação principal do projeto](../../../README.md).*

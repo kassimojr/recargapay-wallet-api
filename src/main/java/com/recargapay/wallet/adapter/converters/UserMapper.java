@@ -34,7 +34,7 @@ public class UserMapper {
         return Objects.requireNonNullElse(domains, List.<User>of()).stream().map(this::toDTO).toList();
     }
     
-    // Conversão de CreateUserRequestDTO para domínio User
+    // Convert CreateUserRequestDTO to User domain
     public User toDomain(CreateUserRequestDTO dto) {
         if (dto == null) return null;
         User user = new User();

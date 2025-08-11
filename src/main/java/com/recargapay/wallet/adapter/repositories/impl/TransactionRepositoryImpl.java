@@ -41,7 +41,7 @@ public class TransactionRepositoryImpl implements TransactionRepository {
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public Transaction saveAndReturn(Transaction transaction) {
-        // Criamos uma nova entidade em vez de buscar e atualizar uma existente
+        // Create a new entity instead of fetching and updating an existing one
         TransactionEntity entity = createNewEntity(transaction);
         TransactionEntity saved = jpaRepository.save(entity);
         return transactionMapper.toDomain(saved);
@@ -91,7 +91,7 @@ public class TransactionRepositoryImpl implements TransactionRepository {
         entity.setId(domain.getId());
         entity.setAmount(domain.getAmount());
         
-        // Buscar a wallet pelo ID para estabelecer a relação
+        // Fetch the wallet by ID to establish the relationship
         if (domain.getWalletId() != null) {
             WalletEntity walletEntity = walletJpaRepository.findById(domain.getWalletId())
                 .orElseThrow(() -> new WalletNotFoundException("Wallet not found: " + domain.getWalletId()));
@@ -105,7 +105,7 @@ public class TransactionRepositoryImpl implements TransactionRepository {
         return entity;
     }
     
-    // Método alternativo que sempre cria uma nova entidade
+    // Alternative method that always creates a new entity
     private TransactionEntity createNewEntity(Transaction domain) {
         if (domain == null) {
             return null;
@@ -115,7 +115,7 @@ public class TransactionRepositoryImpl implements TransactionRepository {
         entity.setId(domain.getId());
         entity.setAmount(domain.getAmount());
         
-        // Buscar a wallet pelo ID para estabelecer a relação
+        // Fetch the wallet by ID to establish the relationship
         if (domain.getWalletId() != null) {
             WalletEntity walletEntity = walletJpaRepository.findById(domain.getWalletId())
                 .orElseThrow(() -> new WalletNotFoundException("Wallet not found: " + domain.getWalletId()));

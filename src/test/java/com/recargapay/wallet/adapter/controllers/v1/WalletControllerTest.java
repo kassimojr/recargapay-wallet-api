@@ -45,7 +45,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @WebMvcTest(WalletController.class)
-@Import(TestSecurityConfig.class)
+@Import({TestSecurityConfig.class, com.recargapay.wallet.infra.TestOpenTelemetryConfig.class})
 @ActiveProfiles("test")
 class WalletControllerTest {
     @Autowired
