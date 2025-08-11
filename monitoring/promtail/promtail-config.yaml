@@ -1,0 +1,101 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # Coleta logs estruturados JSON da API Wallet
+  - job_name: wallet-api-json-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: wallet-api
+          service: wallet-api
+          format: json
+          __path__: /app/logs/wallet-api*.json
+    pipeline_stages:
+      # Extrai campos do JSON principal
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            message: message
+            logger: logger
+            thread: thread
+            application: application
+            environment: environment
+            traceId: traceId
+            spanId: spanId
+      
+      # Tenta extrair JSON do campo message para logs estruturados de operações
+      - json:
+          source: message
+          expressions:
+            operation: operation
+            walletId: walletId
+            amount: amount
+            userId: userId
+            fromWalletId: fromWalletId
+            toWalletId: toWalletId
+            newBalance: newBalance
+            method: method
+            path: path
+            status: status
+            duration: duration
+          
+      # Extrai timestamp para ordenação correta
+      - timestamp:
+          source: timestamp
+          format: RFC3339Nano
+      
+      # Adiciona labels com baixa cardinalidade apenas (evita traceId, spanId, walletId como labels)
+      - labels:
+          level:
+          logger:
+          service:
+          environment:
+          
+      # Ensure traceId and spanId are available for filtering (but not as labels)
+      - output:
+          source: output
+
+  # Coleta logs de arquivos da API Wallet
+  - job_name: wallet-api-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: wallet-api
+          service: wallet-api
+          __path__: /var/log/wallet-api/*log
+
+  # Coleta logs do stdout dos containers Docker
+  - job_name: docker-logs
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+    relabel_configs:
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*?)'
+        target_label: 'container'
+      - source_labels: ['__meta_docker_container_log_stream']
+        target_label: 'logstream'
+      - source_labels: ['__meta_docker_container_label_com_docker_compose_service']
+        target_label: 'service'
+      # Adicionando label job=wallet-api para os containers da nossa aplicação
+      # Isto permite usar a consulta {job="wallet-api"} no Loki
+      - source_labels: ['__meta_docker_container_name']
+        regex: '.*wallet.*|.*spring.*'
+        replacement: 'wallet-api'
+        target_label: 'job'
+      # Adicionar também um label de aplicação para facilitar consultas
+      - source_labels: ['__meta_docker_container_name']
+        regex: '.*wallet.*|.*spring.*'
+        replacement: 'wallet-api'
+        target_label: 'app'

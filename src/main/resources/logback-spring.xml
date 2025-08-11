@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    
+    <!-- Propriedades para logs -->
+    <property name="CONSOLE_LOG_PATTERN"
+              value="%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %highlight(%-5level) [${springAppName:-wallet-api}] [%X{traceId:-},%X{spanId:-}] [%thread] %logger{36} : %msg%n"/>
+    
+    <!-- Console Appender com logs coloridos para desenvolvimento -->
+    <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>utf8</charset>
+        </encoder>
+    </appender>
+    
+    <!-- JSON Appender para logs em formato estruturado no console -->
+    <appender name="Json" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeMdc>true</includeMdc>
+            <customFields>{"application":"wallet-api","environment":"${ENVIRONMENT:-development}"}</customFields>
+            <fieldNames>
+                <timestamp>timestamp</timestamp>
+                <message>message</message>
+                <logger>logger</logger>
+                <thread>thread</thread>
+                <level>level</level>
+                <levelValue>[ignore]</levelValue>
+                <version>[ignore]</version>
+                <stackTrace>exception</stackTrace>
+            </fieldNames>
+            <!-- Inclusão explícita dos campos de rastreamento -->
+            <provider class="net.logstash.logback.composite.loggingevent.LoggingEventPatternJsonProvider">
+                <pattern>
+                    {
+                        "traceId": "%X{traceId:-}",
+                        "spanId": "%X{spanId:-}"
+                    }
+                </pattern>
+            </provider>
+        </encoder>
+    </appender>
+    
+    <!-- JSON File Appender para logs em formato estruturado em arquivo -->
+    <appender name="JsonFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/wallet-api.json</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/wallet-api.%d{yyyy-MM-dd}.json</fileNamePattern>
+            <maxHistory>7</maxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeMdc>true</includeMdc>
+            <customFields>{"application":"wallet-api","environment":"${ENVIRONMENT:-development}"}</customFields>
+            <fieldNames>
+                <timestamp>timestamp</timestamp>
+                <message>message</message>
+                <logger>logger</logger>
+                <thread>thread</thread>
+                <level>level</level>
+                <levelValue>[ignore]</levelValue>
+                <version>[ignore]</version>
+                <stackTrace>exception</stackTrace>
+            </fieldNames>
+            <!-- Inclusão explícita dos campos de rastreamento -->
+            <provider class="net.logstash.logback.composite.loggingevent.LoggingEventPatternJsonProvider">
+                <pattern>
+                    {
+                        "traceId": "%X{traceId:-}",
+                        "spanId": "%X{spanId:-}"
+                    }
+                </pattern>
+            </provider>
+        </encoder>
+    </appender>
+    
+    <!-- Use loggers diferentes para cada ambiente -->
+    <springProfile name="production">
+        <root level="INFO">
+            <appender-ref ref="Json"/>
+            <appender-ref ref="JsonFile"/>
+        </root>
+        <logger name="com.recargapay.wallet" level="INFO"/>
+    </springProfile>
+    
+    <!-- Perfil para desenvolvimento com logs coloridos -->
+    <springProfile name="!production">
+        <root level="INFO">
+            <appender-ref ref="Console"/>
+            <appender-ref ref="JsonFile"/>
+        </root>
+        <logger name="com.recargapay.wallet" level="DEBUG"/>
+    </springProfile>
+</configuration>

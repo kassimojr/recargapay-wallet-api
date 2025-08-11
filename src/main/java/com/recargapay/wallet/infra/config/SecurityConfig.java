@@ -1,5 +1,6 @@
 package com.recargapay.wallet.infra.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,11 +25,13 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    /**
-     * Em ambientes 'dev' e 'test', HTTP Basic Authentication é mantido para facilitar testes locais via Swagger e Postman.
-     * Em produção, recomenda-se remover ou condicionar o uso de httpBasic() apenas para ambientes de desenvolvimento.
-     * O AuthenticationEntryPoint customizado garante que endpoints protegidos retornem 401 para requisições não autenticadas.
-     */
+    @Value("${app.user.username}")
+    private String username;
+
+    @Value("${app.user.password}")
+    private String password;
+
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -39,22 +42,21 @@ public class SecurityConfig {
                     "/v3/api-docs/**",
                     "/swagger-ui/**",
                     "/swagger-ui.html",
-                    "/actuator/health",
+                    "/actuator/**",
                     "/api/public/**",
                     "/api/auth/login",
-                    "/*.html",                // Permite acesso a arquivos HTML na raiz
-                    "/*.js",                  // Permite acesso a arquivos JS na raiz
-                    "/*.css",                 // Permite acesso a arquivos CSS na raiz
-                    "/*.ico",                 // Permite acesso a favicon
-                    "/static/**",             // Permite acesso a todos arquivos na pasta static
-                    "/resources/**"           // Permite acesso a todos arquivos na pasta resources
+                    "/*.html",
+                    "/*.js",
+                    "/*.css",
+                    "/*.ico",
+                    "/static/**",
+                    "/resources/**"
                 ).permitAll()
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2
                 .jwt(Customizer.withDefaults())
-            )
-            .httpBasic(Customizer.withDefaults());
+            );
         return http.build();
     }
 
@@ -71,8 +73,8 @@ public class SecurityConfig {
     @Bean
     public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
         UserDetails admin = User.builder()
-            .username("admin")
-            .password(passwordEncoder.encode("admin123"))
+            .username(username)
+            .password(passwordEncoder.encode(password))
             .roles("ADMIN")
             .build();
             

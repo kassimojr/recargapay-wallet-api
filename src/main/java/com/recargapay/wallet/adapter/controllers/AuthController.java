@@ -82,7 +82,7 @@ public class AuthController {
                 description = "Access credentials",
                 required = true,
                 content = @Content(mediaType = "application/json", 
-                    schema = @Schema(example = "{\"username\": \"admin\", \"password\": \"password\"}")))
+                    schema = @Schema(example = "{\"username\": \"your_username\", \"password\": \"your_password\"}")))
             Map<String, String> credentials) {
             
         String username = credentials.get("username");

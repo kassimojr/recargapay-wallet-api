@@ -65,11 +65,11 @@ class AuthControllerTest {
     void login_withValidCredentials_returnsToken() throws Exception {
         // Arrange
         Map<String, String> credentials = new HashMap<>();
-        credentials.put("username", "admin");
-        credentials.put("password", "admin123");
+        credentials.put("username", "test_user");
+        credentials.put("password", "test_password");
         
         Authentication auth = new UsernamePasswordAuthenticationToken(
-            "admin", 
+            "test_user", 
             null, 
             Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN"))
         );
@@ -99,7 +99,7 @@ class AuthControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(credentials)))
             .andExpect(status().isUnauthorized())
-            .andExpect(jsonPath("$.error").value("Usuário ou senha inválidos"));
+            .andExpect(jsonPath("$.error").value("Invalid username or password"));
     }
     
     @Test
@@ -111,33 +111,33 @@ class AuthControllerTest {
         
         // Uma exceção de autenticação diferente de BadCredentialsException
         when(authenticationManager.authenticate(any()))
-            .thenThrow(new TestAuthenticationException("Conta bloqueada"));
+            .thenThrow(new TestAuthenticationException("Account locked"));
         
         // Act & Assert
         mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(credentials)))
             .andExpect(status().isUnauthorized())
-            .andExpect(jsonPath("$.error").value("Erro de autenticação: Conta bloqueada"));
+            .andExpect(jsonPath("$.error").value("Authentication error: Account locked"));
     }
     
     @Test
     void login_withGenericException_returns500() throws Exception {
         // Arrange
         Map<String, String> credentials = new HashMap<>();
-        credentials.put("username", "admin");
-        credentials.put("password", "admin123");
+        credentials.put("username", "test_user");
+        credentials.put("password", "test_password");
         
         // Uma exceção genérica que não é de autenticação
         when(authenticationManager.authenticate(any()))
-            .thenThrow(new RuntimeException("Erro interno do servidor"));
+            .thenThrow(new RuntimeException("Internal server error"));
         
         // Act & Assert
         mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(credentials)))
             .andExpect(status().isInternalServerError())
-            .andExpect(jsonPath("$.error").value("Erro interno ao processar a autenticação"));
+            .andExpect(jsonPath("$.error").value("Internal error processing authentication"));
     }
     
     @Test
@@ -150,7 +150,8 @@ class AuthControllerTest {
         mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(credentials)))
-            .andExpect(status().isUnauthorized());
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.error").value("Username and password are required"));
     }
     
     // Classe auxiliar para teste de exceção de autenticação personalizada
