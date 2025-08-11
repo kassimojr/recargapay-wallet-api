@@ -6,25 +6,47 @@ spring:
     import: optional:file:.env[.properties]
   
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:walletdb}
-    username: ${DB_USERNAME:admin}
-    password: ${DB_PASSWORD:admin}
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   
+  # Redis Configuration for Distributed Caching
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+      timeout: 2000ms
+      jedis:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+
+  # Cache Configuration
+  cache:
+    type: redis
+    redis:
+      time-to-live: 600000  # 10 minutes default TTL
+      cache-null-values: false
+
   # JPA/Hibernate
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
         jdbc:
           batch_versioned_data: false
         event:
           merge:
             entity_copy_observer: allow
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
   
   # Flyway configuration
   flyway:
@@ -45,11 +67,11 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          secret: ${JWT_SECRET:Q4!z8@pW#r2$Lm9^X7eF%uS6bT1&cV0*Y3jH}
+          secret: ${JWT_SECRET}
 
 # Server configuration
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${SERVER_PORT}
 
 # SpringDoc settings for OpenAPI documentation
 springdoc:
@@ -68,11 +90,24 @@ springdoc:
   packages-to-scan: com.recargapay.wallet.adapter.controllers
   paths-to-match: /api/**
 
-# Application user configuration
+# Application Configuration
 app:
+  # User configuration
   user:
     username: ${USER_NAME}
     password: ${USER_PASSWORD}
+  
+  # Cache configuration
+  cache:
+    version: ${APP_CACHE_VERSION}
+    ttl:
+      # TTL values in minutes following financial industry standards
+      default: ${CACHE_TTL_DEFAULT_MINUTES}           # Conservative default: 2 minutes
+      wallet-list: ${CACHE_TTL_WALLET_LIST_MINUTES}   # Wallet collection: 3 minutes  
+      wallet-single: ${CACHE_TTL_WALLET_SINGLE_MINUTES} # Individual wallet: 1 minute
+      wallet-balance: ${CACHE_TTL_WALLET_BALANCE_SECONDS} # Critical financial data: 30 seconds
+      wallet-transactions: ${CACHE_TTL_WALLET_TRANSACTIONS_MINUTES} # Historical data: 10 minutes
+      user-profile: ${CACHE_TTL_USER_PROFILE_MINUTES} # User data: 15 minutes
 
 # OpenTelemetry Configuration
 otel:

@@ -12,6 +12,8 @@ import com.recargapay.wallet.core.ports.out.TransactionalWalletRepository;
 import com.recargapay.wallet.infra.metrics.MetricsService;
 import com.recargapay.wallet.infra.tracing.Traced;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,6 +63,11 @@ public class TransferFundsService implements TransferFundsUseCase {
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Traced(operation = "transfer")
+    @Caching(evict = {
+        @CacheEvict(value = "wallet-list", key = "'all'"),           // Invalidate wallet list cache
+        @CacheEvict(value = "wallet-single", key = "#fromWalletId"), // Invalidate source wallet cache
+        @CacheEvict(value = "wallet-single", key = "#toWalletId")    // Invalidate destination wallet cache
+    })
     public List<Transaction> transfer(UUID fromWalletId, UUID toWalletId, BigDecimal amount) {
         validateTransferParams(fromWalletId, toWalletId, amount);
         logger.logTransferStart("TRANSFER", fromWalletId.toString(), toWalletId.toString(), amount.toString());

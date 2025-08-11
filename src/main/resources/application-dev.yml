@@ -1,0 +1,58 @@
+# Development Profile Configuration
+spring:
+  # JPA/Hibernate settings for development
+  jpa:
+    show-sql: true
+    hibernate:
+      format_sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  
+  # Flyway settings for development
+  flyway:
+    baseline-on-migrate: true
+    enabled: true
+
+# Development-specific logging
+logging:
+  level:
+    root: ${LOGGING_LEVEL_ROOT}
+    com.recargapay.wallet: ${LOGGING_LEVEL_APP}
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [${spring.application.name:-wallet-api}] [%X{traceId:-},%X{spanId:-}] [%thread] %-5level %logger{36} - %msg%n"
+
+# Development admin configuration
+app:
+  user:
+    username: ${ADMIN_USERNAME}
+    password: ${ADMIN_PASSWORD}
+  
+  # Cache configuration for development (same as production)
+  cache:
+    version: ${APP_CACHE_VERSION}
+    ttl:
+      # TTL values in minutes following financial industry standards
+      default: ${CACHE_TTL_DEFAULT_MINUTES}           # Conservative default: 2 minutes
+      wallet-list: ${CACHE_TTL_WALLET_LIST_MINUTES}   # Wallet collection: 3 minutes  
+      wallet-single: ${CACHE_TTL_WALLET_SINGLE_MINUTES} # Individual wallet: 1 minute
+      wallet-balance: ${CACHE_TTL_WALLET_BALANCE_SECONDS} # Critical financial data: 30 seconds
+      wallet-transactions: ${CACHE_TTL_WALLET_TRANSACTIONS_MINUTES} # Historical data: 10 minutes
+      user-profile: ${CACHE_TTL_USER_PROFILE_MINUTES} # User data: 15 minutes
+
+# Development actuator settings (more permissive)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+    configprops:
+      show-values: always
+    env:
+      show-values: always
