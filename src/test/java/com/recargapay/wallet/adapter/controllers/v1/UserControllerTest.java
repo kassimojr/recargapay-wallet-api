@@ -7,6 +7,7 @@ import com.recargapay.wallet.adapter.dtos.UserDTO;
 import com.recargapay.wallet.core.domain.User;
 import com.recargapay.wallet.core.exceptions.DuplicatedResourceException;
 import com.recargapay.wallet.core.ports.in.CreateUserUseCase;
+import com.recargapay.wallet.infra.TestOpenTelemetryConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -14,6 +15,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Optional;
@@ -28,7 +30,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UserController.class)
-@Import({TestSecurityConfig.class, UserControllerTest.TestConfig.class})
+@Import({TestSecurityConfig.class, UserControllerTest.TestConfig.class, TestOpenTelemetryConfig.class})
+@ActiveProfiles("test")
 class UserControllerTest {
 
     // Config interna para fornecer os mocks necessários
@@ -111,7 +114,7 @@ class UserControllerTest {
         user.setEmail("existing@example.com");
 
         when(userMapper.toDomain(any(CreateUserRequestDTO.class))).thenReturn(user);
-        when(createUserUseCase.create(any(User.class))).thenThrow(new DuplicatedResourceException("Email já está em uso"));
+        when(createUserUseCase.create(any(User.class))).thenThrow(new DuplicatedResourceException("Email is already in use"));
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/users")

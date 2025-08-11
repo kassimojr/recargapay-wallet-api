@@ -35,7 +35,7 @@ services:
       retries: 5
 
   sonarqube:
-    image: sonarqube:10.4-community
+    image: sonarqube:25.7.0.110598-community
     container_name: sonarqube
     depends_on:
       - postgres

@@ -1,7 +1,7 @@
 package com.recargapay.wallet.core.exceptions;
 
 /**
- * Exceção lançada quando uma operação financeira não pode ser concluída devido a saldo insuficiente
+ * Exception thrown when a financial operation cannot be completed due to insufficient balance
  */
 public class InsufficientFundsException extends RuntimeException {
 

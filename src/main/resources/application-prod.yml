@@ -35,8 +35,16 @@ logging:
 # Production configuration
 app:
   user:
-    username: ${ADMIN_USERNAME}
-    password: ${ADMIN_PASSWORD}
+    username: ${USER_NAME}
+    password: ${USER_PASSWORD}
+  
+  # CORS configuration for production
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS}
+    allowed-methods: ${APP_CORS_ALLOWED_METHODS}
+    allowed-headers: ${APP_CORS_ALLOWED_HEADERS}
+    allow-credentials: ${APP_CORS_ALLOW_CREDENTIALS}
+    max-age: ${APP_CORS_MAX_AGE}
   
   # Cache configuration for production (optimized TTLs)
   cache:
