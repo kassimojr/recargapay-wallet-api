@@ -5,9 +5,11 @@ import com.recargapay.wallet.core.domain.TransactionType;
 import com.recargapay.wallet.core.domain.Wallet;
 import com.recargapay.wallet.core.exceptions.WalletNotFoundException;
 import com.recargapay.wallet.core.ports.in.DepositUseCase;
+import com.recargapay.wallet.core.ports.out.DomainLogger;
 import com.recargapay.wallet.core.ports.out.TransactionalWalletRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.recargapay.wallet.infra.metrics.MetricsService;
+import com.recargapay.wallet.infra.tracing.Traced;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,15 +25,22 @@ import java.util.UUID;
 public class DepositService implements DepositUseCase {
 
     private final TransactionalWalletRepository walletRepository;
-    private final Logger logger = LoggerFactory.getLogger(DepositService.class);
+    private final MetricsService metricsService;
+    private final DomainLogger logger;
 
     /**
      * Constructor
      * 
      * @param walletRepository wallet repository with support for transactional operations
+     * @param metricsService service for recording wallet metrics
+     * @param logger domain logger for structured logging
      */
-    public DepositService(TransactionalWalletRepository walletRepository) {
+    public DepositService(TransactionalWalletRepository walletRepository, 
+                        MetricsService metricsService, 
+                        @Qualifier("depositLogger") DomainLogger logger) {
         this.walletRepository = walletRepository;
+        this.metricsService = metricsService;
+        this.logger = logger;
     }
 
     /**
@@ -45,20 +54,20 @@ public class DepositService implements DepositUseCase {
      */
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Traced(operation = "deposit")
     public Transaction deposit(UUID walletId, BigDecimal amount) {
         validateDepositParams(walletId, amount);
-        logger.info("Starting deposit operation for wallet {} with amount {}", walletId, amount);
+        logger.logOperationStart("DEPOSIT", walletId.toString(), amount.toString());
         
         Wallet wallet = walletRepository.findById(walletId)
                 .orElseThrow(() -> {
-                    logger.error("Wallet not found: {}", walletId);
+                    logger.logOperationError("DEPOSIT", walletId.toString(), "WALLET_NOT_FOUND", "Wallet not found: " + walletId);
                     return new WalletNotFoundException("Wallet not found: " + walletId);
                 });
         
-        logger.debug("Wallet found: {} with current balance: {}", walletId, wallet.getBalance());
-
         // Update wallet balance
         if (!walletRepository.updateWalletBalance(walletId, amount, false)) {
+            logger.logOperationError("DEPOSIT", walletId.toString(), "UPDATE_FAILED", "Wallet not found or could not be updated: " + walletId);
             throw new WalletNotFoundException("Wallet not found or could not be updated: " + walletId);
         }
         
@@ -68,7 +77,11 @@ public class DepositService implements DepositUseCase {
             walletId, amount, TransactionType.DEPOSIT, wallet.getUserId(), now
         );
         
-        logger.info("Deposit successfully completed for wallet {}: {}", walletId, transaction);
+        // Get updated wallet to record new balance in metrics
+        BigDecimal newBalance = wallet.getBalance().add(amount);
+        metricsService.recordWalletBalance(walletId.toString(), newBalance);
+        
+        logger.logOperationSuccess("DEPOSIT", walletId.toString(), amount.toString(), transaction.getId().toString());
         
         return transaction;
     }
@@ -83,6 +96,10 @@ public class DepositService implements DepositUseCase {
     private void validateDepositParams(UUID walletId, BigDecimal amount) {
         if (walletId == null) {
             throw new IllegalArgumentException("Wallet ID cannot be null");
+        }
+        
+        if (walletId.equals(UUID.fromString("00000000-0000-0000-0000-000000000000"))) {
+            throw new IllegalArgumentException("Invalid wallet ID: cannot use nil UUID");
         }
 
         if (amount == null) {

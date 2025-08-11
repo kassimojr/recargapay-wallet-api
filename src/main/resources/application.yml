@@ -1,0 +1,132 @@
+spring:
+  application:
+    name: recargapay-wallet-api
+  
+  config:
+    import: optional:file:.env[.properties]
+  
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:walletdb}
+    username: ${DB_USERNAME:admin}
+    password: ${DB_PASSWORD:admin}
+    driver-class-name: org.postgresql.Driver
+  
+  # JPA/Hibernate
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          batch_versioned_data: false
+        event:
+          merge:
+            entity_copy_observer: allow
+  
+  # Flyway configuration
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    baseline-version: 0
+    validate-on-migrate: true
+    placeholder-replacement: true
+    schemas: public
+    sql-migration-prefix: V
+    repeatable-sql-migration-prefix: R
+    sql-migration-separator: __
+    sql-migration-suffixes: .sql
+  
+  # JWT secret manually used via JwtDecoderConfig for local/dev environment
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          secret: ${JWT_SECRET:Q4!z8@pW#r2$Lm9^X7eF%uS6bT1&cV0*Y3jH}
+
+# Server configuration
+server:
+  port: ${SERVER_PORT:8080}
+
+# SpringDoc settings for OpenAPI documentation
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+    doc-expansion: none
+    disable-swagger-default-url: true
+  cache:
+    disabled: true
+  show-actuator: true
+  packages-to-scan: com.recargapay.wallet.adapter.controllers
+  paths-to-match: /api/**
+
+# Application user configuration
+app:
+  user:
+    username: ${USER_NAME}
+    password: ${USER_PASSWORD}
+
+# OpenTelemetry Configuration
+otel:
+  sdk:
+    disabled: true  # Disable OpenTelemetry SDK auto-configuration
+  spring:
+    enabled: false  # Disable Spring integration auto-configuration
+    webmvc:
+      enabled: false # Disable automatic WebMVC instrumentation since we have our own TraceContextFilter
+  service:
+    name: recargapay-wallet-api
+    version: 1.0.0
+  resource:
+    attributes:
+      service.name: recargapay-wallet-api
+      service.version: 1.0.0
+  # Removed OTLP exporter configuration to prevent connection errors
+  propagators: tracecontext,baggage
+  metrics:
+    exporter: none
+  logs:
+    exporter: none
+
+# Logging configuration
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [${spring.application.name:-wallet-api}] [%X{traceId:-},%X{spanId:-}] [%thread] %-5level %logger{36} - %msg%n"
+  level:
+    root: INFO
+    com.recargapay.wallet: DEBUG
+    org:
+      springframework:
+        web:
+          servlet:
+            resource:
+              ResourceHttpRequestHandler: WARN
+    # Reduzir ruído de logs
+    org.springframework.web.servlet.PageNotFound: ERROR
+
+# Actuator endpoints configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics,loggers,env
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+      show-components: always
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true

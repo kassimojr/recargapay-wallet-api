@@ -258,11 +258,12 @@ public class GlobalExceptionHandler {
             ProblemDetail problem = createProblem(
                 HttpStatus.CONFLICT,
                 "Concurrency conflict",
-                "The wallet data was modified by another process. Please try again.",
+                "The wallet data has been modified by another process. Please try again.",
                 "optimistic-lock"
             );
             
             problem.setProperty(CAUSE_PROPERTY, ex.getMessage());
+            problem.setProperty(TIMESTAMP_PROPERTY, Instant.now());
             
             return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
         }
@@ -270,7 +271,7 @@ public class GlobalExceptionHandler {
         // Other integrity errors
         ProblemDetail problem = createProblem(
             HttpStatus.BAD_REQUEST,
-            "Data integrity error",
+            "Data integrity violation",
             ex.getMessage(),
             "data-integrity"
         );
@@ -288,11 +289,12 @@ public class GlobalExceptionHandler {
         ProblemDetail problem = createProblem(
             HttpStatus.CONFLICT,
             "Concurrency conflict",
-            "The data was modified by another process during the operation. Please try again.",
+            "Another user has modified the data during the operation. Please try again.",
             "concurrent-modification"
         );
         
         problem.setProperty(CAUSE_PROPERTY, ex.getMessage());
+        problem.setProperty(TIMESTAMP_PROPERTY, Instant.now());
         
         return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
     }

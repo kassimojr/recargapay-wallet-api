@@ -12,6 +12,11 @@ services:
       - ./src/main/resources/db/init/init-walletdb.sql:/docker-entrypoint-initdb.d/init-walletdb.sql
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d walletdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   sonarqube:
     image: sonarqube:10.4-community
@@ -30,8 +35,94 @@ services:
       - sonarqube_extensions:/opt/sonarqube/extensions
       - sonarqube_logs:/opt/sonarqube/logs
 
+  # Prometheus para coleta de métricas
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: wallet-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    restart: always
+
+  # Grafana para visualização de dashboards
+  grafana:
+    image: grafana/grafana:latest
+    container_name: wallet-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+      - ./monitoring/grafana/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml
+      - ./monitoring/dashboards:/etc/grafana/dashboards
+    restart: always
+    depends_on:
+      - prometheus
+
+  # Loki para centralização de logs
+  loki:
+    image: grafana/loki:2.8.0
+    container_name: wallet-loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./monitoring/loki/loki-config.yaml:/etc/loki/local-config.yaml
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    restart: always
+    user: "0"  # Usar root para evitar problemas de permissão no desenvolvimento
+    depends_on:
+      - grafana
+
+  # Promtail para coleta de logs
+  promtail:
+    image: grafana/promtail:latest
+    container_name: wallet-promtail
+    volumes:
+      - ./monitoring/promtail/promtail-config.yaml:/etc/promtail/config.yml
+      - /var/log:/var/log
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./logs:/app/logs:ro  # Montagem dos logs estruturados JSON da aplicação
+    command: -config.file=/etc/promtail/config.yml
+    restart: always
+    depends_on:
+      - loki
+
+  # Tempo para rastreamento distribuído
+  tempo:
+    image: grafana/tempo:latest
+    container_name: wallet-tempo
+    command: -config.file=/etc/tempo/tempo-config.yaml
+    user: "0"  # Usar root para evitar problemas de permissão no desenvolvimento
+    volumes:
+      - ./monitoring/tempo/tempo-config.yaml:/etc/tempo/tempo-config.yaml
+      - tempo_data:/var/tempo  # Ajustado para corresponder ao novo caminho
+    ports:
+      - "3200:3200"     # tempo
+      - "4317:4317"     # otlp grpc
+    restart: always
+    depends_on:
+      - loki
+
 volumes:
   postgres_data:
   sonarqube_data:
   sonarqube_extensions:
   sonarqube_logs:
+  prometheus_data:
+  grafana_data:
+  loki_data:
+  loki_wal:
+  tempo_data:

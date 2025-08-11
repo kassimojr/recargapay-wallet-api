@@ -1,0 +1,24 @@
+spring:
+  # H2 Database Configuration
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    driverClassName: org.h2.Driver
+    username: sa
+    password: 
+  
+  # JPA/Hibernate Configuration
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  
+  # JWT Configuration
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          secret: Q4!z8@pW#r2$Lm9^X7eF%uS6bT1&cV0*Y3jH

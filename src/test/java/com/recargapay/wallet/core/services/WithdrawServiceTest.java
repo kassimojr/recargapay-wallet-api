@@ -1,193 +1,232 @@
 package com.recargapay.wallet.core.services;
 
 import com.recargapay.wallet.core.domain.Transaction;
+import com.recargapay.wallet.core.domain.TransactionType;
 import com.recargapay.wallet.core.domain.Wallet;
-import com.recargapay.wallet.core.exceptions.InsufficientBalanceException;
-import org.springframework.dao.OptimisticLockingFailureException;
+import com.recargapay.wallet.core.exceptions.InsufficientFundsException;
 import com.recargapay.wallet.core.exceptions.WalletNotFoundException;
-import com.recargapay.wallet.core.ports.out.TransactionRepository;
-import com.recargapay.wallet.core.ports.out.WalletRepository;
+import com.recargapay.wallet.core.ports.out.DomainLogger;
+import com.recargapay.wallet.core.ports.out.TransactionalWalletRepository;
+import com.recargapay.wallet.infra.metrics.MetricsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class WithdrawServiceTest {
+
     @Mock
-    private WalletRepository walletRepository;
+    private TransactionalWalletRepository walletRepository;
+
+    @Mock
+    private MetricsService metricsService;
     
     @Mock
-    private TransactionRepository transactionRepository;
-    
-    @Spy
-    @InjectMocks
-    private WithdrawService service;
+    private DomainLogger logger;
+
+    private WithdrawService withdrawService;
+    private UUID walletId;
+    private Wallet wallet;
+    private BigDecimal withdrawAmount;
 
     @BeforeEach
     void setUp() {
-        // Configurando o serviço para usar a si mesmo como self
-        ReflectionTestUtils.setField(service, "self", service);
+        withdrawService = new WithdrawService(walletRepository, metricsService, logger);
+        walletId = UUID.randomUUID();
+        wallet = new Wallet();
+        wallet.setId(walletId);
+        wallet.setUserId(UUID.randomUUID()); 
+        wallet.setBalance(BigDecimal.valueOf(100.0));
+        withdrawAmount = BigDecimal.valueOf(50.0);
     }
 
     @Test
-    void shouldWithdrawSuccessfully() {
-        UUID walletId = UUID.randomUUID();
-        Wallet wallet = new Wallet(walletId, UUID.randomUUID(), new BigDecimal("100.00"));
-        when(walletRepository.findById(walletId)).thenReturn(Optional.of(wallet));
-        // Mock para o método save retornar o mesmo objeto wallet
-        when(walletRepository.save(any(Wallet.class))).thenReturn(wallet);
-        // Mock para o método saveAndReturn
-        when(transactionRepository.saveAndReturn(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        Transaction tx = service.withdraw(walletId, new BigDecimal("40.00"));
-
-        assertEquals(new BigDecimal("60.00"), wallet.getBalance());
-        verify(walletRepository).save(wallet);
-        verify(transactionRepository).saveAndReturn(any(Transaction.class));
-        assertEquals(walletId, tx.getWalletId());
-        assertEquals(new BigDecimal("-40.00"), tx.getAmount());
-    }
-
-    @Test
-    void shouldThrowWhenWalletNotFound() {
-        UUID walletId = UUID.randomUUID();
-        when(walletRepository.findById(walletId)).thenReturn(Optional.empty());
-        assertThrows(WalletNotFoundException.class, () ->
-            service.withdraw(walletId, new BigDecimal("10.00"))
-        );
-    }
-
-    @Test
-    void shouldThrowWhenInsufficientBalance() {
-        UUID walletId = UUID.randomUUID();
-        Wallet wallet = new Wallet(walletId, UUID.randomUUID(), new BigDecimal("20.00"));
-        when(walletRepository.findById(walletId)).thenReturn(Optional.of(wallet));
-        assertThrows(InsufficientBalanceException.class, () ->
-            service.withdraw(walletId, new BigDecimal("30.00"))
-        );
-    }
-
-    @Test
-    void withdraw_shouldRetryOnOptimisticLockingFailure() {
+    void withdraw_shouldDeductBalanceAndCreateTransaction() {
         // Arrange
-        UUID walletId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
-        Wallet wallet = new Wallet(walletId, userId, new BigDecimal("100.00"));
+        when(walletRepository.findById(walletId)).thenReturn(Optional.of(wallet));
         
-        // Criar uma nova carteira com o saldo atualizado para simular a segunda consulta
-        Wallet updatedWallet = new Wallet(walletId, userId, new BigDecimal("60.00"));
+        UUID transactionId = UUID.randomUUID();
+        Transaction mockTransaction = new Transaction();
+        mockTransaction.setId(transactionId);
+        mockTransaction.setWalletId(walletId);
+        mockTransaction.setAmount(withdrawAmount);
+        mockTransaction.setType(TransactionType.WITHDRAW);
         
-        when(walletRepository.findById(walletId))
-                .thenReturn(Optional.of(wallet))
-                .thenReturn(Optional.of(wallet)); // Retorna a mesma carteira na segunda chamada
-        
-        // Simula falha de otimistic locking na primeira tentativa e sucesso na segunda
-        when(walletRepository.save(any(Wallet.class)))
-                .thenThrow(OptimisticLockingFailureException.class)
-                .thenReturn(wallet);
-        
-        // Mock para o método saveAndReturn
-        when(transactionRepository.saveAndReturn(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(walletRepository.updateWalletBalance(walletId, withdrawAmount, true)).thenReturn(true);
+        when(walletRepository.createTransaction(eq(walletId), eq(withdrawAmount), eq(TransactionType.WITHDRAW), any(UUID.class), any(LocalDateTime.class)))
+                .thenReturn(mockTransaction);
         
         // Act
-        Transaction result = service.withdraw(walletId, new BigDecimal("40.00"));
+        Transaction result = withdrawService.withdraw(walletId, withdrawAmount);
         
         // Assert
-        verify(walletRepository, times(2)).findById(walletId);
-        verify(walletRepository, times(2)).save(any(Wallet.class));
-        verify(transactionRepository).saveAndReturn(any(Transaction.class));
-        
+        assertNotNull(result);
         assertEquals(walletId, result.getWalletId());
-        assertEquals(new BigDecimal("-40.00"), result.getAmount());
+        assertEquals(withdrawAmount, result.getAmount());
+        assertEquals(TransactionType.WITHDRAW, result.getType());
+        
+        // Verify repository calls
+        verify(walletRepository).findById(walletId);
+        verify(walletRepository).updateWalletBalance(walletId, withdrawAmount, true);
+        verify(walletRepository).createTransaction(eq(walletId), eq(withdrawAmount), eq(TransactionType.WITHDRAW), eq(wallet.getUserId()), any(LocalDateTime.class));
+        
+        // Verify metrics recording
+        verify(metricsService).recordWalletBalance(eq(walletId.toString()), eq(BigDecimal.valueOf(50.0)));
+        
+        // Verify logging
+        verify(logger).logOperationStart("WITHDRAW", walletId.toString(), withdrawAmount.toString());
+        verify(logger).logOperationSuccess("WITHDRAW", walletId.toString(), withdrawAmount.toString(), result.getId().toString());
     }
-
+    
     @Test
-    void withdraw_shouldFailAfterMaxRetryAttempts() {
+    void withdraw_shouldThrowWalletNotFoundException_whenWalletNotFound() {
         // Arrange
-        UUID walletId = UUID.randomUUID();
-        BigDecimal amount = new BigDecimal("50.00");
-        UUID userId = UUID.randomUUID();
+        when(walletRepository.findById(walletId)).thenReturn(Optional.empty());
         
-        // Criando uma carteira com saldo INSUFICIENTE
-        // Isso garantirá que a validação do saldo falhe antes de chegar ao ponto
-        // onde o OptimisticLockingFailureException seria lançado
-        BigDecimal insufficientBalance = amount.subtract(new BigDecimal("10.00"));
-        Wallet wallet = new Wallet(walletId, userId, insufficientBalance);
+        // Act & Assert
+        assertThrows(WalletNotFoundException.class, () -> 
+            withdrawService.withdraw(walletId, withdrawAmount)
+        );
         
-        // Configurando o comportamento para encontrar a carteira
+        // Verify repository calls
+        verify(walletRepository).findById(walletId);
+        verify(walletRepository, never()).updateWalletBalance(any(), any(), anyBoolean());
+        verify(walletRepository, never()).createTransaction(any(), any(), any(), any(), any());
+        
+        // Verify logging
+        verify(logger).logOperationStart("WITHDRAW", walletId.toString(), withdrawAmount.toString());
+        verify(logger).logOperationError(eq("WITHDRAW"), eq(walletId.toString()), eq("WALLET_NOT_FOUND"), anyString());
+    }
+    
+    @Test
+    void withdraw_shouldThrowInsufficientFundsException_whenBalanceInsufficient() {
+        // Arrange
+        wallet.setBalance(BigDecimal.valueOf(30.0));  
         when(walletRepository.findById(walletId)).thenReturn(Optional.of(wallet));
         
         // Act & Assert
-        InsufficientBalanceException exception = assertThrows(
-                InsufficientBalanceException.class, 
-                () -> service.withdraw(walletId, amount)
+        assertThrows(InsufficientFundsException.class, () -> 
+            withdrawService.withdraw(walletId, withdrawAmount)
         );
         
-        // Verificando que o método findById foi chamado
+        // Verify repository calls
         verify(walletRepository).findById(walletId);
-        // Verificando que o método save nunca foi chamado (por causa da exceção de saldo insuficiente)
-        verify(walletRepository, never()).save(any(Wallet.class));
+        verify(walletRepository, never()).updateWalletBalance(any(), any(), anyBoolean());
+        verify(walletRepository, never()).createTransaction(any(), any(), any(), any(), any());
+        
+        // Verify logging
+        verify(logger).logOperationStart("WITHDRAW", walletId.toString(), withdrawAmount.toString());
+        verify(logger).logOperationError(eq("WITHDRAW"), eq(walletId.toString()), eq("INSUFFICIENT_FUNDS"), anyString());
     }
     
     @Test
-    void withdraw_shouldThrowWhenWalletIdIsNull() {
-        // Refatorado para evitar múltiplas possíveis exceções em um único lambda
-        BigDecimal amount = new BigDecimal("10.00");
-        assertThrows(IllegalArgumentException.class, () -> {
-            service.withdraw(null, amount);
-        });
+    void withdraw_shouldThrowWalletNotFoundException_whenWalletUpdateFails() {
+        // Arrange
+        when(walletRepository.findById(walletId)).thenReturn(Optional.of(wallet));
+        when(walletRepository.updateWalletBalance(walletId, withdrawAmount, true)).thenReturn(false);
+        
+        // Act & Assert
+        assertThrows(WalletNotFoundException.class, () -> 
+            withdrawService.withdraw(walletId, withdrawAmount)
+        );
+        
+        // Verify repository calls
+        verify(walletRepository).findById(walletId);
+        verify(walletRepository).updateWalletBalance(walletId, withdrawAmount, true);
+        verify(walletRepository, never()).createTransaction(any(), any(), any(), any(), any());
+        
+        // Verify logging
+        verify(logger).logOperationStart("WITHDRAW", walletId.toString(), withdrawAmount.toString());
+        verify(logger).logOperationError(eq("WITHDRAW"), eq(walletId.toString()), eq("UPDATE_FAILED"), anyString());
     }
-    
+
     @Test
-    void withdraw_shouldThrowWhenWalletNotFound() {
-        UUID walletId = UUID.randomUUID();
-        when(walletRepository.findById(walletId)).thenReturn(Optional.empty());
+    void withdraw_shouldThrowWalletNotFoundException_whenUpdateFails() {
+        // Arrange
+        when(walletRepository.findById(walletId)).thenReturn(Optional.of(wallet));
+        when(walletRepository.updateWalletBalance(eq(walletId), eq(withdrawAmount), eq(true))).thenReturn(false);
+
+        // Act & Assert
+        assertThrows(WalletNotFoundException.class, () -> 
+            withdrawService.withdraw(walletId, withdrawAmount)
+        );
         
-        // Refatorado para evitar múltiplas possíveis exceções em um único lambda
-        BigDecimal amount = new BigDecimal("10.00");
-        assertThrows(WalletNotFoundException.class, () -> {
-            service.withdraw(walletId, amount);
-        });
+        // Verify repository calls
+        verify(walletRepository).findById(walletId);
+        verify(walletRepository).updateWalletBalance(eq(walletId), eq(withdrawAmount), eq(true));
+        verify(walletRepository, never()).createTransaction(any(), any(), any(), any(), any());
+        
+        // Verify logging
+        verify(logger).logOperationStart("WITHDRAW", walletId.toString(), withdrawAmount.toString());
+        verify(logger).logOperationError(eq("WITHDRAW"), eq(walletId.toString()), eq("UPDATE_FAILED"), anyString());
     }
-    
+
     @Test
-    void withdraw_shouldThrowWhenAmountIsNull() {
-        UUID walletId = UUID.randomUUID();
+    void withdraw_shouldThrowException_whenWalletIdIsNull() {
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> 
+            withdrawService.withdraw(null, withdrawAmount)
+        );
         
-        // Refatorado para evitar múltiplas possíveis exceções em um único lambda
-        assertThrows(IllegalArgumentException.class, () -> {
-            service.withdraw(walletId, null);
-        });
+        // Verify no repository calls
+        verify(walletRepository, never()).findById(any());
+        verify(walletRepository, never()).updateWalletBalance(any(), any(), anyBoolean());
+        verify(walletRepository, never()).createTransaction(any(), any(), any(), any(), any());
     }
-    
+
     @Test
-    void withdraw_shouldThrowWhenAmountIsZeroOrNegative() {
-        UUID walletId = UUID.randomUUID();
+    void withdraw_shouldThrowException_whenWithdrawAmountIsNull() {
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> 
+            withdrawService.withdraw(walletId, null)
+        );
         
-        // Teste para valor zero - refatorado para evitar múltiplas possíveis exceções
-        Exception zeroException = assertThrows(IllegalArgumentException.class, () -> {
-            service.withdraw(walletId, BigDecimal.ZERO);
-        });
-        assertEquals("Valor de saque deve ser maior que zero", zeroException.getMessage());
+        // Verify no repository calls
+        verify(walletRepository, never()).findById(any());
+        verify(walletRepository, never()).updateWalletBalance(any(), any(), anyBoolean());
+        verify(walletRepository, never()).createTransaction(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void withdraw_shouldThrowException_whenWithdrawAmountIsZero() {
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> 
+            withdrawService.withdraw(walletId, BigDecimal.ZERO)
+        );
         
-        // Teste para valor negativo - refatorado para evitar múltiplas possíveis exceções
-        BigDecimal negativeAmount = new BigDecimal("-1.00");
-        Exception negativeException = assertThrows(IllegalArgumentException.class, () -> {
-            service.withdraw(walletId, negativeAmount);
-        });
-        assertEquals("Valor de saque deve ser maior que zero", negativeException.getMessage());
+        // Verify no repository calls
+        verify(walletRepository, never()).findById(any());
+        verify(walletRepository, never()).updateWalletBalance(any(), any(), anyBoolean());
+        verify(walletRepository, never()).createTransaction(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void withdraw_shouldThrowException_whenWithdrawAmountIsNegative() {
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> 
+            withdrawService.withdraw(walletId, BigDecimal.valueOf(-10.0))
+        );
+        
+        // Verify no repository calls
+        verify(walletRepository, never()).findById(any());
+        verify(walletRepository, never()).updateWalletBalance(any(), any(), anyBoolean());
+        verify(walletRepository, never()).createTransaction(any(), any(), any(), any(), any());
     }
 }
