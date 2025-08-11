@@ -3,6 +3,8 @@ package com.recargapay.wallet.infra.logging;
 import com.recargapay.wallet.core.ports.out.DomainLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Implementation of the DomainLogger port that uses structured JSON logging.
@@ -17,43 +19,51 @@ public class JsonDomainLogger implements DomainLogger {
     
     @Override
     public void logOperationStart(String operation, String walletId, String amount) {
-        LoggingUtils.log(logger, operation + "_START", 
+        LoggingUtils.log(logger, operation, 
+                "status", "START",
                 "walletId", walletId, 
-                "amount", amount, 
-                "currency", "BRL");
+                "amount", amount);
     }
     
     @Override
     public void logTransferStart(String operation, String fromWalletId, String toWalletId, String amount) {
-        LoggingUtils.log(logger, operation + "_START", 
-                "fromWalletId", fromWalletId, 
-                "toWalletId", toWalletId, 
-                "amount", amount, 
-                "currency", "BRL");
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("status", "START");
+        data.put("fromWalletId", fromWalletId);
+        data.put("toWalletId", toWalletId);
+        data.put("amount", amount);
+        data.put("currency", "BRL");
+        LoggingUtils.log(logger, operation, data);
     }
     
     @Override
     public void logOperationSuccess(String operation, String walletId, String amount, String transactionId) {
-        LoggingUtils.log(logger, operation + "_SUCCESS", 
-                "walletId", walletId, 
-                "amount", amount, 
-                "transactionId", transactionId);
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("status", "SUCCESS");
+        data.put("walletId", walletId);
+        data.put("amount", amount);
+        data.put("transactionId", transactionId);
+        data.put("currency", "BRL");
+        LoggingUtils.log(logger, operation, data);
     }
     
     @Override
     public void logTransferSuccess(String operation, String fromWalletId, String toWalletId, String amount, String transactionId) {
-        LoggingUtils.log(logger, operation + "_SUCCESS", 
-                "fromWalletId", fromWalletId, 
-                "toWalletId", toWalletId, 
-                "amount", amount, 
-                "transactionId", transactionId);
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("status", "SUCCESS");
+        data.put("fromWalletId", fromWalletId);
+        data.put("toWalletId", toWalletId);
+        data.put("amount", amount);
+        data.put("transactionId", transactionId);
+        data.put("currency", "BRL");
+        LoggingUtils.log(logger, operation, data);
     }
     
     @Override
     public void logOperationError(String operation, String walletId, String errorType, String errorMessage) {
-        LoggingUtils.log(logger, operation + "_ERROR", 
+        LoggingUtils.log(logger, operation, 
+                "status", "ERROR",
                 "walletId", walletId, 
-                "errorType", errorType, 
-                "errorMessage", errorMessage);
+                "errorType", errorType);
     }
 }

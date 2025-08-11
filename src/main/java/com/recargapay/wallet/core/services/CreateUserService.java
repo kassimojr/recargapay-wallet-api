@@ -21,12 +21,12 @@ public class CreateUserService implements CreateUserUseCase {
     @Override
     @Transactional
     public User create(User user) {
-        // Verificar se o e-mail já está em uso
+        // Check if email is already in use
         if (user.getEmail() != null && userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new DuplicatedResourceException("E-mail já está em uso: " + user.getEmail());
+            throw new DuplicatedResourceException("Email is already in use: " + user.getEmail());
         }
         
-        // Aqui pode-se adicionar validações de negócio, se necessário
+        // Business validations can be added here if needed
         return userRepository.save(user);
     }
 

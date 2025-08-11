@@ -32,22 +32,35 @@ scrape_configs:
             environment: environment
             traceId: traceId
             spanId: spanId
-      
-      # Tenta extrair JSON do campo message para logs estruturados de operações
-      - json:
-          source: message
-          expressions:
             operation: operation
-            walletId: walletId
-            amount: amount
-            userId: userId
-            fromWalletId: fromWalletId
-            toWalletId: toWalletId
-            newBalance: newBalance
-            method: method
-            path: path
             status: status
-            duration: duration
+            walletId: walletId
+      
+      # Extrai operation do JSON aninhado usando regex (fallback para logs que não têm no MDC)
+      - regex:
+          expression: '"operation":"(?P<nested_operation>[^"]*)"'
+          source: message
+      
+      # Extrai status do JSON aninhado usando regex (fallback)
+      - regex:
+          expression: '"status":"(?P<nested_status>[^"]*)"'
+          source: message
+      
+      # Extrai walletId do JSON aninhado usando regex (fallback)
+      - regex:
+          expression: '"walletId":"(?P<nested_walletId>[^"]*)"'
+          source: message
+          
+      # Use nested values as fallback if main fields are empty
+      - template:
+          source: operation
+          template: '{{ if .operation }}{{ .operation }}{{ else }}{{ .nested_operation }}{{ end }}'
+      - template:
+          source: status
+          template: '{{ if .status }}{{ .status }}{{ else }}{{ .nested_status }}{{ end }}'
+      - template:
+          source: walletId
+          template: '{{ if .walletId }}{{ .walletId }}{{ else }}{{ .nested_walletId }}{{ end }}'
           
       # Extrai timestamp para ordenação correta
       - timestamp:
@@ -60,10 +73,18 @@ scrape_configs:
           logger:
           service:
           environment:
+          operation:
+          status:
           
-      # Ensure traceId and spanId are available for filtering (but not as labels)
+      # Ensure all fields are available for filtering and display
       - output:
           source: output
+          
+      # Add extracted fields to the log entry for better visualization in Grafana
+      - template:
+          source: output
+          template: |
+            {{ .timestamp }} {{ .level }} {{ .logger }} {{ if .operation }}[{{ .operation }}{{ if .status }}/{{ .status }}{{ end }}] {{ end }}{{ .message }}
 
   # Coleta logs de arquivos da API Wallet
   - job_name: wallet-api-logs
@@ -80,22 +101,16 @@ scrape_configs:
     docker_sd_configs:
       - host: unix:///var/run/docker.sock
         refresh_interval: 5s
+        filters:
+          - name: label
+            values: ["logging=promtail"]
     relabel_configs:
       - source_labels: ['__meta_docker_container_name']
-        regex: '/(.*?)'
+        regex: '/(.*)'
         target_label: 'container'
       - source_labels: ['__meta_docker_container_log_stream']
         target_label: 'logstream'
       - source_labels: ['__meta_docker_container_label_com_docker_compose_service']
         target_label: 'service'
-      # Adicionando label job=wallet-api para os containers da nossa aplicação
-      # Isto permite usar a consulta {job="wallet-api"} no Loki
-      - source_labels: ['__meta_docker_container_name']
-        regex: '.*wallet.*|.*spring.*'
-        replacement: 'wallet-api'
-        target_label: 'job'
-      # Adicionar também um label de aplicação para facilitar consultas
-      - source_labels: ['__meta_docker_container_name']
-        regex: '.*wallet.*|.*spring.*'
-        replacement: 'wallet-api'
+      - source_labels: ['__meta_docker_container_label_com_docker_compose_project']
         target_label: 'app'

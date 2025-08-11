@@ -24,6 +24,15 @@ public class LoggingUtils {
      */
     public static void log(Logger logger, String operation, Map<String, Object> data) {
         try {
+            // Add operation and key fields to MDC for better Grafana visualization
+            MDC.put("operation", operation);
+            if (data.containsKey("status")) {
+                MDC.put("status", String.valueOf(data.get("status")));
+            }
+            if (data.containsKey("walletId")) {
+                MDC.put("walletId", String.valueOf(data.get("walletId")));
+            }
+            
             // Use LinkedHashMap to ensure traceId and spanId appear first
             Map<String, Object> logEntry = new LinkedHashMap<>();
             
@@ -52,9 +61,15 @@ public class LoggingUtils {
             
             // Log as single-line JSON
             logger.info(objectMapper.writeValueAsString(logEntry));
+            
         } catch (Exception e) {
             // Fallback if serialization fails
             logger.info("{}: {} (Error formatting log: {})", operation, data, e.getMessage());
+        } finally {
+            // Clean up MDC to avoid leaking context
+            MDC.remove("operation");
+            MDC.remove("status");
+            MDC.remove("walletId");
         }
     }
     

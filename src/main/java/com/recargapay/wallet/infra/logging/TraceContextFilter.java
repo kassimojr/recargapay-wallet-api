@@ -13,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -42,6 +44,7 @@ import java.util.UUID;
  */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
+@Profile("!test")
 public class TraceContextFilter extends OncePerRequestFilter {
 
     private static final Logger log = LoggerFactory.getLogger(TraceContextFilter.class);
