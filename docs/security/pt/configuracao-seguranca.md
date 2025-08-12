@@ -255,7 +255,7 @@ curl http://localhost:9090/actuator/health  # Porta de gerenciamento em produç�
 
 ## Documentação Relacionada
 
-- **Documentação Principal**: [README do Projeto](../../../README.md)
+- **Documentação Principal**: [README do Projeto](../../README-PT.md)
 - **Setup de Ambiente**: [Guia de Configuração](../../configuration/pt/configuracao-ambiente.md)
 - **Onboarding do Time**: [Setup de Segurança](../../onboarding/pt/integracao-time.md#passo-2-verificar-segurança)
 - **Monitoramento de Segurança**: [Guia de Monitoramento](../../monitoring/pt/)
@@ -269,4 +269,4 @@ curl http://localhost:9090/actuator/health  # Porta de gerenciamento em produç�
 
 ---
 
-*Para mais informações, consulte a [documentação principal do projeto](../../../README.md).*
+*Para mais informações, consulte a [documentação principal do projeto](../../README-PT.md).*

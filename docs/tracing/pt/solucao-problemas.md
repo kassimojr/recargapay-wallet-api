@@ -321,4 +321,4 @@ private String generateTraceId() {
 
 ---
 
-*Para mais informações, consulte a [documentação principal do projeto](../../../README.md).*
+*Para mais informações, consulte a [documentação principal do projeto](../../README-PT.md).*

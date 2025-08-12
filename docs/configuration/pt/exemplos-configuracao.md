@@ -617,4 +617,4 @@ Estes exemplos fornecem configurações prontas para diferentes cenários e ambi
 
 ---
 
-*Para mais informações, consulte a [documentação principal do projeto](../../../README.md).*
+*Para mais informações, consulte a [documentação principal do projeto](../../README-PT.md).*

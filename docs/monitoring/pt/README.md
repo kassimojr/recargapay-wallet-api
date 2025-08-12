@@ -137,7 +137,7 @@ Contexto de Tracing (traceId/spanId) → Correlação
 
 ## 🔗 Documentação Relacionada
 
-- **🏠 Documentação Principal**: [README do Projeto](../../../README.md)
+- **🏠 Documentação Principal**: [README do Projeto](../../README-PT.md)
 - **⚙️ Configuração**: [Setup de Ambiente](../../configuration/pt/configuracao-ambiente.md)
 - **🔍 Tracing**: [Rastreamento Distribuído](../../tracing/pt/)
 - **🔒 Segurança**: [Monitoramento de Segurança](../../security/pt/configuracao-seguranca.md#monitoramento-de-segurança)
@@ -171,4 +171,4 @@ Contexto de Tracing (traceId/spanId) → Correlação
 
 ---
 
-*Para mais informações, consulte a [documentação principal do projeto](../../../README.md).*
+*Para mais informações, consulte a [documentação principal do projeto](../../README-PT.md).*

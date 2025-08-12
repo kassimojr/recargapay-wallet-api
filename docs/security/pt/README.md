@@ -44,7 +44,7 @@ Esta seção cobre todos os aspectos de segurança da RecargaPay Wallet API, inc
 
 ## 🔗 Documentação Relacionada
 
-- **🏠 Documentação Principal**: [README do Projeto](../../../README.md)
+- **🏠 Documentação Principal**: [README do Projeto](../../README-PT.md)
 - **⚙️ Configuração**: [Setup de Ambiente](../../configuration/pt/)
 - **🚀 Onboarding**: [Setup do Time](../../onboarding/pt/)
 - **📊 Monitoramento**: [Guia de Monitoramento](../../monitoring/pt/README.md)
@@ -72,4 +72,4 @@ Esta seção cobre todos os aspectos de segurança da RecargaPay Wallet API, inc
 
 ---
 
-*Para mais informações, consulte a [documentação principal do projeto](../../../README.md).*
+*Para mais informações, consulte a [documentação principal do projeto](../../README-PT.md).*

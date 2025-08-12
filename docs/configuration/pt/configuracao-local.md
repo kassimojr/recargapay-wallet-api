@@ -284,8 +284,8 @@ Após setup local bem-sucedido:
 
 ## 🔗 Documentação Relacionada
 
-- **🏠 Documentação Principal**: [README do Projeto](../../../README.md)
-- **⚙️ Setup de Ambiente**: [Guia Completo de Configuração](configuracao-ambiente.md)
+- **🏠 Documentação Principal**: [README do Projeto](../../README-PT.md)
+- **⚙️ Setup de Ambiente**: [Guia Completo de Configuração](configuracao-local.md)
 - **🔒 Segurança**: [Configuração de Segurança](../../security/pt/configuracao-seguranca.md)
 - **🚀 Onboarding do Time**: [Guia de Integração](../../onboarding/pt/)
 
@@ -298,4 +298,4 @@ Após setup local bem-sucedido:
 
 ---
 
-*Para mais informações, consulte a [documentação principal do projeto](../../../README.md).*
+*Para mais informações, consulte a [documentação principal do projeto](../../README-PT.md).*

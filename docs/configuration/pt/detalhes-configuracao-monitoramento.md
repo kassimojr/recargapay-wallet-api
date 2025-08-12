@@ -341,4 +341,4 @@ Esta referência detalhada de configuração garante compreensão e manutenção
 
 ---
 
-*Para mais informações, consulte a [documentação principal do projeto](../../../README.md).*
+*Para mais informações, consulte a [documentação principal do projeto](../../README-PT.md).*

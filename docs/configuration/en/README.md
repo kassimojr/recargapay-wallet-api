@@ -18,7 +18,7 @@ This directory contains comprehensive documentation for all configuration files 
 - **[Referência de Configuração](../pt/referencia-configuracao.md)** - Versão em português da referência completa
 - **[Detalhes de Configuração de Monitoramento](../pt/detalhes-configuracao-monitoramento.md)** - Configurações detalhadas do stack de monitoramento
 - **[Exemplos de Configuração](../pt/exemplos-configuracao.md)** - Exemplos práticos e cenários
-- **[README em Português](../pt/README.md)** - Índice completo em português
+- **[README em Português](../../README-PT.md)** - Índice completo em português
 
 ## Quick Reference
 

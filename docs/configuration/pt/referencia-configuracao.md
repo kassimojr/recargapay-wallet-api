@@ -322,4 +322,4 @@ Esta referência de configuração garante que todas as propriedades sejam docum
 
 ---
 
-*Para mais informações, consulte a [documentação principal do projeto](../../../README.md).*
+*Para mais informações, consulte a [documentação principal do projeto](../../README-PT.md).*

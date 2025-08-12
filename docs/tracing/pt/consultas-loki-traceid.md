@@ -165,4 +165,4 @@ sum(rate({job="wallet-api", operation="DEPOSIT"}[5m])) | json | sum(amount)
 
 ---
 
-*Para mais informações, consulte a [documentação principal do projeto](../../../README.md).*
+*Para mais informações, consulte a [documentação principal do projeto](../../README-PT.md).*
