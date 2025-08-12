@@ -161,7 +161,7 @@ rate(count_over_time({job="wallet-api"} | json | traceId!="" [5m]))
 
 ### Documentação Relacionada
 
-- **🏠 Documentação Principal**: [README do Projeto](../../../README.md)
+- **🏠 Documentação Principal**: [README do Projeto](../../README-PT.md)
 - **📊 Monitoramento**: [Configuração de Monitoramento](../../monitoring/pt/README.md)
 - **⚙️ Configuração**: [Configuração de Logging](../../configuration/pt/configuracao-ambiente.md#configuração-de-logging)
 - **🔒 Segurança**: [Configuração de Segurança](../../security/pt/configuracao-seguranca.md)
@@ -180,4 +180,4 @@ Para dúvidas técnicas ou sugestões de melhoria, consulte a documentação esp
 
 ---
 
-*Para mais informações, consulte a [documentação principal do projeto](../../../README.md).*
+*Para mais informações, consulte a [documentação principal do projeto](../../README-PT.md).*

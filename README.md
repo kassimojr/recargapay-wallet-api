@@ -449,7 +449,7 @@ All project documentation is organized by categories, available in English and P
 ## 🌍 Language Versions
 
 - **🇺🇸 English**: You are here!
-- **🇧🇷 Português**: [README em Português](docs/README_PT.md)
+- **🇧🇷 Português**: [README em Português](docs/README-PT.md)
 
 ---
 

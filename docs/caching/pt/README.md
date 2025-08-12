@@ -93,7 +93,7 @@ app:
 
 ## 🔗 Documentação Relacionada
 
-- **🏠 Documentação Principal**: [README do Projeto](../../../README.md)
+- **🏠 Documentação Principal**: [README do Projeto](../../README-PT.md)
 - **⚙️ Configuração**: [Setup de Ambiente](../../configuration/pt/configuracao-ambiente.md)
 - **🔒 Segurança**: [Configuração de Segurança](../../security/pt/configuracao-seguranca.md)
 - **📊 Monitoramento**: [Setup de Observabilidade](../../monitoring/pt/)
@@ -121,4 +121,4 @@ app:
 
 ---
 
-*Para mais informações, consulte a [documentação principal do projeto](../../../README.md).*
+*Para mais informações, consulte a [documentação principal do projeto](../../README-PT.md).*
