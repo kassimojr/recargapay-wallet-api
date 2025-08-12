@@ -234,4 +234,4 @@ Esta configuração de monitoramento fornece visibilidade abrangente na API Wall
 
 ---
 
-*Para mais informações, consulte a [documentação principal do projeto](../../../README.md).*
+*Para mais informações, consulte a [documentação principal do projeto](../../README-PT.md).*

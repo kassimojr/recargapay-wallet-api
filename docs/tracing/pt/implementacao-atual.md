@@ -419,4 +419,4 @@ Para evoluir para rastreamento distribuído granular, consulte:
 
 ---
 
-*Para mais informações, consulte a [documentação principal do projeto](../../../README.md).*
+*Para mais informações, consulte a [documentação principal do projeto](../../README-PT.md).*

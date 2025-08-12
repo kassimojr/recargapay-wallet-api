@@ -24,7 +24,7 @@ Bem-vindo ao time da RecargaPay Wallet API! Esta seção contém tudo que você 
 
 ## 🔗 Documentação Relacionada
 
-- **🏠 Documentação Principal**: [README do Projeto](../../../README.md)
+- **🏠 Documentação Principal**: [README do Projeto](../../README-PT.md)
 - **⚙️ Configuração**: [Setup de Ambiente](../../configuration/pt/)
 - **🔒 Segurança**: [Configuração de Segurança](../../security/pt/)
 - **📊 Monitoramento**: [Setup de Observabilidade](../../monitoring/pt/)
@@ -43,4 +43,4 @@ Bem-vindo ao time da RecargaPay Wallet API! Esta seção contém tudo que você 
 
 ---
 
-*Para mais informações, consulte a [documentação principal do projeto](../../../README.md).*
+*Para mais informações, consulte a [documentação principal do projeto](../../README-PT.md).*

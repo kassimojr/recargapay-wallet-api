@@ -193,4 +193,4 @@ Esta documentação garante compreensão abrangente de todos os aspectos de conf
 
 ---
 
-*Para mais informações, consulte a [documentação principal do projeto](../../../README.md).*
+*Para mais informações, consulte a [documentação principal do projeto](../../README-PT.md).*
