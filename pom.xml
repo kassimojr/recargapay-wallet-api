@@ -16,10 +16,18 @@
     <properties>
         <sonar.exclusions>
             **/test/**,
-            **/adapter/repositories/**,
-            **/infra/persistence/entities/**,
-            **/config/**,
-            **/RecargapayWalletApiApplication.java
+            **/RecargapayWalletApiApplication.java,
+            **/infra/config/WebMvcConfig.java,
+            **/infra/config/CorsConfig.java,
+            **/infra/config/OpenApiConfig.java,
+            **/infra/config/LoggingConfig.java,
+            **/infra/config/TracingConfig.java,
+            **/infra/config/ParameterNameDiscovererConfig.java,
+            **/adapter/dtos/**/*Builder.java,
+            **/infra/persistence/entities/**/**.java,
+            **/core/exceptions/InvalidTransferException.java,
+            **/infra/metrics/MetricsConstants.java,
+            **/infra/tracing/Traced.java
         </sonar.exclusions>
         <spring-boot.version>3.3.3</spring-boot.version>
         <lombok.version>1.18.30</lombok.version>
@@ -185,6 +193,12 @@
             <artifactId>opentelemetry-exporter-otlp</artifactId>
             <version>${opentelemetry.version}</version>
         </dependency>
+        <!-- OpenTelemetry extension for trace propagation -->
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-extension-trace-propagators</artifactId>
+            <version>${opentelemetry.version}</version>
+        </dependency>
         <dependency>
             <groupId>io.opentelemetry.instrumentation</groupId>
             <artifactId>opentelemetry-logback-mdc-1.0</artifactId>
@@ -272,8 +286,29 @@
                         </goals>
                         <configuration>
                             <excludes>
-                                <exclude>com/recargapay/wallet/config/*</exclude>
+                                <!-- Main application class -->
                                 <exclude>com/recargapay/wallet/RecargapayWalletApiApplication*</exclude>
+                                
+                                <!-- Simple configuration classes -->
+                                <exclude>com/recargapay/wallet/infra/config/WebMvcConfig*</exclude>
+                                <exclude>com/recargapay/wallet/infra/config/CorsConfig*</exclude>
+                                <exclude>com/recargapay/wallet/infra/config/OpenApiConfig*</exclude>
+                                <exclude>com/recargapay/wallet/infra/config/LoggingConfig*</exclude>
+                                <exclude>com/recargapay/wallet/infra/config/TracingConfig*</exclude>
+                                <exclude>com/recargapay/wallet/infra/config/ParameterNameDiscovererConfig*</exclude>
+                                
+                                <!-- Lombok builders -->
+                                <exclude>com/recargapay/wallet/adapter/dtos/**/*Builder*</exclude>
+                                
+                                <!-- Simple entities -->
+                                <exclude>com/recargapay/wallet/infra/persistence/entities/**</exclude>
+                                
+                                <!-- Simple exceptions -->
+                                <exclude>com/recargapay/wallet/core/exceptions/InvalidTransferException*</exclude>
+                                
+                                <!-- Constants and annotations -->
+                                <exclude>com/recargapay/wallet/infra/metrics/MetricsConstants*</exclude>
+                                <exclude>com/recargapay/wallet/infra/tracing/Traced*</exclude>
                             </excludes>
                             <rules>
                                 <rule>

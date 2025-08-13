@@ -7,13 +7,16 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: sonarqube
+      # Create additional database for wallet API
+      POSTGRES_MULTIPLE_DATABASES: sonarqube,walletdb
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./src/main/resources/db/init/init-walletdb.sql:/docker-entrypoint-initdb.d/init-walletdb.sql
+      - ./src/main/resources/db/init/init-walletdb.sql:/docker-entrypoint-initdb.d/02-init-walletdb.sql
+      - ./scripts/init-postgres-multiple-db.sh:/docker-entrypoint-initdb.d/01-init-multiple-db.sh
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d walletdb"]
+      test: ["CMD-SHELL", "pg_isready -U admin -d sonarqube && pg_isready -U admin -d walletdb"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -43,7 +46,6 @@ services:
       SONAR_JDBC_URL: jdbc:postgresql://postgres:5432/sonarqube
       SONAR_JDBC_USERNAME: admin
       SONAR_JDBC_PASSWORD: admin
-      #Change password first login on http//localhost:9000
     ports:
       - "9000:9000"
     volumes:

@@ -23,27 +23,34 @@ public class WalletDatabaseHealthIndicator implements HealthIndicator {
     @Override
     public Health health() {
         try {
-            // Execute a simple query to test database connectivity
-            int result = jdbcTemplate.queryForObject("SELECT 1", Integer.class);
-            
-            if (result == 1) {
-                // Check if wallet table is accessible
-                int walletCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM wallets", Integer.class);
-                
-                return Health.up()
-                    .withDetail("database", "PostgreSQL")
-                    .withDetail("walletCount", walletCount)
-                    .build();
-            } else {
+            // Test basic database connectivity
+            Integer testResult = jdbcTemplate.queryForObject("SELECT 1", Integer.class);
+            if (testResult == null || testResult != 1) {
                 return Health.down()
                     .withDetail("database", "PostgreSQL")
                     .withDetail("error", "Database test query failed")
                     .build();
             }
+            
+            // Test wallet table access and get count
+            Integer walletCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM wallets", Integer.class);
+            if (walletCount == null) {
+                return Health.down()
+                    .withDetail("database", "PostgreSQL")
+                    .withDetail("error", "Wallet count query returned null")
+                    .build();
+            }
+            
+            return Health.up()
+                .withDetail("database", "PostgreSQL")
+                .withDetail("walletCount", walletCount)
+                .withDetail("status", "Connected")
+                .build();
         } catch (Exception e) {
+            String errorMessage = e.getMessage() != null ? e.getMessage() : "Unknown database error occurred";
             return Health.down()
                 .withDetail("database", "PostgreSQL")
-                .withDetail("error", e.getMessage())
+                .withDetail("error", errorMessage)
                 .build();
         }
     }
