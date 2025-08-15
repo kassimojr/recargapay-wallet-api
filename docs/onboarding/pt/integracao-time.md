@@ -14,7 +14,7 @@ Bem-vindo ao time da RecargaPay Wallet API! Use este checklist abrangente para g
 ### ✅ Configuração do Ambiente
 
 #### Passo 1: Criar Configuração Local
-- [ ] Copiar template de ambiente: `cp .env.template .env`
+- [ ] Copiar template de ambiente: `cp src/main/resources/templates/.env.template .env`
 - [ ] Editar arquivo `.env` com seus valores pessoais:
   ```bash
   # Configuração do Banco de Dados

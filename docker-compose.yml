@@ -54,7 +54,7 @@ services:
 
   # Prometheus para coleta de métricas
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v2.45.6
     container_name: wallet-prometheus
     ports:
       - "9090:9090"
@@ -72,7 +72,7 @@ services:
 
   # Grafana para visualização de dashboards
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:11.2.0
     container_name: wallet-grafana
     ports:
       - "3000:3000"
@@ -98,7 +98,7 @@ services:
 
   # Loki para centralização de logs
   loki:
-    image: grafana/loki:latest
+    image: grafana/loki:3.1.1
     container_name: wallet-loki
     ports:
       - "3100:3100"
@@ -113,7 +113,7 @@ services:
 
   # Promtail para envio de logs ao Loki
   promtail:
-    image: grafana/promtail:latest
+    image: grafana/promtail:3.1.1
     container_name: wallet-promtail
     volumes:
       - ./monitoring/promtail/promtail-config.yaml:/etc/promtail/config.yml
@@ -130,7 +130,7 @@ services:
 
   # Tempo para rastreamento distribuído
   tempo:
-    image: grafana/tempo:latest
+    image: grafana/tempo:2.4.2
     container_name: wallet-tempo
     command: -config.file=/etc/tempo/tempo-config.yaml
     user: "0"  # Usar root para evitar problemas de permissão no desenvolvimento

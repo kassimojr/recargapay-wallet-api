@@ -8,35 +8,40 @@ O projeto usa variáveis de ambiente para gerenciamento de configuração, elimi
 
 ## ⚡ Setup Rápido
 
-### 1. Configuração do Ambiente
+### 1. Configuração Automática do Ambiente
 
-Copie o template de ambiente e configure seus valores locais:
+O arquivo `.env` é **gerado automaticamente** quando você executa o script de inicialização:
 
 ```bash
-cp .env.template .env
+./wallet-api-startup.sh
 ```
 
-Edite o arquivo `.env` com sua configuração local:
+O script automaticamente:
+- Gera `.env` baseado no `src/main/resources/templates/.env.template`
+- Aplica valores padrão seguros para desenvolvimento
+- Cria backup se um `.env` existente for encontrado
+
+O arquivo `.env` gerado inclui:
 
 ```bash
 # Configuração do Banco de Dados
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=recargapay_wallet
-DB_USERNAME=seu_usuario_banco
-DB_PASSWORD=sua_senha_banco
+DB_NAME=walletdb
+DB_USERNAME=admin
+DB_PASSWORD=admin
 
 # Configuração JWT (mínimo 32 caracteres)
-JWT_SECRET=sua_chave_jwt_secreta_com_pelo_menos_32_caracteres
+JWT_SECRET=my-super-secure-jwt-secret-key-for-development-at-least-32-characters-long
 
-# Configuração do Usuário Admin
-ADMIN_USERNAME=seu_usuario_admin
-ADMIN_PASSWORD=sua_senha_admin
+# Configuração do Usuário da Aplicação
+USER_NAME=admin
+USER_PASSWORD=admin
 
 # Configuração do Redis
 REDIS_HOST=localhost
 REDIS_PORT=6379
-REDIS_PASSWORD=sua_senha_redis
+REDIS_PASSWORD=
 
 # Configuração do Cache
 APP_CACHE_VERSION=v1
@@ -52,8 +57,16 @@ SERVER_PORT=8080
 SPRING_PROFILES_ACTIVE=dev
 
 # Configuração de Logging
-LOGGING_LEVEL_ROOT=DEBUG
+LOGGING_LEVEL_ROOT=INFO
 LOGGING_LEVEL_APP=DEBUG
+
+# Configuração CORS
+APP_CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:8080
+
+# Configuração SonarQube
+SONAR_USER=admin
+SONAR_PASS=admin
+SONAR_NEW_PASS=admin123
 ```
 
 ### 2. Iniciar Serviços
@@ -90,7 +103,7 @@ curl http://localhost:8080/actuator/health
 # Testar autenticação
 curl -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"username":"seu_usuario_admin","password":"sua_senha_admin"}'
+  -d '{"username":"admin","password":"admin"}'
 ```
 
 ## 🔧 Métodos Alternativos de Configuração

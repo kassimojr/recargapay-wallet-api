@@ -103,7 +103,14 @@ com.recargapay.wallet/
 ┌─────────────────────────────────────────────────────────────┐
 │                   Infrastructure Layer                       │
 │    Database + Cache + Security + Monitoring + Logging       │
-│         PostgreSQL + Redis + JWT + Metrics + Tracing        │
+│    PostgreSQL + Redis + JWT + Grafana + Structured Logs     │
+└───────────────────────────┬─────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   Observability Stack                       │
+│     Prometheus + Grafana + Loki + Tempo + OpenTelemetry     │
+│          Real-time Dashboards + Alerts + Tracing            │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -122,55 +129,36 @@ com.recargapay.wallet/
 
 The project uses a modern and robust technology stack:
 
-### Core Framework
-- **Java 21**: Main language with advanced features
-- **Spring Boot 3.2+**: Application development framework
-- **Spring Data JPA**: Simplified data persistence
-- **Spring Security**: Authentication and authorization
-- **Spring Boot Actuator**: Production-ready features and monitoring
+### Core Stack
+- **Java 21** - Latest LTS version with modern language features
+- **Spring Boot 3.2+** - Enterprise-grade framework with auto-configuration
+- **PostgreSQL 16** - Robust relational database with advanced features
+- **Redis 7** - High-performance distributed caching and session storage
+- **Docker & Docker Compose** - Containerization with **pinned stable versions** (no `latest` tags)
 
-### Database & Persistence
-- **PostgreSQL**: Production database
-- **H2 Database**: In-memory database for development and testing
-- **Flyway**: Database migration management
+### Security & Authentication
+- **Spring Security 6** - Comprehensive security framework
+- **JWT (JSON Web Tokens)** - Stateless authentication mechanism
+- **BCrypt** - Secure password hashing algorithm
+- **CORS Configuration** - Cross-origin resource sharing setup
+- **Security Headers** - HTTP security headers (HSTS, X-Frame-Options, etc.)
 
-### Caching & Performance
-- **Redis**: Distributed caching system
-- **Spring Cache**: Cache abstraction with Redis integration
-- **Connection pooling**: Optimized database connections
-
-### Observability & Monitoring
-- **OpenTelemetry**: Distributed tracing and observability
-- **Structured Logging**: JSON-formatted logs with correlation IDs
-- **Grafana**: Visualization and dashboards
-- **Loki**: Log aggregation and querying
-- **Promtail**: Log collection and forwarding
-- **Spring Boot Actuator**: Health checks and metrics
-
-### Security
-- **JWT (JSON Web Tokens)**: Stateless authentication
-- **OAuth2 Resource Server**: JWT token validation
-- **BCrypt**: Password hashing
-- **Security Headers**: CSRF, CORS, and security headers
-- **Input Validation**: Bean Validation (JSR-303)
-
-### Documentation & API
-- **Swagger/OpenAPI 3**: Interactive API documentation
-- **Spring REST Docs**: Test-driven documentation
+### Observability Stack
+- **Prometheus v2.45.6** - LTS version with proven stability in production
+- **Grafana 11.2.0** - **Modern dashboards** with enhanced UI and business intelligence
+- **Loki 3.1.1** - Stable structured JSON log aggregation with performance improvements
+- **Promtail 3.1.1** - Enhanced log shipping with correlation IDs and compatibility
+- **Tempo 2.4.2** - Stable distributed tracing with reliable capabilities
+- **OpenTelemetry** - Unified observability framework with full stack integration
 
 ### Development & Quality
-- **Maven**: Dependency management and build tool
-- **Docker & Docker Compose**: Containerization for development and production
-- **JUnit 5**: Testing framework
-- **Mockito**: Mocking framework for unit tests
-- **Testcontainers**: Integration testing with real databases
-- **JaCoCo**: Code coverage analysis
-- **SonarQube**: Static code analysis and quality gates
+- **Maven** - Dependency management and build automation
+- **SonarQube 25.7** - Code quality analysis and coverage reporting
+- **JUnit 5** - Modern testing framework with extensive assertions
+- **Testcontainers** - Integration testing with real database instances
+- **Jacoco** - Code coverage analysis and reporting
 
-### DevOps & Deployment
-- **Docker**: Application containerization
-- **Docker Compose**: Multi-container orchestration
-- **Environment-specific profiles**: Dev, test, staging, production configurations
+> **📋 Note**: All Docker images use **pinned stable versions** instead of `latest` tags to ensure reproducible builds and prevent unexpected breaking changes. See [Docker Versions Guide](docs/configuration/en/docker-versions.md) for version selection criteria.
 
 ---
 
@@ -190,36 +178,60 @@ git clone https://github.com/your-username/recargapay-wallet-api.git
 cd recargapay-wallet-api
 ```
 
-### Starting with Docker Compose
-
-The project includes Docker Compose configuration for easy development and testing:
-
-1. **Starting services**:
+### 🎯 Quick Validation (Recommended)
+**CI/CD Pipeline Simulation** - Complete validation in one command:
 
 ```bash
+./wallet-api-startup.sh
+```
+
+This script simulates a complete CI/CD pipeline and validates:
+- ✅ **Automatic `.env` generation** (from template with secure defaults)
+- ✅ Environment setup and dependencies
+- ✅ Infrastructure services startup (Docker Compose)
+- ✅ Application build and tests (Maven)
+- ✅ Code quality analysis (SonarQube)
+- ✅ Application deployment and health checks
+- ✅ **Monitoring stack validation** (Grafana dashboards)
+
+**🎯 Perfect for**: Code reviews, integration validation, demo preparation
+
+### 🛠️ Development Modes
+For specific development needs:
+
+#### Manual Infrastructure Setup
+```bash
+docker-compose up -d  # Infrastructure only
+mvn spring-boot:run   # Application in development mode
+```
+
+#### Step-by-Step Validation
+```bash
+# 1. Infrastructure services
 docker-compose up -d
+
+# 2. Build & Test
+mvn clean verify
+
+# 3. Code Quality
+mvn sonar:sonar
+
+# 4. Application
+mvn spring-boot:run
 ```
 
-This command will start:
-- PostgreSQL database
-- Redis cache
-- Observability stack (Grafana, Loki, Promtail)
-- RecargaPay Wallet API application
-
-2. **Checking services**:
-
-```bash
-docker-compose ps
-```
-
-You'll see a list of running services and their ports.
+This will start:
+- PostgreSQL database (port 5432)
+- Redis cache (port 6379)
+- **Enhanced observability stack** (Prometheus, Grafana, Loki, Tempo)
+- SonarQube code analysis (port 9000)
 
 ### Environment Configuration
 
 Copy the environment template and configure your variables:
 
 ```bash
-cp .env.template .env
+cp src/main/resources/templates/.env.template .env
 # Edit .env with your specific configurations
 ```
 
@@ -292,11 +304,96 @@ curl -X POST http://localhost:8080/api/auth/login \
 | `POST` | `/api/wallets/{userId}/withdraw` | Withdraw funds |
 | `POST` | `/api/wallets/transfer` | Transfer between wallets |
 
-For detailed API documentation, visit: `http://localhost:8080/swagger-ui.html`
+### 📋 API Testing Resources
+- **Swagger UI**: `http://localhost:8080/swagger-ui.html`
+- **Postman Collection**: [Import from docs/collections/postman/](docs/collections/postman/)
+
+### 🔧 cURL Examples
+
+#### 1. Create Wallet
+```bash
+curl -X POST http://localhost:8080/api/wallets \
+  -H "Authorization: Bearer $JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "userId": "123e4567-e89b-12d3-a456-426614174000",
+    "userName": "John Doe",
+    "initialBalance": 100.00
+  }'
+```
+
+#### 2. Get Current Balance
+```bash
+curl -X GET http://localhost:8080/api/wallets/123e4567-e89b-12d3-a456-426614174000/balance \
+  -H "Authorization: Bearer $JWT_TOKEN"
+```
+
+#### 3. Get Historical Balance
+```bash
+curl -X GET "http://localhost:8080/api/wallets/123e4567-e89b-12d3-a456-426614174000/balance?date=2025-01-15T10:30:00Z" \
+  -H "Authorization: Bearer $JWT_TOKEN"
+```
+
+#### 4. Deposit Funds
+```bash
+curl -X POST http://localhost:8080/api/wallets/123e4567-e89b-12d3-a456-426614174000/deposit \
+  -H "Authorization: Bearer $JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": 50.00,
+    "description": "Salary deposit"
+  }'
+```
+
+#### 5. Withdraw Funds
+```bash
+curl -X POST http://localhost:8080/api/wallets/123e4567-e89b-12d3-a456-426614174000/withdraw \
+  -H "Authorization: Bearer $JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": 25.00,
+    "description": "ATM withdrawal"
+  }'
+```
+
+#### 6. Transfer Between Wallets
+```bash
+curl -X POST http://localhost:8080/api/wallets/transfer \
+  -H "Authorization: Bearer $JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "fromUserId": "123e4567-e89b-12d3-a456-426614174000",
+    "toUserId": "987fcdeb-51d2-43a8-b456-426614174999",
+    "amount": 30.00,
+    "description": "Payment to friend"
+  }'
+```
+
+> **💡 Note**: Replace `$JWT_TOKEN` with the actual token obtained from the login endpoint
 
 ---
 
 ## 🛠️ Operations & Monitoring
+
+### 📊 Real-Time Dashboards
+Access comprehensive monitoring at `http://localhost:3000` (admin/admin):
+
+- **🚦 Application Health Dashboard** - System status, performance metrics, alerts
+- **💰 Wallet Metrics Dashboard** - Business metrics, transaction rates, financial KPIs
+
+### 🔍 Observability Stack
+- **Prometheus** (`localhost:9090`) - Metrics collection and alerting
+- **Grafana** (`localhost:3000`) - Visualization and dashboards  
+- **Loki** (`localhost:3100`) - Centralized logging
+- **Tempo** (`localhost:3200`) - Distributed tracing
+
+### 📈 Key Metrics Monitored
+- **System Health**: API status, database connectivity, cache performance
+- **Business Metrics**: Transaction rates, wallet balances, operation success rates
+- **Performance**: Response times, throughput, resource utilization
+- **Alerts**: Automated notifications for critical issues
+
+> **💡 Tip**: Run `./wallet-api-startup.sh` to automatically validate the complete monitoring stack
 
 ### Health Checks
 
@@ -310,12 +407,7 @@ curl http://localhost:8080/actuator/health
 curl http://localhost:8080/actuator/health/detailed
 ```
 
-### Observability Stack
-
-Access the monitoring tools:
-
-- **Grafana Dashboards**: `http://localhost:3000` (admin/admin)
-- **Application Logs**: Structured JSON logs with correlation IDs
+### Application Metrics
 - **Metrics**: Available via Spring Boot Actuator endpoints
 - **Distributed Tracing**: Request correlation with traceId/spanId
 
@@ -431,12 +523,15 @@ All project documentation is organized by categories, available in English and P
 - **[Local Setup](docs/configuration/en/README.md)** - Development environment
 - **[API Testing](docs/configuration/en/README.md)** - Postman/Insomnia collections
 - **[Cache Implementation](docs/caching/en/README.md)** - How to use cache
+- **[SonarQube Automation](docs/configuration/en/sonarqube-automation.md)** - Code quality automation
 
 #### For DevOps/SysAdmin
 - **[Environment Setup](docs/configuration/en/README.md)** - Complete configuration
 - **[Security Configuration](docs/security/en/README.md)** - Security and compliance
 - **[Monitoring Setup](docs/monitoring/en/README.md)** - Observability and alerts
 - **[Production Deployment](docs/configuration/en/README.md)** - Production deployment
+- **[SonarQube Password Config](docs/configuration/en/sonarqube-password-config.md)** - SonarQube password management
+- **[Docker Versions](docs/configuration/en/docker-versions.md)** - Docker image versions reference
 
 #### For Architects/Tech Leads
 - **[Architecture Overview](#-architecture)** - Hexagonal architecture overview
