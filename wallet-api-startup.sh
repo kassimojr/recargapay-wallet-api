@@ -591,7 +591,26 @@ validate_coverage_from_api() {
 start_infrastructure() {
     print_step "Starting Infrastructure Services"
     
-    print_info "Starting all Docker services..."
+    # Check if key infrastructure services are already running
+    local services_to_check=("wallet-redis" "wallet-grafana" "wallet-loki" "wallet-promtail" "wallet-prometheus" "wallet-tempo")
+    local all_running=true
+    
+    print_info "Checking infrastructure services status..."
+    for service in "${services_to_check[@]}"; do
+        if ! is_service_healthy "$service" "container"; then
+            all_running=false
+            break
+        fi
+    done
+    
+    if [ "$all_running" = true ]; then
+        print_success "✅ All infrastructure services are already running and healthy"
+        print_info "📋 Services Status:"
+        docker ps --format "table {{.Names}}\t{{.Status}}" --filter "name=wallet-" | grep -E "(redis|grafana|loki|promtail|prometheus|tempo)"
+        return 0
+    fi
+    
+    print_info "Starting Docker services..."
     print_info "📝 Docker output will be shown below and saved to: $DOCKER_LOG"
     echo ""
     
@@ -602,45 +621,6 @@ start_infrastructure() {
         print_error "Check $DOCKER_LOG for detailed error information"
         exit 1
     fi
-    
-    # Wait for key services to be ready
-    local services=(
-        "PostgreSQL:http://localhost:5432"
-        "Redis:http://localhost:6379"
-        "Prometheus:http://localhost:9090/-/ready"
-        "Grafana:http://localhost:3000/api/health"
-    )
-    
-    for service_info in "${services[@]}"; do
-        local service_name=$(echo "$service_info" | cut -d':' -f1)
-        local service_url=$(echo "$service_info" | cut -d':' -f2-)
-        
-        # Special handling for PostgreSQL and Redis (just check port)
-        if [ "$service_name" = "PostgreSQL" ] || [ "$service_name" = "Redis" ]; then
-            local port=$(echo "$service_url" | cut -d':' -f3)
-            local attempt=1
-            local max_attempts=30
-            
-            print_info "Waiting for $service_name to be ready..."
-            while [ $attempt -le $max_attempts ]; do
-                if nc -z localhost $port >/dev/null 2>&1; then
-                    print_success "$service_name is ready!"
-                    break
-                fi
-                echo -n "."
-                sleep 2
-                attempt=$((attempt + 1))
-            done
-            
-            if [ $attempt -gt $max_attempts ]; then
-                print_warning "$service_name may not be ready, but continuing..."
-            fi
-        else
-            wait_for_service "$service_name" "$service_url" || print_warning "$service_name may not be ready, but continuing..."
-        fi
-    done
-    
-    print_success "Infrastructure services are ready!"
 }
 
 # =============================================================================
@@ -650,13 +630,20 @@ start_infrastructure() {
 start_spring_boot_docker() {
     print_step "Starting Spring Boot Application (Docker Service)"
     
-    # Remove existing container if it exists
-    if docker ps -a --format "table {{.Names}}" | grep -q "^wallet-api$"; then
-        print_info "🔄 Removing existing wallet-api container..."
-        docker stop wallet-api >/dev/null 2>&1 || true
-        docker rm wallet-api >/dev/null 2>&1 || true
-        print_success "✅ Previous container removed"
+    # Always remove existing container to ensure fresh build/deployment
+    print_info "🔄 Ensuring clean environment for fresh deployment..."
+    
+    # Force stop and remove any existing wallet-api container (robust approach)
+    docker stop wallet-api >/dev/null 2>&1 || true
+    docker rm -f wallet-api >/dev/null 2>&1 || true
+    
+    # Double-check and force removal if still exists
+    if docker ps -a --format "{{.Names}}" | grep -q "^wallet-api$"; then
+        print_info "🔄 Force removing persistent wallet-api container..."
+        docker rm -f wallet-api >/dev/null 2>&1 || true
     fi
+    
+    print_success "✅ Clean environment ready for fresh deployment"
     
     print_info "Building Docker image for the application..."
     local version=$(get_project_version)
@@ -668,21 +655,27 @@ start_spring_boot_docker() {
     print_info "Building Docker image: recargapay-wallet-api:$version"
     
     # Build with clean output - show progress but hide verbose details
-    print_info "🔨 Building application image (this may take a few minutes)..."
+    if [ "$IDE_MODE" = true ]; then
+        print_info "🔨 Building application image (IDE mode - may use cache)..."
+        local build_args=""
+    else
+        print_info "🔨 Building application image from scratch (CI/CD mode - no cache)..."
+        local build_args="--no-cache --pull"
+    fi
     
     # Capture build output for logging but show clean progress
     local build_output=$(mktemp)
     local build_start_time=$(date +%s)
     
-    if docker build -t recargapay-wallet-api:$version . > "$build_output" 2>&1; then
+    if docker build $build_args -t recargapay-wallet-api:$version . > "$build_output" 2>&1; then
         local build_end_time=$(date +%s)
         local build_duration=$((build_end_time - build_start_time))
         
         # Check if build used cache (fast) or was full build (slow)
-        if grep -q "CACHED" "$build_output"; then
+        if [ "$IDE_MODE" = true ] && grep -q "CACHED" "$build_output"; then
             print_success "✅ Docker image built successfully! (${build_duration}s - used cache)"
         else
-            print_success "✅ Docker image built successfully! (${build_duration}s - full build)"
+            print_success "✅ Docker image built successfully! (${build_duration}s - fresh build)"
         fi
         
         # Log detailed output to file for troubleshooting
@@ -708,7 +701,7 @@ start_spring_boot_docker() {
         --label com.docker.compose.project=recargapay-wallet-api \
         --label com.docker.compose.service=wallet-api \
         -p 8080:8080 \
-        -v $(pwd)/logs:/logs \
+        -v $(pwd)/logs:/app/logs \
         --env-file .env \
         -e SPRING_PROFILES_ACTIVE=prod \
         -e DB_HOST=postgres-sonar \
@@ -734,7 +727,7 @@ start_spring_boot_docker() {
     else
         print_error "❌ Container wallet-api is not running properly"
         print_error "📋 Container status:"
-        docker ps -a --filter name=wallet-api --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+        docker ps -a --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" --filter name=wallet-api
         print_error "💡 Check Docker logs: docker logs wallet-api"
         exit 1
     fi
@@ -759,7 +752,7 @@ verify_application_startup() {
     print_info "🔍 Verifying container is running and healthy..."
     
     # Step 1: Verify container is actually running
-    if ! docker ps --format "table {{.Names}}" | grep -q "^wallet-api$"; then
+    if ! docker ps --format "{{.Names}}" | grep -q "^wallet-api$"; then
         print_error "❌ wallet-api container is not running!"
         return 1
     fi
@@ -788,7 +781,7 @@ verify_application_startup() {
     fi
     
     # Step 5: Final verification - container still running?
-    if docker ps --format "table {{.Names}}" | grep -q "^wallet-api$"; then
+    if docker ps --format "{{.Names}}" | grep -q "^wallet-api$"; then
         print_warning "⚠️  Health endpoints not responding yet, but container is running"
         print_info "🎯 This is normal for startup from zero - application may need more time"
         print_info "💡 Container is healthy and will continue initializing in background"
@@ -888,7 +881,7 @@ run_health_checks() {
             if [ "$log_count" -gt "0" ]; then
                 print_success "✅ Log ingestion working! Found $log_count log streams in Loki"
                 print_info "📈 Logs are being collected and ingested successfully"
-                print_info "🌐 Access Grafana at http://localhost:3000 (admin/admin) to view logs"
+                print_info "🌐 Access Grafana at http://localhost:3000 to view logs"
             else
                 print_warning "Logs are being generated but may not be fully ingested yet"
                 print_info "⏳ This is normal on first startup - logs should appear in Grafana within 15 seconds"
@@ -964,13 +957,14 @@ show_final_info() {
     echo -e "${GREEN}║  🔍 Health Check:    http://localhost:$API_PORT/actuator/health                    ║${NC}"
     echo -e "${GREEN}║  📈 Metrics:         http://localhost:$API_PORT/actuator/prometheus               ║${NC}"
     echo -e "${GREEN}║  📋 SonarQube:       $SONAR_HOST_URL                                    ║${NC}"
-    echo -e "${GREEN}║  📊 Grafana:         http://localhost:3000 (admin/admin)                    ║${NC}"
+    echo -e "${GREEN}║  📊 Grafana:         http://localhost:3000                                    ║${NC}"
     echo -e "${GREEN}║  🔍 Loki Logs:       http://localhost:3000/explore                          ║${NC}"
     echo -e "${GREEN}║                                                                              ║${NC}"
     echo -e "${GREEN}║  📝 Profile Used:    $SPRING_PROFILE                                              ║${NC}"
     echo -e "${GREEN}║  🎯 Coverage Target: $REQUIRED_COVERAGE%                                            ║${NC}"
     echo -e "${GREEN}║  📊 Current Coverage: ${current_coverage}%                                           ║${NC}"
     echo -e "${GREEN}║  ⏱️  Total Execution Time: ${execution_time}                                        ║${NC}"
+    echo -e "${GREEN}║  📝 Execution Mode:  ${EXECUTION_MODE}                                             ║${NC}"
     echo -e "${GREEN}║                                                                              ║${NC}"
     echo -e "${GREEN}╚══════════════════════════════════════════════════════════════════════════════╝${NC}"
     echo ""
@@ -979,6 +973,13 @@ show_final_info() {
     echo "  • Stop services: ./wallet-api-shutdown.sh"
     echo "  • View logs: docker-compose logs -f wallet-api"
     echo "  • Monitor services: ./scripts/monitoring.sh"
+    echo ""
+    
+    print_info "🚀 Execution Modes Available:"
+    echo "  • Full CI/CD:        ./wallet-api-startup.sh"
+    echo "  • IDE Development:   ./wallet-api-startup.sh --ide-mode"
+    echo "  • Infrastructure:    ./wallet-api-startup.sh --infrastructure-only"
+    echo "  • Help:              ./wallet-api-startup.sh --help"
     echo ""
     
     print_info "📚 API Documentation:"
@@ -1008,7 +1009,7 @@ while [[ $# -gt 0 ]]; do
             IDE_MODE=true
             shift
             ;;
-        --infrastructure)
+        --infrastructure-only|--infrastructure)
             INFRASTRUCTURE_ONLY=true
             shift
             ;;
@@ -1029,15 +1030,28 @@ if [ "$SHOW_HELP" = true ]; then
     echo "RecargaPay Wallet API - Startup Script"
     echo ""
     echo "Usage:"
-    echo "  $0                    Full startup (build + infrastructure + application)"
-    echo "  $0 --ide-mode         IDE development mode (build + infrastructure, no application)"
-    echo "  $0 --infrastructure   Infrastructure only (no build, no application)"
-    echo "  $0 --help             Show this help message"
+    echo "  $0                         Full startup (fresh build + infrastructure + application)"
+    echo "  $0 --ide-mode              IDE development mode (cached build + infrastructure, no application)"
+    echo "  $0 --infrastructure-only   Infrastructure only (no build, no application)"
+    echo "  $0 --help                  Show this help message"
     echo ""
     echo "Modes:"
-    echo "  Full startup:       Complete environment with Docker application"
-    echo "  IDE mode:           Prepares environment for IDE debugging (port 8080 free)"
-    echo "  Infrastructure:     Only starts supporting services (DB, Redis, monitoring)"
+    echo "  Full startup (default):    Complete CI/CD simulation with fresh Docker build"
+    echo "                            - Fresh Maven build + SonarQube analysis"
+    echo "                            - Docker build with --no-cache --pull"
+    echo "                            - All infrastructure services"
+    echo "                            - Application as Docker container"
+    echo ""
+    echo "  IDE development mode:      Optimized for development workflow"
+    echo "                            - Maven build (no SonarQube)"
+    echo "                            - Docker build with cache (faster)"
+    echo "                            - All infrastructure services"
+    echo "                            - Port 8080 free for IDE debugging"
+    echo ""
+    echo "  Infrastructure only:       Supporting services only"
+    echo "                            - No Maven build or SonarQube"
+    echo "                            - All infrastructure services (DB, Redis, monitoring)"
+    echo "                            - Port 8080 free for external application"
     echo ""
     exit 0
 fi
@@ -1045,64 +1059,134 @@ fi
 main() {
     print_header
     
+    # Show execution mode
+    if [ "$IDE_MODE" = true ]; then
+        EXECUTION_MODE="IDE Development"
+        print_info "🎯 EXECUTION MODE: IDE Development"
+        print_info "   ├─ Maven build (no SonarQube): ✅"
+        print_info "   ├─ Docker build with cache: ✅"
+        print_info "   ├─ Infrastructure services: ✅"
+        print_info "   └─ Application startup: ❌ (port 8080 free for IDE)"
+    elif [ "$INFRASTRUCTURE_ONLY" = true ]; then
+        EXECUTION_MODE="Infrastructure Only"
+        print_info "🏗️ EXECUTION MODE: Infrastructure Only"
+        print_info "   ├─ Maven build + SonarQube analysis: ❌"
+        print_info "   ├─ Docker build: ❌"
+        print_info "   ├─ Infrastructure services: ✅"
+        print_info "   └─ Application startup: ❌ (port 8080 free for external app)"
+    else
+        EXECUTION_MODE="Full CI/CD Pipeline"
+        print_info "🚀 EXECUTION MODE: Full CI/CD Pipeline"
+        print_info "   ├─ Maven build + SonarQube analysis: ✅"
+        print_info "   ├─ Docker build (fresh, no cache): ✅"
+        print_info "   ├─ Infrastructure services: ✅"
+        print_info "   └─ Application startup: ✅ (Docker container)"
+    fi
+    echo ""
+    
     # Pre-validation checks
     pre_validation_checks
     
     # Pre-download Docker images
     pre_download_images
     
-    # Start core services (PostgreSQL + SonarQube) for build process
-    print_step "Starting Core Services (PostgreSQL + SonarQube)"
-    print_info "Starting PostgreSQL and SonarQube for build process..."
-    docker-compose up -d postgres sonarqube
-    
-    # Wait for services to be ready
-    print_info "Waiting for PostgreSQL to be ready..."
-    if ! wait_for_service "PostgreSQL" "localhost:5432"; then
-        print_error "PostgreSQL failed to start"
-        exit 1
-    fi
-    
-    print_info "Waiting for SonarQube to be ready..."
-    if ! wait_for_sonarqube_ready; then
-        print_error "SonarQube failed to start"
-        exit 1
-    fi
-    
-    print_success "Core services are ready!"
-    
-    # Initialize databases
-    print_info "Initializing databases..."
-    if [ -f "scripts/02-init-database.sh" ]; then
-        bash scripts/02-init-database.sh
-        if [ $? -eq 0 ]; then
-            print_success "Database initialization completed!"
-        else
-            print_warning "Database initialization had issues, but continuing..."
-        fi
-    else
-        print_warning "Database initialization script not found, continuing..."
-    fi
-    
-    # Run SonarQube automation setup to handle password reset and configuration
-    print_info "Running SonarQube automation setup..."
-    if [ -f "scripts/03-setup-sonarqube.sh" ]; then
-        bash scripts/03-setup-sonarqube.sh
-        if [ $? -eq 0 ]; then
-            print_success "SonarQube automation setup completed!"
-        else
-            print_warning "SonarQube automation setup had issues, but continuing..."
-        fi
-    else
-        print_warning "SonarQube automation setup script not found, continuing with default approach"
-    fi
-    
-    # Skip build and SonarQube setup if infrastructure-only mode
+    # Start core services (PostgreSQL + SonarQube) for build process - only if build is needed
     if [ "$INFRASTRUCTURE_ONLY" = false ]; then
-        # Integrated build with SonarQube analysis and coverage validation
-        maven_build
+        if [ "$IDE_MODE" = true ]; then
+            print_step "Starting Core Services (PostgreSQL only - IDE Mode)"
+        else
+            print_step "Starting Core Services (PostgreSQL + SonarQube)"
+        fi
+        
+        # Check if PostgreSQL is already running
+        if is_service_healthy "postgres-sonar" "container" && is_service_healthy "PostgreSQL" "port"; then
+            print_success "✅ PostgreSQL is already running and healthy"
+        else
+            if [ "$IDE_MODE" = true ]; then
+                print_info "Starting PostgreSQL for build process..."
+                docker-compose up -d postgres
+            else
+                print_info "Starting PostgreSQL and SonarQube for build process..."
+                docker-compose up -d postgres sonarqube
+            fi
+            
+            # Wait for PostgreSQL to be ready
+            print_info "Waiting for PostgreSQL to be ready..."
+            if ! wait_for_service "PostgreSQL" "localhost:5432"; then
+                print_error "PostgreSQL failed to start"
+                exit 1
+            fi
+            print_success "PostgreSQL is ready!"
+        fi
+        
+        # Only start SonarQube if not in IDE mode
+        if [ "$IDE_MODE" = false ]; then
+            # Check if SonarQube is already running
+            if is_service_healthy "sonarqube" "container" && is_service_healthy "SonarQube" "port"; then
+                print_success "✅ SonarQube is already running and healthy"
+            else
+                if ! docker ps --format "table {{.Names}}" | grep -q "^sonarqube"; then
+                    print_info "Starting SonarQube..."
+                    docker-compose up -d sonarqube
+                fi
+                
+                print_info "Waiting for SonarQube to be ready..."
+                if ! wait_for_sonarqube_ready; then
+                    print_error "SonarQube failed to start"
+                    exit 1
+                fi
+                print_success "SonarQube is ready!"
+            fi
+            
+            # Run SonarQube automation setup to handle password reset and configuration
+            print_info "Running SonarQube automation setup..."
+            if [ -f "scripts/03-setup-sonarqube.sh" ]; then
+                bash scripts/03-setup-sonarqube.sh
+                if [ $? -eq 0 ]; then
+                    print_success "SonarQube automation setup completed!"
+                else
+                    print_warning "SonarQube automation setup had issues, but continuing..."
+                fi
+            else
+                print_warning "SonarQube automation setup script not found, continuing with default approach"
+            fi
+        else
+            print_info "🎯 IDE Mode: Skipping SonarQube setup and analysis"
+        fi
+        
+        # Initialize databases
+        print_info "Initializing databases..."
+        if [ -f "scripts/02-init-database.sh" ]; then
+            bash scripts/02-init-database.sh
+            if [ $? -eq 0 ]; then
+                print_success "Database initialization completed!"
+            else
+                print_warning "Database initialization had issues, but continuing..."
+            fi
+        else
+            print_warning "Database initialization script not found, continuing..."
+        fi
     else
-        print_info "Skipping build and SonarQube analysis (infrastructure-only mode)"
+        print_info "🏗️ Infrastructure-Only Mode: Skipping build and SonarQube setup"
+    fi
+    
+    # Run Maven build - with or without SonarQube based on mode
+    if [ "$INFRASTRUCTURE_ONLY" = false ]; then
+        if [ "$IDE_MODE" = true ]; then
+            print_step "Maven Build (IDE Mode - No SonarQube)"
+            print_info "Running Maven build without SonarQube analysis..."
+            
+            # Simple Maven build for IDE mode
+            if mvn clean compile test-compile -q; then
+                print_success "✅ Maven build completed successfully!"
+            else
+                print_error "❌ Maven build failed"
+                exit 1
+            fi
+        else
+            # Full Maven build with SonarQube analysis
+            maven_build
+        fi
     fi
     
     # Start remaining infrastructure services
@@ -1239,6 +1323,44 @@ execute_with_timeout() {
     # Cleanup
     rm -f "$temp_script"
     return $exit_code
+}
+
+# Function to check if service is already running and healthy
+is_service_healthy() {
+    local service_name="$1"
+    local check_type="${2:-container}"
+    
+    case "$check_type" in
+        "container")
+            # Check if container is running and healthy
+            if docker ps --format "{{.Names}}\t{{.Status}}" | grep -q "^${service_name}.*Up.*healthy"; then
+                return 0
+            elif docker ps --format "{{.Names}}\t{{.Status}}" | grep -q "^${service_name}.*Up"; then
+                return 0
+            fi
+            ;;
+        "port")
+            # Check if port is responding
+            case "$service_name" in
+                "postgres-sonar"|"PostgreSQL")
+                    if command -v nc >/dev/null 2>&1 && nc -z localhost 5432 >/dev/null 2>&1; then
+                        return 0
+                    fi
+                    ;;
+                "sonarqube"|"SonarQube")
+                    if curl -s -f "http://localhost:9000/api/system/status" | grep -q '"status":"UP"' >/dev/null 2>&1; then
+                        return 0
+                    fi
+                    ;;
+                "wallet-api")
+                    if curl -s -f "http://localhost:8080/actuator/health" >/dev/null 2>&1; then
+                        return 0
+                    fi
+                    ;;
+            esac
+            ;;
+    esac
+    return 1
 }
 
 # Run main function

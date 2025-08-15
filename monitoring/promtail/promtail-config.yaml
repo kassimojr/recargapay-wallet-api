@@ -76,6 +76,13 @@ scrape_configs:
           operation:
           status:
           
+      # Structured metadata para campos de alta cardinalidade (compatível com Loki v3.1.1)
+      - structured_metadata:
+          traceId:
+          spanId:
+          walletId:
+          thread:
+          
       # Ensure all fields are available for filtering and display
       - output:
           source: output
