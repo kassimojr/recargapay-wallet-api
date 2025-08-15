@@ -69,7 +69,30 @@ SONAR_PASS=admin
 SONAR_NEW_PASS=admin123
 ```
 
-### 2. Start Services
+### 2. Fix Script Permissions (If Needed)
+
+If you encounter permission errors when running scripts, fix all script permissions at once:
+
+```bash
+# Give execution permission to all .sh scripts
+find . -name "*.sh" -type f -exec chmod +x {} \;
+```
+
+**Alternative methods:**
+```bash
+# Using xargs (more readable)
+find . -name "*.sh" -type f | xargs chmod +x
+
+# For specific scripts only
+chmod +x *.sh scripts/*.sh scripts/utils/*.sh
+```
+
+**Pro Tip:** Add this alias to your `~/.bashrc` or `~/.zshrc`:
+```bash
+alias fix-scripts="find . -name '*.sh' -type f -exec chmod +x {} \;"
+```
+
+### 3. Start Services
 
 Start all required services using Docker Compose:
 
@@ -84,7 +107,7 @@ This will start:
 - **Loki** logging aggregation
 - **Promtail** log collection
 
-### 3. Start the Application
+### 4. Start the Application
 
 ```bash
 ./mvnw spring-boot:run
@@ -92,7 +115,7 @@ This will start:
 
 The application will automatically load environment variables from the `.env` file.
 
-### 4. Verify Setup
+### 5. Verify Setup
 
 Check if everything is working:
 
