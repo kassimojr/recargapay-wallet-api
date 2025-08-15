@@ -1,21 +1,27 @@
 package com.recargapay.wallet.adapter.repositories.impl;
 
 import com.recargapay.wallet.adapter.converters.WalletMapper;
+import com.recargapay.wallet.adapter.entities.UserEntity;
 import com.recargapay.wallet.adapter.entities.WalletEntity;
-import com.recargapay.wallet.adapter.repositories.WalletJpaRepository;
 import com.recargapay.wallet.adapter.repositories.UserJpaRepository;
+import com.recargapay.wallet.adapter.repositories.WalletJpaRepository;
 import com.recargapay.wallet.core.domain.Wallet;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class WalletRepositoryImplTest {
@@ -119,5 +125,178 @@ class WalletRepositoryImplTest {
         List<Wallet> result = walletRepository.findAll();
         assertEquals(1, result.size());
         assertEquals(wallet, result.get(0));
+    }
+
+    @Test
+    void findByUserId_shouldReturnWallet() {
+        // Given
+        WalletEntity entity = new WalletEntity();
+        when(jpaRepository.findByUser_Id(userId)).thenReturn(Optional.of(entity));
+
+        // When
+        Optional<Wallet> result = walletRepository.findByUserId(userId);
+
+        // Then
+        assertTrue(result.isPresent());
+        assertEquals(wallet, result.get());
+        verify(jpaRepository).findByUser_Id(userId);
+    }
+
+    @Test
+    void findByUserId_shouldReturnEmpty() {
+        // Given
+        when(jpaRepository.findByUser_Id(userId)).thenReturn(Optional.empty());
+
+        // When
+        Optional<Wallet> result = walletRepository.findByUserId(userId);
+
+        // Then
+        assertFalse(result.isPresent());
+        verify(jpaRepository).findByUser_Id(userId);
+    }
+
+    @Test
+    void save_withNullWallet_shouldHandleGracefully() {
+        // Given
+        Wallet nullWallet = null;
+
+        // When
+        Wallet result = walletRepository.save(nullWallet);
+
+        // Then
+        assertNull(result);
+        verify(jpaRepository).save(null);
+    }
+
+    @Test
+    void update_withNullWallet_shouldHandleGracefully() {
+        // Given
+        Wallet nullWallet = null;
+
+        // When
+        walletRepository.update(nullWallet);
+
+        // Then
+        verify(jpaRepository).save(null);
+    }
+
+    @Test
+    void save_withWalletWithUserId_shouldSetUserEntity() {
+        // Given
+        UserEntity userEntity = new UserEntity();
+        userEntity.setId(userId);
+        when(userJpaRepository.findById(userId)).thenReturn(Optional.of(userEntity));
+        
+        ArgumentCaptor<WalletEntity> entityCaptor = ArgumentCaptor.forClass(WalletEntity.class);
+
+        // When
+        Wallet result = walletRepository.save(wallet);
+
+        // Then
+        verify(jpaRepository).save(entityCaptor.capture());
+        verify(userJpaRepository).findById(userId);
+        
+        WalletEntity capturedEntity = entityCaptor.getValue();
+        assertEquals(walletId, capturedEntity.getId());
+        assertEquals(BigDecimal.ONE, capturedEntity.getBalance());
+        assertEquals(userEntity, capturedEntity.getUser());
+        assertEquals(wallet, result);
+    }
+
+    @Test
+    void save_withWalletWithNonExistentUserId_shouldSetNullUser() {
+        // Given
+        when(userJpaRepository.findById(userId)).thenReturn(Optional.empty());
+        
+        ArgumentCaptor<WalletEntity> entityCaptor = ArgumentCaptor.forClass(WalletEntity.class);
+
+        // When
+        Wallet result = walletRepository.save(wallet);
+
+        // Then
+        verify(jpaRepository).save(entityCaptor.capture());
+        verify(userJpaRepository).findById(userId);
+        
+        WalletEntity capturedEntity = entityCaptor.getValue();
+        assertEquals(walletId, capturedEntity.getId());
+        assertEquals(BigDecimal.ONE, capturedEntity.getBalance());
+        assertNull(capturedEntity.getUser());
+        assertEquals(wallet, result);
+    }
+
+    @Test
+    void save_withWalletWithoutUserId_shouldNotSetUser() {
+        // Given
+        Wallet walletWithoutUser = new Wallet(walletId, null, BigDecimal.ONE);
+        
+        ArgumentCaptor<WalletEntity> entityCaptor = ArgumentCaptor.forClass(WalletEntity.class);
+
+        // When
+        Wallet result = walletRepository.save(walletWithoutUser);
+
+        // Then
+        verify(jpaRepository).save(entityCaptor.capture());
+        verify(userJpaRepository, never()).findById(any());
+        
+        WalletEntity capturedEntity = entityCaptor.getValue();
+        assertEquals(walletId, capturedEntity.getId());
+        assertEquals(BigDecimal.ONE, capturedEntity.getBalance());
+        assertNull(capturedEntity.getUser());
+        assertEquals(wallet, result);
+    }
+
+    @Test
+    void update_withWalletWithUserId_shouldSetUserEntity() {
+        // Given
+        UserEntity userEntity = new UserEntity();
+        userEntity.setId(userId);
+        when(userJpaRepository.findById(userId)).thenReturn(Optional.of(userEntity));
+        
+        ArgumentCaptor<WalletEntity> entityCaptor = ArgumentCaptor.forClass(WalletEntity.class);
+
+        // When
+        walletRepository.update(wallet);
+
+        // Then
+        verify(jpaRepository).save(entityCaptor.capture());
+        verify(userJpaRepository).findById(userId);
+        
+        WalletEntity capturedEntity = entityCaptor.getValue();
+        assertEquals(walletId, capturedEntity.getId());
+        assertEquals(BigDecimal.ONE, capturedEntity.getBalance());
+        assertEquals(userEntity, capturedEntity.getUser());
+    }
+
+    @Test
+    void update_withWalletWithoutUserId_shouldNotSetUser() {
+        // Given
+        Wallet walletWithoutUser = new Wallet(walletId, null, BigDecimal.ONE);
+        
+        ArgumentCaptor<WalletEntity> entityCaptor = ArgumentCaptor.forClass(WalletEntity.class);
+
+        // When
+        walletRepository.update(walletWithoutUser);
+
+        // Then
+        verify(jpaRepository).save(entityCaptor.capture());
+        verify(userJpaRepository, never()).findById(any());
+        
+        WalletEntity capturedEntity = entityCaptor.getValue();
+        assertEquals(walletId, capturedEntity.getId());
+        assertEquals(BigDecimal.ONE, capturedEntity.getBalance());
+        assertNull(capturedEntity.getUser());
+    }
+
+    @Test
+    void findAll_shouldReturnEmptyList() {
+        // Given
+        when(jpaRepository.findAll()).thenReturn(java.util.Collections.emptyList());
+
+        // When
+        List<Wallet> result = walletRepository.findAll();
+
+        // Then
+        assertTrue(result.isEmpty());
+        verify(jpaRepository).findAll();
     }
 }

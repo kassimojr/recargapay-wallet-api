@@ -103,7 +103,14 @@ com.recargapay.wallet/
 ┌─────────────────────────────────────────────────────────────┐
 │                   Camada de Infraestrutura                   │
 │    Banco + Cache + Segurança + Monitoramento + Logging      │
-│         PostgreSQL + Redis + JWT + Métricas + Tracing       │
+│    PostgreSQL + Redis + JWT + Grafana + Logs Estruturados   │
+└───────────────────────────┬─────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   Stack de Observabilidade                  │
+│     Prometheus + Grafana + Loki + Tempo + OpenTelemetry     │
+│          Dashboards Tempo Real + Alertas + Tracing          │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -139,13 +146,13 @@ O projeto utiliza um stack moderno e robusto:
 - **Spring Cache**: Abstração de cache com integração Redis
 - **Connection pooling**: Conexões otimizadas com banco de dados
 
-### Observabilidade e Monitoramento
-- **OpenTelemetry**: Rastreamento distribuído e observabilidade
-- **Logging Estruturado**: Logs em formato JSON com IDs de correlação
-- **Grafana**: Visualização e dashboards
-- **Loki**: Agregação e consulta de logs
-- **Promtail**: Coleta e encaminhamento de logs
-- **Spring Boot Actuator**: Health checks e métricas
+### Stack de Observabilidade
+- **Prometheus v2.45.6** - Versão LTS com estabilidade comprovada em produção
+- **Grafana 11.2.0** - **Dashboards modernos** com UI aprimorada e inteligência de negócio
+- **Loki 3.1.1** - Agregação estável de logs JSON estruturados com melhorias de performance
+- **Promtail 3.1.1** - Envio aprimorado de logs com IDs de correlação e compatibilidade
+- **Tempo 2.4.2** - Rastreamento distribuído estável com capacidades confiáveis
+- **OpenTelemetry** - Framework unificado de observabilidade com integração completa do stack
 
 ### Segurança
 - **JWT (JSON Web Tokens)**: Autenticação stateless
@@ -189,23 +196,53 @@ git clone https://github.com/seu-usuario/recargapay-wallet-api.git
 cd recargapay-wallet-api
 ```
 
-### Iniciando com Docker Compose
-
-O projeto inclui configuração Docker Compose para facilitar o desenvolvimento e testes:
-
-1. **Iniciando os serviços**:
+### 🎯 Validação Rápida (Recomendado)
+**Simulação de Pipeline CI/CD** - Validação completa em um comando:
 
 ```bash
-docker-compose up -d
+./wallet-api-startup.sh
 ```
 
-Este comando iniciará:
-- Banco de dados PostgreSQL
-- Cache Redis
-- Stack de observabilidade (Grafana, Loki, Promtail)
-- Aplicação RecargaPay Wallet API
+Este script simula um pipeline CI/CD completo e valida:
+- ✅ **Geração automática do `.env`** (baseado no template com valores padrão seguros)
+- ✅ Configuração do ambiente e dependências
+- ✅ Inicialização dos serviços de infraestrutura (Docker Compose)
+- ✅ Build e testes da aplicação (Maven)
+- ✅ Análise de qualidade de código (SonarQube)
+- ✅ Deploy da aplicação e verificações de saúde
+- ✅ **Validação da stack de monitoramento** (dashboards Grafana)
 
-2. **Verificando os serviços**:
+**🎯 Perfeito para**: Revisões de código, validação de integração, preparação de demos
+
+### 🛠️ Modos de Desenvolvimento
+Para necessidades específicas de desenvolvimento:
+
+#### Configuração Manual da Infraestrutura
+```bash
+docker-compose up -d  # Apenas infraestrutura
+mvn spring-boot:run   # Aplicação em modo desenvolvimento
+```
+
+#### Validação Passo a Passo
+```bash
+# 1. Serviços de infraestrutura
+docker-compose up -d
+
+# 2. Build e Testes
+mvn clean verify
+
+# 3. Qualidade de Código
+mvn sonar:sonar
+
+# 4. Aplicação
+mvn spring-boot:run
+```
+
+Isso iniciará:
+- Banco de dados PostgreSQL (porta 5432)
+- Cache Redis (porta 6379)
+- **Stack de observabilidade aprimorada** (Prometheus, Grafana, Loki, Tempo)
+- Análise de código SonarQube (porta 9000)
 
 ```bash
 docker-compose ps
@@ -218,7 +255,7 @@ Você verá uma lista dos serviços em execução e suas portas.
 Copie o template de ambiente e configure suas variáveis:
 
 ```bash
-cp .env.template .env
+cp src/main/resources/templates/.env.template .env
 # Edite o .env com suas configurações específicas
 ```
 
@@ -291,7 +328,72 @@ curl -X POST http://localhost:8080/api/v1/auth/login \
 | `POST` | `/api/wallets/{userId}/withdraw` | Sacar fundos |
 | `POST` | `/api/wallets/transfer` | Transferir entre carteiras |
 
-Para documentação detalhada da API, visite: `http://localhost:8080/swagger-ui.html`
+### 📋 Recursos para Teste da API
+- **Swagger UI**: `http://localhost:8080/swagger-ui.html`
+- **Collection Postman**: [Importar de docs/collections/postman/](docs/collections/postman/)
+
+### 🔧 Exemplos cURL
+
+#### 1. Criar Carteira
+```bash
+curl -X POST http://localhost:8080/api/wallets \
+  -H "Authorization: Bearer $JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "userId": "123e4567-e89b-12d3-a456-426614174000",
+    "userName": "João Silva",
+    "initialBalance": 100.00
+  }'
+```
+
+#### 2. Obter Saldo Atual
+```bash
+curl -X GET http://localhost:8080/api/wallets/123e4567-e89b-12d3-a456-426614174000/balance \
+  -H "Authorization: Bearer $JWT_TOKEN"
+```
+
+#### 3. Obter Saldo Histórico
+```bash
+curl -X GET "http://localhost:8080/api/wallets/123e4567-e89b-12d3-a456-426614174000/balance?date=2025-01-15T10:30:00Z" \
+  -H "Authorization: Bearer $JWT_TOKEN"
+```
+
+#### 4. Depositar Fundos
+```bash
+curl -X POST http://localhost:8080/api/wallets/123e4567-e89b-12d3-a456-426614174000/deposit \
+  -H "Authorization: Bearer $JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": 50.00,
+    "description": "Depósito de salário"
+  }'
+```
+
+#### 5. Sacar Fundos
+```bash
+curl -X POST http://localhost:8080/api/wallets/123e4567-e89b-12d3-a456-426614174000/withdraw \
+  -H "Authorization: Bearer $JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": 25.00,
+    "description": "Saque no caixa eletrônico"
+  }'
+```
+
+#### 6. Transferir Entre Carteiras
+```bash
+curl -X POST http://localhost:8080/api/wallets/transfer \
+  -H "Authorization: Bearer $JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "fromUserId": "123e4567-e89b-12d3-a456-426614174000",
+    "toUserId": "987fcdeb-51d2-43a8-b456-426614174999",
+    "amount": 30.00,
+    "description": "Pagamento para amigo"
+  }'
+```
+
+> **💡 Nota**: Substitua `$JWT_TOKEN` pelo token real obtido do endpoint de login
 
 ---
 
@@ -309,14 +411,25 @@ curl http://localhost:8080/actuator/health
 curl http://localhost:8080/actuator/health/detailed
 ```
 
-### Stack de Observabilidade
+### 📊 Dashboards Tempo Real
+Acesse monitoramento abrangente em `http://localhost:3000` (admin/admin):
 
-Acesse as ferramentas de monitoramento:
+- **🚦 Dashboard de Saúde da Aplicação** - Status do sistema, métricas de performance, alertas
+- **💰 Dashboard de Métricas Wallet** - Métricas de negócio, taxas de transação, KPIs financeiros
 
-- **Dashboards Grafana**: `http://localhost:3000` (admin/admin)
-- **Logs da Aplicação**: Logs JSON estruturados com IDs de correlação
-- **Métricas**: Disponíveis via endpoints do Spring Boot Actuator
-- **Rastreamento Distribuído**: Correlação de requisições com traceId/spanId
+### 🔍 Stack de Observabilidade
+- **Prometheus** (`localhost:9090`) - Coleta de métricas e alertas
+- **Grafana** (`localhost:3000`) - Visualização e dashboards  
+- **Loki** (`localhost:3100`) - Logging centralizado
+- **Tempo** (`localhost:3200`) - Rastreamento distribuído
+
+### 📈 Principais Métricas Monitoradas
+- **Saúde do Sistema**: Status da API, conectividade do banco, performance do cache
+- **Métricas de Negócio**: Taxas de transação, saldos de carteiras, taxas de sucesso das operações
+- **Performance**: Tempos de resposta, throughput, utilização de recursos
+- **Alertas**: Notificações automáticas para problemas críticos
+
+> **💡 Dica**: Execute `./wallet-api-startup.sh` para validar automaticamente toda a stack de monitoramento
 
 ### Gerenciamento de Logs
 
@@ -417,12 +530,15 @@ Toda a documentação do projeto está organizada por categorias, disponível em
 - **[Setup Local](configuration/pt/README.md)** - Ambiente de desenvolvimento
 - **[Testes da API](configuration/pt/README.md)** - Coleções Postman/Insomnia
 - **[Implementação de Cache](caching/pt/README.md)** - Como usar o cache
+- **[Automação SonarQube](configuration/pt/sonarqube-automation.md)** - Automação de qualidade de código
 
 #### Para DevOps/SysAdmin
 - **[Configuração de Ambiente](configuration/pt/README.md)** - Configuração completa
 - **[Configuração de Segurança](security/pt/README.md)** - Segurança e compliance
 - **[Setup de Monitoramento](monitoring/pt/README.md)** - Observabilidade e alertas
 - **[Deploy em Produção](configuration/pt/README.md)** - Deploy em produção
+- **[Configuração de Senhas SonarQube](configuration/pt/sonarqube-password-config.md)** - Gerenciamento de senhas SonarQube
+- **[Versões Docker](configuration/pt/docker-versions.md)** - Referência de versões das imagens Docker
 
 #### Para Arquitetos/Tech Leads
 - **[Visão Geral da Arquitetura](#arquitetura)** - Visão geral da arquitetura hexagonal

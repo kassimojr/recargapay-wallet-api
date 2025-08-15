@@ -19,7 +19,7 @@ This directory contains all monitoring and observability configurations for the 
 The monitoring stack can be started using the included script:
 
 ```bash
-./start-monitoring.sh
+./monitoring.sh
 ```
 
 This will start PostgreSQL, Prometheus, Grafana, and SonarQube via Docker Compose.

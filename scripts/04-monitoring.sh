@@ -1,5 +1,17 @@
 #!/bin/bash
 
+# Monitoring Setup Script
+# This script manages PostgreSQL, Prometheus, and Grafana services using Docker Compose
+
+# Load common utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/utils/common.sh"
+
+# Ensure we're in the project root
+ensure_project_root
+
+print_step "Monitoring Environment Setup"
+
 # Set color variables for better output formatting
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'

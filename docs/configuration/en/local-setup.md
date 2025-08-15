@@ -8,35 +8,40 @@ The project uses environment variables for configuration management, eliminating
 
 ## ⚡ Quick Setup
 
-### 1. Environment Configuration
+### 1. Automatic Environment Configuration
 
-Copy the environment template and configure your local values:
+The `.env` file is **automatically generated** when you run the startup script:
 
 ```bash
-cp .env.template .env
+./wallet-api-startup.sh
 ```
 
-Edit the `.env` file with your local configuration:
+The script will automatically:
+- Generate `.env` from `src/main/resources/templates/.env.template`
+- Apply secure default values for development
+- Create a backup if an existing `.env` is found
+
+The generated `.env` file includes:
 
 ```bash
 # Database Configuration
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=recargapay_wallet
-DB_USERNAME=your_database_username
-DB_PASSWORD=your_database_password
+DB_NAME=walletdb
+DB_USERNAME=admin
+DB_PASSWORD=admin
 
 # JWT Configuration (minimum 32 characters)
-JWT_SECRET=your_jwt_secret_key_at_least_32_characters_long
+JWT_SECRET=my-super-secure-jwt-secret-key-for-development-at-least-32-characters-long
 
-# Admin User Configuration
-ADMIN_USERNAME=your_admin_username
-ADMIN_PASSWORD=your_admin_password
+# Application User Configuration
+USER_NAME=admin
+USER_PASSWORD=admin
 
 # Redis Configuration
 REDIS_HOST=localhost
 REDIS_PORT=6379
-REDIS_PASSWORD=your_redis_password
+REDIS_PASSWORD=
 
 # Cache Configuration
 APP_CACHE_VERSION=v1
@@ -52,8 +57,16 @@ SERVER_PORT=8080
 SPRING_PROFILES_ACTIVE=dev
 
 # Logging Configuration
-LOGGING_LEVEL_ROOT=DEBUG
+LOGGING_LEVEL_ROOT=INFO
 LOGGING_LEVEL_APP=DEBUG
+
+# CORS Configuration
+APP_CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:8080
+
+# SonarQube Configuration
+SONAR_USER=admin
+SONAR_PASS=admin
+SONAR_NEW_PASS=admin123
 ```
 
 ### 2. Start Services
@@ -90,7 +103,7 @@ curl http://localhost:8080/actuator/health
 # Test authentication
 curl -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"username":"your_admin_username","password":"your_admin_password"}'
+  -d '{"username":"admin","password":"admin"}'
 ```
 
 ## 🔧 Alternative Configuration Methods

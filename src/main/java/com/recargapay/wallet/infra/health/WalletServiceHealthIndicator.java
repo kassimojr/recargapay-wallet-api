@@ -39,9 +39,10 @@ public class WalletServiceHealthIndicator implements HealthIndicator {
                 .withDetail("responseTimeMs", duration.toMillis())
                 .build();
         } catch (Exception e) {
+            String errorMessage = e.getMessage() != null ? e.getMessage() : "Unknown error occurred";
             return Health.down()
                 .withDetail("service", "Wallet")
-                .withDetail("error", e.getMessage())
+                .withDetail("error", errorMessage)
                 .build();
         }
     }

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Console appender for test output -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} -- %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Root logger configuration for tests -->
+    <root level="WARN">
+        <appender-ref ref="CONSOLE" />
+    </root>
+
+    <!-- Application specific loggers -->
+    <logger name="com.recargapay.wallet" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE" />
+    </logger>
+
+    <!-- Suppress noisy test-related loggers -->
+    <logger name="org.springframework" level="WARN" />
+    <logger name="org.hibernate" level="WARN" />
+    <logger name="org.flywaydb" level="WARN" />
+    <logger name="com.zaxxer.hikari" level="WARN" />
+    <logger name="org.apache.maven" level="WARN" />
+    <logger name="org.junit" level="WARN" />
+    
+    <!-- OpenTelemetry related loggers -->
+    <logger name="io.opentelemetry" level="WARN" />
+    
+    <!-- H2 Database loggers -->
+    <logger name="org.h2" level="WARN" />
+    
+    <!-- Metrics and monitoring loggers - keep at INFO for test validation -->
+    <logger name="com.recargapay.wallet.infra.metrics" level="INFO" />
+    <logger name="com.recargapay.wallet.infra.logging" level="INFO" />
+    
+    <!-- Exception handlers - keep at INFO for test validation -->
+    <logger name="com.recargapay.wallet.infra.handler" level="INFO" />
+    
+    <!-- Test-specific loggers that should show expected errors -->
+    <logger name="com.recargapay.wallet.core.services.common.TransactionServiceTest" level="INFO" />
+    <logger name="com.recargapay.wallet.infra.handler.GlobalExceptionHandlerTest" level="INFO" />
+    
+    <!-- WalletMetricsScheduler test - reduce ERROR level for expected test failures -->
+    <logger name="com.recargapay.wallet.infra.metrics.WalletMetricsScheduler" level="WARN" />
+    <logger name="com.recargapay.wallet.infra.metrics.WalletMetricsSchedulerTest" level="INFO" />
+</configuration>
