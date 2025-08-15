@@ -562,6 +562,69 @@ Toda a documentação do projeto está organizada por categorias, disponível em
 
 ---
 
+## 🎯 Planejamento e Entrega do Projeto sob Restrições de Tempo
+
+Este projeto foi planejado, refinado e guiado de forma estruturada e organizada utilizando **metodologia Kanban**.
+
+**🔗 Board Kanban**: [Ver Board do Projeto](https://github.com/users/kassimojr/projects/1/views/1)
+
+O projeto foi desenvolvido com foco em qualidade e apesar de ser para um Assessment, cada etapa foi cuidadosamente planejada e executada.
+
+Abaixo segue uma estimativa realista de tempo estimado via **refinamento técnico vs tempo gasto**:
+
+### Comparativo de Tempo por Atividade
+
+| Atividade | Estimado | Realizado | Economia | Eficiência |
+|-----------|----------|-----------|----------|------------|
+| Cache Distribuído | 4h | 2h | 2h | 50% |
+| Monitoramento/Observabilidade e CI/CD | 16h | 8h | 8h | 50% |
+| Criar Carteira para Usuário | 12h | 6h | 6h | 50% |
+| Recuperar Saldo Atual | 6h | 3h | 3h | 50% |
+| Depositar Fundos | 8h | 4h | 4h | 50% |
+| Sacar Fundos | 8h | 4h | 4h | 50% |
+| Transferir Fundos | 10h | 5h | 5h | 50% |
+| Testes/Postman/Swagger/README | 8h | 3h | 5h | 38% |
+| Recuperar Saldo Histórico | 7h | 3.5h | 3.5h | 50% |
+| TOTAL | 79h | 38.5h | 40.5h | 49% |
+
+### Resumo Executivo
+
+| Métrica | Valor |
+|---------|-------|
+| Total Estimado | 79h |
+| Total Realizado | 38.5h |
+| Economia Total | 40.5h |
+| Eficiência Geral | 49% |
+
+### Análise por Categoria
+
+| Categoria | Estimado | Realizado | Economia | Eficiência |
+|-----------|----------|-----------|----------|------------|
+| Infraestrutura/DevOps | 16h | 8h | 8h | 50% |
+| Desenvolvimento APIs Core | 51h | 25.5h | 25.5h | 50% |
+| Testes e Documentação | 8h | 3h | 5h | 38% |
+| Cache/Performance | 4h | 2h | 2h | 50% |
+
+### 🎯 Principais Insights de Desenvolvimento
+
+**🚀 Aceleração Significativa**
+- Redução de aproximadamente 49% no tempo de desenvolvimento
+- Manutenção da qualidade técnica com 90%+ de cobertura de testes
+- Entrega de funcionalidades além do escopo original
+
+**💡 Áreas de Maior Impacto**
+- **Documentação Técnica**: Geração completa de documentação bilíngue
+- **Configuração de Infraestrutura**: Setup automatizado de observabilidade
+- **Geração de Código**: Aceleração na criação de controllers, services e testes
+- **Resolução de Problemas**: Identificação e resolução rápida de questões técnicas
+
+**🔧 Abordagem Técnica**
+O processo de desenvolvimento focou em decisões arquiteturais estratégicas e validação de regras de negócio, aproveitando **vibe coding** para acelerar tarefas de implementação operacionais. Todos os componentes foram devidamente revisados e testados, garantindo a qualidade e robustez da solução final.
+
+**📊 Resultado**: Entrega de um projeto completo e robusto em 38.5 horas, representando aproximadamente 2x de eficiência de desenvolvimento em relação à estimativa original.
+
+---
+
 ## 🌍 Versões de Idioma
 
 - **🇧🇷 Português**: Você está aqui!

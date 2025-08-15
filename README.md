@@ -555,6 +555,69 @@ All project documentation is organized by categories, available in English and P
 
 ---
 
+## 🎯 Project Planning & Delivery under Time Constraints
+
+This project was planned, refined, and guided in a structured and organized manner using **Kanban methodology**.
+
+**🔗 Kanban Board**: [View Project Board](https://github.com/users/kassimojr/projects/1/views/1)
+
+The project was developed with a focus on quality and despite being for an Assessment, each step was carefully planned and executed.
+
+Below follows a realistic time estimate via **technical refinement vs time spent**:
+
+### Time Comparison by Activity
+
+| Activity | Estimated | Spent | Time Saved | Efficiency |
+|----------|-----------|-------|------------|------------|
+| Distributed Cache | 4h | 2h | 2h | 50% |
+| Monitoring/Observability & CI/CD | 16h | 8h | 8h | 50% |
+| Create User Wallet | 12h | 6h | 6h | 50% |
+| Retrieve Current Balance | 6h | 3h | 3h | 50% |
+| Deposit Funds | 8h | 4h | 4h | 50% |
+| Withdraw Funds | 8h | 4h | 4h | 50% |
+| Transfer Funds | 10h | 5h | 5h | 50% |
+| Tests/Postman/Swagger/README | 8h | 3h | 5h | 38% |
+| Retrieve Historical Balance | 7h | 3.5h | 3.5h | 50% |
+| TOTAL | 79h | 38.5h | 40.5h | 49% |
+
+### Executive Summary
+
+| Metric | Value |
+|--------|-------|
+| Total Estimated | 79h |
+| Total Spent | 38.5h |
+| Total Time Saved | 40.5h |
+| Overall Efficiency | 49% |
+
+### Analysis by Category
+
+| Category | Estimated | Spent | Time Saved | Efficiency |
+|----------|-----------|-------|------------|------------|
+| Infrastructure/DevOps | 16h | 8h | 8h | 50% |
+| Core API Development | 51h | 25.5h | 25.5h | 50% |
+| Testing & Documentation | 8h | 3h | 5h | 38% |
+| Cache/Performance | 4h | 2h | 2h | 50% |
+
+### 🎯 Key Development Insights
+
+**🚀 Significant Acceleration**
+- Approximately 49% reduction in development time
+- Maintained technical quality with 90%+ test coverage
+- Delivered functionality beyond original scope
+
+**💡 Areas of Greatest Impact**
+- **Technical Documentation**: Complete bilingual documentation generation
+- **Infrastructure Configuration**: Automated observability setup
+- **Code Generation**: Accelerated creation of controllers, services, and tests
+- **Problem Resolution**: Quick identification and resolution of issues
+
+**🔧 Technical Approach**
+The development process focused on strategic architectural decisions and business rule validation, while leveraging **vibe coding** to accelerate operational implementation tasks. All components were properly reviewed and tested, ensuring the quality and robustness of the final solution.
+
+**📊 Result**: Delivery of a complete and robust project in 38.5 hours, representing approximately 2x development efficiency compared to the original estimate.
+
+---
+
 ## 🌍 Language Versions
 
 - **🇺🇸 English**: You are here!
