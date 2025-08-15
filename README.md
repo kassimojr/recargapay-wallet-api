@@ -226,6 +226,20 @@ This will start:
 - **Enhanced observability stack** (Prometheus, Grafana, Loki, Tempo)
 - SonarQube code analysis (port 9000)
 
+### 🔧 Script Permissions (Troubleshooting)
+
+If you encounter permission errors when running scripts, fix all script permissions:
+
+```bash
+# Fix all .sh script permissions at once
+find . -name "*.sh" -type f -exec chmod +x {} \;
+```
+
+**Pro Tip:** Add this alias to your shell profile:
+```bash
+alias fix-scripts="find . -name '*.sh' -type f -exec chmod +x {} \;"
+```
+
 ### Environment Configuration
 
 Copy the environment template and configure your variables:

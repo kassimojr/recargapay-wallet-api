@@ -244,6 +244,20 @@ Isso iniciará:
 - **Stack de observabilidade aprimorada** (Prometheus, Grafana, Loki, Tempo)
 - Análise de código SonarQube (porta 9000)
 
+### 🔧 Permissões de Scripts (Solução de Problemas)
+
+Se você encontrar erros de permissão ao executar scripts, corrija todas as permissões:
+
+```bash
+# Corrigir permissões de todos os scripts .sh de uma vez
+find . -name "*.sh" -type f -exec chmod +x {} \;
+```
+
+**Dica Pro:** Adicione este alias ao seu perfil do shell:
+```bash
+alias fix-scripts="find . -name '*.sh' -type f -exec chmod +x {} \;"
+```
+
 ```bash
 docker-compose ps
 ```
