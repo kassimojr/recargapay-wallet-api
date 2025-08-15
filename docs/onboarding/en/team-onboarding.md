@@ -14,7 +14,7 @@ Welcome to the RecargaPay Wallet API team! Use this comprehensive checklist to e
 ### ✅ Environment Setup
 
 #### Step 1: Create Local Configuration
-- [ ] Copy environment template: `cp .env.template .env`
+- [ ] Copy environment template: `cp src/main/resources/templates/.env.template .env`
 - [ ] Edit `.env` file with your personal values:
   ```bash
   # Database Configuration

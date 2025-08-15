@@ -67,9 +67,3 @@ management:
   endpoint:
     health:
       show-details: never
-    configprops:
-      show-values: never
-    env:
-      show-values: never
-  server:
-    port: 9090  # Different port for management in production

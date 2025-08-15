@@ -3,6 +3,9 @@ package com.recargapay.wallet.infra.config;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.context.propagation.ContextPropagators;
+import io.opentelemetry.context.propagation.TextMapPropagator;
+import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
+import io.opentelemetry.api.baggage.propagation.W3CBaggagePropagator;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
@@ -50,11 +53,11 @@ public class OpenTelemetryConfig {
                 .build();
 
         // Configure context propagators for distributed tracing
-        // Using only W3C standard propagators that are available by default
+        // Using W3C standard propagators that are available in the core API
         ContextPropagators contextPropagators = ContextPropagators.create(
-                io.opentelemetry.context.propagation.TextMapPropagator.composite(
-                        io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator.getInstance(),
-                        io.opentelemetry.api.baggage.propagation.W3CBaggagePropagator.getInstance()
+                TextMapPropagator.composite(
+                        W3CTraceContextPropagator.getInstance(),
+                        W3CBaggagePropagator.getInstance()
                 )
         );
 

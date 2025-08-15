@@ -19,13 +19,16 @@ import org.mockito.quality.Strictness;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -174,5 +177,212 @@ class WalletMapperTest {
     @Test
     void toDTO_withNullDomain_shouldReturnNull() {
         assertNull(walletMapper.toDTO(null));
+    }
+
+    @Test
+    void toDomainFromEntity_withNullUser_shouldMapWithNullUserId() {
+        // Given
+        WalletEntity entity = new WalletEntity();
+        entity.setId(id);
+        entity.setUser(null); // No user associated
+        entity.setBalance(balance);
+        
+        // When
+        Wallet wallet = walletMapper.toDomain(entity);
+        
+        // Then
+        assertNotNull(wallet);
+        assertEquals(id, wallet.getId());
+        assertNull(wallet.getUserId());
+        assertEquals(balance, wallet.getBalance());
+    }
+
+    @Test
+    void toEntity_withNullUserId_shouldCreateEntityWithoutUser() {
+        // Given
+        Wallet domain = new Wallet();
+        domain.setId(id);
+        domain.setUserId(null); // No user ID
+        domain.setBalance(balance);
+        
+        // When
+        WalletEntity entity = walletMapper.toEntity(domain);
+        
+        // Then
+        assertNotNull(entity);
+        assertEquals(id, entity.getId());
+        assertNull(entity.getUser());
+        assertEquals(balance, entity.getBalance());
+    }
+
+    @Test
+    void toDTO_withUserIdButNoUserFound_shouldMapWithoutUserName() {
+        // Given
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        
+        Wallet domain = new Wallet();
+        domain.setId(id);
+        domain.setUserId(userId);
+        domain.setBalance(balance);
+        
+        // When
+        WalletDTO dto = walletMapper.toDTO(domain);
+        
+        // Then
+        assertNotNull(dto);
+        assertEquals(id, dto.getId());
+        assertEquals(userId, dto.getUserId());
+        assertEquals(balance, dto.getBalance());
+        assertNull(dto.getUserName()); // Should be null when user not found
+    }
+
+    @Test
+    void toDTO_withUserRepositoryException_shouldHandleGracefully() {
+        // Given
+        when(userRepository.findById(userId)).thenThrow(new RuntimeException("Database error"));
+        
+        Wallet domain = new Wallet();
+        domain.setId(id);
+        domain.setUserId(userId);
+        domain.setBalance(balance);
+        
+        // When
+        WalletDTO dto = walletMapper.toDTO(domain);
+        
+        // Then
+        assertNotNull(dto);
+        assertEquals(id, dto.getId());
+        assertEquals(userId, dto.getUserId());
+        assertEquals(balance, dto.getBalance());
+        assertNull(dto.getUserName()); // Should be null when exception occurs
+        verify(userRepository).findById(userId);
+    }
+
+    @Test
+    void toDTO_withNullUserId_shouldNotCallUserRepository() {
+        // Given
+        Wallet domain = new Wallet();
+        domain.setId(id);
+        domain.setUserId(null); // No user ID
+        domain.setBalance(balance);
+        
+        // When
+        WalletDTO dto = walletMapper.toDTO(domain);
+        
+        // Then
+        assertNotNull(dto);
+        assertEquals(id, dto.getId());
+        assertNull(dto.getUserId());
+        assertEquals(balance, dto.getBalance());
+        assertNull(dto.getUserName());
+        verify(userRepository, never()).findById(any());
+    }
+
+    @Test
+    void getUserName_withValidUserId_shouldReturnUserName() {
+        // When
+        String result = walletMapper.getUserName(userId);
+        
+        // Then
+        assertEquals(userName, result);
+        verify(userRepository).findById(userId);
+    }
+
+    @Test
+    void getUserName_withNullUserId_shouldReturnEmptyString() {
+        // When
+        String result = walletMapper.getUserName(null);
+        
+        // Then
+        assertEquals("", result);
+        verify(userRepository, never()).findById(any());
+    }
+
+    @Test
+    void getUserName_withNonExistentUserId_shouldReturnEmptyString() {
+        // Given
+        UUID nonExistentUserId = UUID.randomUUID();
+        when(userRepository.findById(nonExistentUserId)).thenReturn(Optional.empty());
+        
+        // When
+        String result = walletMapper.getUserName(nonExistentUserId);
+        
+        // Then
+        assertEquals("", result);
+        verify(userRepository).findById(nonExistentUserId);
+    }
+
+    @Test
+    void getUserName_withRepositoryException_shouldReturnEmptyString() {
+        // Given
+        UUID errorUserId = UUID.randomUUID();
+        when(userRepository.findById(errorUserId)).thenThrow(new RuntimeException("Database error"));
+        
+        // When
+        String result = walletMapper.getUserName(errorUserId);
+        
+        // Then
+        assertEquals("", result);
+        verify(userRepository).findById(errorUserId);
+    }
+
+    @Test
+    void toDomainFromCreateWalletRequestDTO_withNull_shouldReturnNull() {
+        // When
+        Wallet result = walletMapper.toDomain((CreateWalletRequestDTO) null);
+        
+        // Then
+        assertNull(result);
+    }
+
+    @Test
+    void toDomainFromDepositRequestDTO_withNull_shouldReturnNull() {
+        // When
+        Wallet result = walletMapper.toDomain((DepositRequestDTO) null);
+        
+        // Then
+        assertNull(result);
+    }
+
+    @Test
+    void toDomainFromWithdrawRequestDTO_withNull_shouldReturnNull() {
+        // When
+        Wallet result = walletMapper.toDomain((WithdrawRequestDTO) null);
+        
+        // Then
+        assertNull(result);
+    }
+
+    @Test
+    void toDTOList_withEmptyList_shouldReturnEmptyList() {
+        // Given
+        List<Wallet> emptyList = Collections.emptyList();
+        
+        // When
+        List<WalletDTO> result = walletMapper.toDTOList(emptyList);
+        
+        // Then
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void toDTO_withUserIdAndValidUser_shouldSetUserName() {
+        // Given
+        Wallet domain = new Wallet();
+        domain.setId(id);
+        domain.setUserId(userId);
+        domain.setBalance(balance);
+        
+        // When
+        WalletDTO dto = walletMapper.toDTO(domain);
+        
+        // Then
+        assertNotNull(dto);
+        assertEquals(id, dto.getId());
+        assertEquals(userId, dto.getUserId());
+        assertEquals(balance, dto.getBalance());
+        assertEquals(userName, dto.getUserName());
+        verify(userRepository).findById(userId);
     }
 }

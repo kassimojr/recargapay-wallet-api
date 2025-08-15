@@ -8,6 +8,7 @@ import com.recargapay.wallet.core.domain.User;
 import com.recargapay.wallet.core.exceptions.DuplicatedResourceException;
 import com.recargapay.wallet.core.ports.in.CreateUserUseCase;
 import com.recargapay.wallet.infra.TestOpenTelemetryConfig;
+import com.recargapay.wallet.infra.config.TestSecurityConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;

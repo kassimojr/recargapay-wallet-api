@@ -52,25 +52,39 @@ spring.profiles.active=hml
 
 ## Variáveis de Ambiente
 
-### Variáveis Obrigatórias
+### Configuração Automática do Ambiente
 
-Crie um arquivo `.env` baseado no `.env.template`:
+O arquivo `.env` é **gerado automaticamente** quando você executa o script de inicialização:
+
+```bash
+./wallet-api-startup.sh
+```
+
+O script automaticamente:
+1. Verifica se o `.env` existe e é válido
+2. Se não existir, gera baseado no `src/main/resources/templates/.env.template`
+3. Aplica valores padrão seguros para desenvolvimento
+4. Cria backup se um `.env` existente for encontrado
+
+### Variáveis de Ambiente Geradas
+
+O arquivo `.env` gerado automaticamente inclui:
 
 ```bash
 # Configuração do Banco de Dados
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=recargapay_wallet
-DB_USERNAME=your_db_username
-DB_PASSWORD=your_secure_db_password
+DB_NAME=walletdb
+DB_USERNAME=admin
+DB_PASSWORD=admin
 
 # Configuração de Segurança JWT
-JWT_SECRET=your_super_secure_jwt_secret_key_here_minimum_256_bits
+JWT_SECRET=my-super-secure-jwt-secret-key-for-development-at-least-32-characters-long
 
 # Configuração do Cache Redis
 REDIS_HOST=localhost
 REDIS_PORT=6379
-REDIS_PASSWORD=redis_secure_password_here
+REDIS_PASSWORD=
 
 # Configuração do Cache
 APP_CACHE_VERSION=v1
@@ -83,9 +97,9 @@ CACHE_TTL_WALLET_BALANCE_SECONDS=30
 CACHE_TTL_WALLET_TRANSACTIONS_MINUTES=10
 CACHE_TTL_USER_PROFILE_MINUTES=15
 
-# Configuração do Usuário Admin
-ADMIN_USERNAME=your_admin_username
-ADMIN_PASSWORD=your_secure_admin_password
+# Configuração do Usuário da Aplicação
+USER_NAME=admin
+USER_PASSWORD=admin
 
 # Configuração da Aplicação
 SERVER_PORT=8080
@@ -94,6 +108,18 @@ SPRING_PROFILES_ACTIVE=dev
 # Configuração de Logging
 LOGGING_LEVEL_ROOT=INFO
 LOGGING_LEVEL_APP=DEBUG
+
+# Configuração CORS
+APP_CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:8080
+APP_CORS_ALLOWED_METHODS=GET,POST,PUT,DELETE,OPTIONS
+APP_CORS_ALLOWED_HEADERS=*
+APP_CORS_ALLOW_CREDENTIALS=true
+APP_CORS_MAX_AGE=3600
+
+# Configuração SonarQube
+SONAR_USER=admin
+SONAR_PASS=admin
+SONAR_NEW_PASS=admin123
 ```
 
 ### Variáveis Específicas por Ambiente
@@ -493,7 +519,7 @@ Métricas disponíveis:
 ### Checklist de Setup do Ambiente
 
 #### Pré-deploy
-- [ ] Criar arquivo `.env` com todas as variáveis necessárias
+- [ ] Executar `./wallet-api-startup.sh` (gera `.env` automaticamente se necessário)
 - [ ] Verificar conectividade do banco de dados
 - [ ] Verificar conectividade do Redis
 - [ ] Testar força do segredo JWT

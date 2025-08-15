@@ -2,12 +2,18 @@ spring:
   application:
     name: recargapay-wallet-api
   
-  # H2 Database Configuration
+  # H2 Database Configuration - Optimized for tests
   datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
     driverClassName: org.h2.Driver
     username: sa
     password: 
+    hikari:
+      maximum-pool-size: 2
+      minimum-idle: 1
+      connection-timeout: 5000
+      idle-timeout: 30000
+      max-lifetime: 60000
   
   # JPA/Hibernate Configuration
   jpa:

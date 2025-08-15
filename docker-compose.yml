@@ -1,26 +1,28 @@
 services:
   postgres:
-    image: postgres:16
+    image: postgres:16.1
     container_name: postgres-sonar
     restart: unless-stopped
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: sonarqube
+      # Create additional database for wallet API
+      POSTGRES_MULTIPLE_DATABASES: sonarqube,walletdb
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./src/main/resources/db/init/init-walletdb.sql:/docker-entrypoint-initdb.d/init-walletdb.sql
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d walletdb"]
+      test: ["CMD-SHELL", "pg_isready -U admin -d sonarqube"]
       interval: 10s
       timeout: 5s
       retries: 5
 
   # Redis for distributed caching
   redis:
-    image: redis:7-alpine
+    image: redis:7.0.11-alpine
     container_name: wallet-redis
     restart: unless-stopped
     ports:
@@ -43,7 +45,6 @@ services:
       SONAR_JDBC_URL: jdbc:postgresql://postgres:5432/sonarqube
       SONAR_JDBC_USERNAME: admin
       SONAR_JDBC_PASSWORD: admin
-      #Change password first login on http//localhost:9000
     ports:
       - "9000:9000"
     volumes:
@@ -53,7 +54,7 @@ services:
 
   # Prometheus para coleta de métricas
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v2.45.6
     container_name: wallet-prometheus
     ports:
       - "9090:9090"
@@ -66,29 +67,38 @@ services:
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
     restart: always
+    networks:
+      - wallet-network
 
   # Grafana para visualização de dashboards
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:11.2.0
     container_name: wallet-grafana
     ports:
       - "3000:3000"
     environment:
-      - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
       - GF_INSTALL_PLUGINS=grafana-piechart-panel
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./monitoring/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
-      - ./monitoring/grafana/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml
-      - ./monitoring/dashboards:/etc/grafana/dashboards
-    restart: always
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+    restart: unless-stopped
     depends_on:
       - prometheus
+      - loki
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - wallet-network
 
   # Loki para centralização de logs
   loki:
-    image: grafana/loki:2.8.0
+    image: grafana/loki:3.1.1
     container_name: wallet-loki
     ports:
       - "3100:3100"
@@ -96,14 +106,14 @@ services:
       - ./monitoring/loki/loki-config.yaml:/etc/loki/local-config.yaml
       - loki_data:/loki
     command: -config.file=/etc/loki/local-config.yaml
-    restart: always
-    user: "0"  # Usar root para evitar problemas de permissão no desenvolvimento
-    depends_on:
-      - grafana
+    restart: unless-stopped
+    user: "0"  # Root para evitar problemas de permissão
+    networks:
+      - wallet-network
 
-  # Promtail para coleta de logs
+  # Promtail para envio de logs ao Loki
   promtail:
-    image: grafana/promtail:latest
+    image: grafana/promtail:3.1.1
     container_name: wallet-promtail
     volumes:
       - ./monitoring/promtail/promtail-config.yaml:/etc/promtail/config.yml
@@ -112,13 +122,15 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./logs:/app/logs:ro  # Montagem dos logs estruturados JSON da aplicação
     command: -config.file=/etc/promtail/config.yml
-    restart: always
+    restart: unless-stopped
     depends_on:
       - loki
+    networks:
+      - wallet-network
 
   # Tempo para rastreamento distribuído
   tempo:
-    image: grafana/tempo:latest
+    image: grafana/tempo:2.4.2
     container_name: wallet-tempo
     command: -config.file=/etc/tempo/tempo-config.yaml
     user: "0"  # Usar root para evitar problemas de permissão no desenvolvimento
@@ -143,3 +155,6 @@ volumes:
   loki_wal:
   tempo_data:
   redis_data:
+
+networks:
+  wallet-network:

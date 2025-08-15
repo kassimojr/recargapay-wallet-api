@@ -231,4 +231,113 @@ class GlobalExceptionHandlerTest {
         assertTrue(problem.getDetail().contains("Another user has modified the data"));
         assertNotNull(problem.getProperties().get("cause"));
     }
+
+    @Test
+    @DisplayName("Should return BAD_REQUEST for InsufficientFundsException")
+    void testHandleInsufficientFunds() {
+        // Arrange
+        InsufficientFundsException ex = new InsufficientFundsException("Insufficient funds for transfer");
+        
+        // Act
+        ResponseEntity<ProblemDetail> response = handler.handleInsufficientFunds(ex);
+        
+        // Assert
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        ProblemDetail problem = response.getBody();
+        assertNotNull(problem);
+        assertEquals("Insufficient balance to complete the operation", problem.getTitle());
+        assertEquals("Insufficient funds for transfer", problem.getDetail());
+        assertEquals("INSUFFICIENT_FUNDS", problem.getProperties().get("code"));
+    }
+
+    @Test
+    @DisplayName("Should return CONFLICT for DuplicatedResourceException")
+    void testHandleDuplicatedResource() {
+        // Arrange
+        DuplicatedResourceException ex = new DuplicatedResourceException("Resource already exists");
+        
+        // Act
+        ResponseEntity<ProblemDetail> response = handler.handleDuplicatedResource(ex);
+        
+        // Assert
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        ProblemDetail problem = response.getBody();
+        assertNotNull(problem);
+        assertEquals("Resource already exists", problem.getTitle());
+        assertEquals("Resource already exists", problem.getDetail());
+    }
+
+    @Test
+    @DisplayName("Should return BAD_REQUEST for InvalidDateFormatException")
+    void testHandleInvalidDateFormat() {
+        // Arrange
+        InvalidDateFormatException ex = new InvalidDateFormatException("Invalid date format provided");
+        
+        // Act
+        ResponseEntity<ProblemDetail> response = handler.handleInvalidDateFormat(ex);
+        
+        // Assert
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        ProblemDetail problem = response.getBody();
+        assertNotNull(problem);
+        assertEquals("Invalid date format", problem.getTitle());
+        assertEquals("Invalid date format provided", problem.getDetail());
+        assertEquals("INVALID_DATE_FORMAT", problem.getProperties().get("code"));
+        assertNotNull(problem.getProperties().get("expectedFormats"));
+    }
+
+    @Test
+    @DisplayName("Should handle MethodArgumentNotValidException with null default message")
+    void testHandleValidationExceptionWithNullMessage() {
+        // Arrange
+        MethodArgumentNotValidException ex = mock(MethodArgumentNotValidException.class);
+        BindingResult bindingResult = mock(BindingResult.class);
+        
+        List<FieldError> fieldErrors = new ArrayList<>();
+        FieldError error = mock(FieldError.class);
+        when(error.getField()).thenReturn("email");
+        when(error.getDefaultMessage()).thenReturn(null); // Test null message handling
+        fieldErrors.add(error);
+        
+        when(bindingResult.getFieldErrors()).thenReturn(fieldErrors);
+        when(ex.getBindingResult()).thenReturn(bindingResult);
+        
+        // Act
+        ResponseEntity<ProblemDetail> response = handler.handleValidationException(ex);
+        
+        // Assert
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        ProblemDetail problem = response.getBody();
+        assertNotNull(problem);
+        
+        @SuppressWarnings("unchecked")
+        Map<String, String> validationErrors = (Map<String, String>) problem.getProperties().get("validationErrors");
+        assertNotNull(validationErrors);
+        assertEquals("Invalid value", validationErrors.get("email")); // Should use default message
+    }
+
+    @Test
+    @DisplayName("Should handle createProblem method with all parameters")
+    void testCreateProblemMethod() {
+        // This test ensures the private createProblem method is covered through public methods
+        // Testing different combinations to ensure all branches are covered
+        
+        // Test with WalletNotFoundException (different type)
+        WalletNotFoundException ex1 = new WalletNotFoundException("Test wallet not found");
+        ResponseEntity<ProblemDetail> response1 = handler.handleWalletNotFound(ex1);
+        
+        ProblemDetail problem1 = response1.getBody();
+        assertNotNull(problem1);
+        assertNotNull(problem1.getType());
+        assertNotNull(problem1.getProperties().get("timestamp"));
+        
+        // Test with IllegalArgumentException (different type)
+        IllegalArgumentException ex2 = new IllegalArgumentException("Test illegal argument");
+        ResponseEntity<ProblemDetail> response2 = handler.handleIllegalArgumentException(ex2);
+        
+        ProblemDetail problem2 = response2.getBody();
+        assertNotNull(problem2);
+        assertNotNull(problem2.getType());
+        assertNotNull(problem2.getProperties().get("timestamp"));
+    }
 }

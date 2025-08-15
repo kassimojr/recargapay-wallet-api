@@ -75,7 +75,7 @@
     </appender>
     
     <!-- Use loggers diferentes para cada ambiente -->
-    <springProfile name="production">
+    <springProfile name="prod">
         <root level="INFO">
             <appender-ref ref="Json"/>
             <appender-ref ref="JsonFile"/>
@@ -84,7 +84,7 @@
     </springProfile>
     
     <!-- Perfil para desenvolvimento com logs coloridos -->
-    <springProfile name="!production">
+    <springProfile name="!prod">
         <root level="INFO">
             <appender-ref ref="Console"/>
             <appender-ref ref="JsonFile"/>

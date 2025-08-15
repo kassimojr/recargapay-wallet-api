@@ -36,6 +36,18 @@ build/
 .env.local
 .env.production
 .env.staging
+.env.backup.*
 secrets/
 *.key
 *.pem
+
+# Log files (keep current logs, ignore old ones)
+logs/
+!**/src/main/**/logs/
+
+# IDE specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

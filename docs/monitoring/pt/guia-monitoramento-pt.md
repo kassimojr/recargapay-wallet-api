@@ -40,7 +40,7 @@ Uma plataforma de visualização que exibe métricas em dashboards personalizáv
 
 2. Execute o script de configuração de monitoramento:
    ```bash
-   ./start-monitoring.sh
+   ./monitoring.sh
    ```
 
 3. Aguarde que todos os serviços iniciem (PostgreSQL, Prometheus, Grafana, etc.)
