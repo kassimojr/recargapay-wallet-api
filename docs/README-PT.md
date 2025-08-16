@@ -304,6 +304,9 @@ O relatório de cobertura estará disponível em `target/site/jacoco/index.html`
 
 O projeto mantém altos padrões de qualidade:
 
+![Cobertura de Código SonarQube](utils/img/sonar-code-coverage.png)
+*Análise do SonarQube mostrando 90%+ de cobertura de testes e métricas de qualidade*
+
 - **90%+ de cobertura de testes** obrigatória
 - **Quality gates do SonarQube** para análise de código
 - **Preparado para ser integrado** em pipeline CI/CD
@@ -428,8 +431,13 @@ curl http://localhost:8080/actuator/health/detailed
 ### 📊 Dashboards Tempo Real
 Acesse monitoramento abrangente em `http://localhost:3000` (admin/admin):
 
-- **🚦 Dashboard de Saúde da Aplicação** - Status do sistema, métricas de performance, alertas
-- **💰 Dashboard de Métricas Wallet** - Métricas de negócio, taxas de transação, KPIs financeiros
+#### 🚦 Dashboard de Saúde da Aplicação
+![Dashboard de Saúde da Aplicação](utils/img/dashboard-grafana-application-health.png)
+*Status do sistema em tempo real, métricas de performance e alertas*
+
+#### 💰 Dashboard de Métricas de Negócio
+![Dashboard de Métricas de Negócio](utils/img/dashboard-grafana-application-business.png)
+*Taxas de transação, saldos de carteiras e KPIs financeiros*
 
 ### 🔍 Stack de Observabilidade
 - **Prometheus** (`localhost:9090`) - Coleta de métricas e alertas
@@ -448,6 +456,9 @@ Acesse monitoramento abrangente em `http://localhost:3000` (admin/admin):
 ### Gerenciamento de Logs
 
 Os logs são estruturados em formato JSON para melhor observabilidade:
+
+![Rastreamento Distribuído Grafana Loki](utils/img/grafana-loki-tracing.png)
+*Rastreamento distribuído e logging estruturado com IDs de correlação no Grafana/Loki*
 
 - **Desenvolvimento local**: Saída no console
 - **Deploy em container**: Disponível via `docker logs recargapay-wallet-api`
@@ -559,6 +570,72 @@ Toda a documentação do projeto está organizada por categorias, disponível em
 - **[Rastreamento Distribuído](tracing/pt/README.md)** - Rastreamento e correlação
 - **[Otimização de Performance](caching/pt/README.md#benefícios-de-performance)** - Otimizações de performance
 - **[Arquitetura de Segurança](security/pt/README.md)** - Arquitetura de segurança
+
+---
+
+## 🎯 Planejamento e Entrega do Projeto sob Restrições de Tempo
+
+Este projeto foi planejado, refinado e guiado de forma estruturada e organizada utilizando **metodologia Kanban**.
+
+![Board Kanban RecargaPay Wallet API](utils/img/board-kanban-recargapay-walletapi.png)
+*Planejamento e acompanhamento da execução do projeto usando metodologia Kanban*
+
+**🔗 Board Kanban**: [Ver Board do Projeto](https://github.com/users/kassimojr/projects/1/views/1)
+
+O projeto foi desenvolvido com foco em qualidade e apesar de ser para um Assessment, cada etapa foi cuidadosamente planejada e executada.
+
+Abaixo segue uma estimativa realista de tempo estimado via **refinamento técnico vs tempo gasto**:
+
+### Comparativo de Tempo por Atividade
+
+| Atividade | Estimado | Realizado | Economia | Eficiência |
+|-----------|----------|-----------|----------|------------|
+| Cache Distribuído | 4h | 2h | 2h | 50% |
+| Monitoramento/Observabilidade e CI/CD | 16h | 8h | 8h | 50% |
+| Criar Carteira para Usuário | 12h | 6h | 6h | 50% |
+| Recuperar Saldo Atual | 6h | 3h | 3h | 50% |
+| Depositar Fundos | 8h | 4h | 4h | 50% |
+| Sacar Fundos | 8h | 4h | 4h | 50% |
+| Transferir Fundos | 10h | 5h | 5h | 50% |
+| Testes/Postman/Swagger/README | 8h | 3h | 5h | 38% |
+| Recuperar Saldo Histórico | 7h | 3.5h | 3.5h | 50% |
+| TOTAL | 79h | 38.5h | 40.5h | 49% |
+
+### Resumo Executivo
+
+| Métrica | Valor |
+|---------|-------|
+| Total Estimado | 79h |
+| Total Realizado | 38.5h |
+| Economia Total | 40.5h |
+| Eficiência Geral | 49% |
+
+### Análise por Categoria
+
+| Categoria | Estimado | Realizado | Economia | Eficiência |
+|-----------|----------|-----------|----------|------------|
+| Infraestrutura/DevOps | 16h | 8h | 8h | 50% |
+| Desenvolvimento APIs Core | 51h | 25.5h | 25.5h | 50% |
+| Testes e Documentação | 8h | 3h | 5h | 38% |
+| Cache/Performance | 4h | 2h | 2h | 50% |
+
+### 🎯 Principais Insights de Desenvolvimento
+
+**🚀 Aceleração Significativa**
+- Redução de aproximadamente 49% no tempo de desenvolvimento
+- Manutenção da qualidade técnica com 90%+ de cobertura de testes
+- Entrega de funcionalidades além do escopo original
+
+**💡 Áreas de Maior Impacto**
+- **Documentação Técnica**: Geração completa de documentação bilíngue
+- **Configuração de Infraestrutura**: Setup automatizado de observabilidade
+- **Geração de Código**: Aceleração na criação de controllers, services e testes
+- **Resolução de Problemas**: Identificação e resolução rápida de questões técnicas
+
+**🔧 Abordagem Técnica**
+O processo de desenvolvimento focou em decisões arquiteturais estratégicas e validação de regras de negócio, aproveitando **vibe coding** para acelerar tarefas de implementação operacionais. Todos os componentes foram devidamente revisados e testados, garantindo a qualidade e robustez da solução final.
+
+**📊 Resultado**: Entrega de um projeto completo e robusto em 38.5 horas, representando aproximadamente 2x de eficiência de desenvolvimento em relação à estimativa original.
 
 ---
 
