@@ -570,6 +570,9 @@ All project documentation is organized by categories, available in English and P
 
 This project was planned, refined, and guided in a structured and organized manner using **Kanban methodology**.
 
+![Kanban Board RecargaPay Wallet API](docs/utils/img/board-kanban-recargapay-walletapi.png)
+*Project planning and execution tracking using Kanban methodology*
+
 **🔗 Kanban Board**: [View Project Board](https://github.com/users/kassimojr/projects/1/views/1)
 
 The project was developed with a focus on quality and despite being for an Assessment, each step was carefully planned and executed.
