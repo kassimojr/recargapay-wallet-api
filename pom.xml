@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.recargapay.wallet</groupId>
     <artifactId>recargapay-wallet-api</artifactId>
-    <version>v1.2.0</version>
+    <version>v1.2.1</version>
     <name>recargapay-wallet-api</name>
     <description>Wallet API RecargaPay Assessment</description>
     <properties>
