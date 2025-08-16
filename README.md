@@ -280,6 +280,9 @@ Coverage report will be available at `target/site/jacoco/index.html`
 
 The project maintains high code quality standards:
 
+![SonarQube Code Coverage](docs/utils/img/sonar-code-coverage.png)
+*SonarQube analysis showing 90%+ test coverage and quality metrics*
+
 - **90%+ test coverage** requirement
 - **SonarQube quality gates** for code analysis
 - **Ready for CI/CD pipeline integration**
@@ -392,8 +395,13 @@ curl -X POST http://localhost:8080/api/wallets/transfer \
 ### 📊 Real-Time Dashboards
 Access comprehensive monitoring at `http://localhost:3000` (admin/admin):
 
-- **🚦 Application Health Dashboard** - System status, performance metrics, alerts
-- **💰 Wallet Metrics Dashboard** - Business metrics, transaction rates, financial KPIs
+#### 🚦 Application Health Dashboard
+![Application Health Dashboard](docs/utils/img/dashboard-grafana-application-health.png)
+*Real-time system health, performance metrics, and alerts*
+
+#### 💰 Business Metrics Dashboard  
+![Business Metrics Dashboard](docs/utils/img/dashboard-grafana-application-business.png)
+*Transaction rates, wallet balances, and financial KPIs*
 
 ### 🔍 Observability Stack
 - **Prometheus** (`localhost:9090`) - Metrics collection and alerting
@@ -428,6 +436,9 @@ curl http://localhost:8080/actuator/health/detailed
 ### Log Management
 
 Logs are structured in JSON format for better observability:
+
+![Grafana Loki Distributed Tracing](docs/utils/img/grafana-loki-tracing.png)
+*Distributed tracing and structured logging with correlation IDs in Grafana/Loki*
 
 - **Local development**: Console output
 - **Container deployment**: Available via `docker logs recargapay-wallet-api`

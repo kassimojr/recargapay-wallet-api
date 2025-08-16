@@ -304,6 +304,9 @@ O relatório de cobertura estará disponível em `target/site/jacoco/index.html`
 
 O projeto mantém altos padrões de qualidade:
 
+![Cobertura de Código SonarQube](utils/img/sonar-code-coverage.png)
+*Análise do SonarQube mostrando 90%+ de cobertura de testes e métricas de qualidade*
+
 - **90%+ de cobertura de testes** obrigatória
 - **Quality gates do SonarQube** para análise de código
 - **Preparado para ser integrado** em pipeline CI/CD
@@ -428,8 +431,13 @@ curl http://localhost:8080/actuator/health/detailed
 ### 📊 Dashboards Tempo Real
 Acesse monitoramento abrangente em `http://localhost:3000` (admin/admin):
 
-- **🚦 Dashboard de Saúde da Aplicação** - Status do sistema, métricas de performance, alertas
-- **💰 Dashboard de Métricas Wallet** - Métricas de negócio, taxas de transação, KPIs financeiros
+#### 🚦 Dashboard de Saúde da Aplicação
+![Dashboard de Saúde da Aplicação](utils/img/dashboard-grafana-application-health.png)
+*Status do sistema em tempo real, métricas de performance e alertas*
+
+#### 💰 Dashboard de Métricas de Negócio
+![Dashboard de Métricas de Negócio](utils/img/dashboard-grafana-application-business.png)
+*Taxas de transação, saldos de carteiras e KPIs financeiros*
 
 ### 🔍 Stack de Observabilidade
 - **Prometheus** (`localhost:9090`) - Coleta de métricas e alertas
@@ -448,6 +456,9 @@ Acesse monitoramento abrangente em `http://localhost:3000` (admin/admin):
 ### Gerenciamento de Logs
 
 Os logs são estruturados em formato JSON para melhor observabilidade:
+
+![Rastreamento Distribuído Grafana Loki](utils/img/grafana-loki-tracing.png)
+*Rastreamento distribuído e logging estruturado com IDs de correlação no Grafana/Loki*
 
 - **Desenvolvimento local**: Saída no console
 - **Deploy em container**: Disponível via `docker logs recargapay-wallet-api`
