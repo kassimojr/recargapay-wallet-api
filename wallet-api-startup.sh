@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # =============================================================================
-# RecargaPay Wallet API - Complete Startup Script
+# Digital Wallet API - Complete Startup Script
 # =============================================================================
 # This script provides a complete development environment setup and simulates a CI/CD pipeline by:
 # - Infrastructure services (PostgreSQL, Redis, SonarQube, Grafana, etc.)
@@ -108,7 +108,7 @@ sonar_token=""
 # =============================================================================
 
 print_header() {
-    echo -e "\n${BOLD}${CYAN}🚀 RecargaPay Wallet API - Complete Startup${NC}"
+    echo -e "\n${BOLD}${CYAN}🚀 Digital Wallet API - Complete Startup${NC}"
     echo -e "${CYAN}=============================================${NC}\n"
 }
 
@@ -195,7 +195,7 @@ wait_for_service() {
 
 # Function to extract coverage from SonarQube
 get_sonar_coverage() {
-    local project_key="recargapay-wallet-api"
+    local project_key="digital-wallet-api"
     local sonar_api="${SONAR_HOST_URL}/api/measures/component"
     
     # Wait a bit for SonarQube to process the analysis
@@ -242,7 +242,7 @@ get_project_version() {
     # Fallback to grep/sed if xmllint not available or failed
     if [ -z "$version" ]; then
         # Look for version after artifactId to avoid parent version
-        version=$(awk '/<artifactId>recargapay-wallet-api<\/artifactId>/{found=1; next} found && /<version>/{gsub(/.*<version>|<\/version>.*/, ""); print; exit}' "$pom_file" | tr -d '[:space:]')
+        version=$(awk '/<artifactId>digital-wallet-api<\/artifactId>/{found=1; next} found && /<version>/{gsub(/.*<version>|<\/version>.*/, ""); print; exit}' "$pom_file" | tr -d '[:space:]')
     fi
     
     if [ -z "$version" ]; then
@@ -444,7 +444,7 @@ maven_build() {
     
     # Prepare Maven build command
     local maven_command="mvn clean verify sonar:sonar \
-        -Dsonar.projectKey=recargapay-wallet-api \
+        -Dsonar.projectKey=digital-wallet-api \
         -Dsonar.host.url=\"$SONAR_HOST_URL\" \
         -Dsonar.token=\"$sonar_token\" \
         -s settings.xml"
@@ -516,7 +516,7 @@ maven_build() {
     fi
     
     # Display SonarQube dashboard link
-    print_info "🔗 View detailed analysis at: ${SONAR_HOST_URL}/dashboard?id=recargapay-wallet-api"
+    print_info "🔗 View detailed analysis at: ${SONAR_HOST_URL}/dashboard?id=digital-wallet-api"
 }
 
 # =============================================================================
@@ -554,7 +554,7 @@ wait_for_sonarqube_ready() {
 # Function to validate coverage from SonarQube API
 validate_coverage_from_api() {
     local token="$1"
-    local project_key="recargapay-wallet-api"
+    local project_key="digital-wallet-api"
     
     print_info "Retrieving coverage data from SonarQube API..." >&2
     
@@ -652,7 +652,7 @@ start_spring_boot_docker() {
         exit 1
     fi
     
-    print_info "Building Docker image: recargapay-wallet-api:$version"
+    print_info "Building Docker image: digital-wallet-api:$version"
     
     # Build with clean output - show progress but hide verbose details
     if [ "$IDE_MODE" = true ]; then
@@ -667,7 +667,7 @@ start_spring_boot_docker() {
     local build_output=$(mktemp)
     local build_start_time=$(date +%s)
     
-    if docker build $build_args -t recargapay-wallet-api:$version . > "$build_output" 2>&1; then
+    if docker build $build_args -t digital-wallet-api:$version . > "$build_output" 2>&1; then
         local build_end_time=$(date +%s)
         local build_duration=$((build_end_time - build_start_time))
         
@@ -697,8 +697,8 @@ start_spring_boot_docker() {
     local container_id
     if container_id=$(docker run -d \
         --name wallet-api \
-        --network recargapay-wallet-api_default \
-        --label com.docker.compose.project=recargapay-wallet-api \
+        --network digital-wallet-api_default \
+        --label com.docker.compose.project=digital-wallet-api \
         --label com.docker.compose.service=wallet-api \
         -p 8080:8080 \
         -v $(pwd)/logs:/app/logs \
@@ -706,7 +706,7 @@ start_spring_boot_docker() {
         -e SPRING_PROFILES_ACTIVE=prod \
         -e DB_HOST=postgres-sonar \
         -e REDIS_HOST=wallet-redis \
-        recargapay-wallet-api:$version 2>&1); then
+        digital-wallet-api:$version 2>&1); then
         print_success "✅ Container started successfully!"
         print_info "📋 Container ID: ${container_id:0:12}..."
     else
@@ -1027,7 +1027,7 @@ done
 
 # Show help if requested
 if [ "$SHOW_HELP" = true ]; then
-    echo "RecargaPay Wallet API - Startup Script"
+    echo "Digital Wallet API - Startup Script"
     echo ""
     echo "Usage:"
     echo "  $0                         Full startup (fresh build + infrastructure + application)"

@@ -1,6 +1,6 @@
 # Consultas Loki para TraceId e Operações de Negócio
 
-Este documento explica como consultar logs por `traceId`, `spanId` e operações de negócio (`operation`) no Grafana Loki da RecargaPay Wallet API.
+Este documento explica como consultar logs por `traceId`, `spanId` e operações de negócio (`operation`) no Grafana Loki da Digital Wallet API.
 
 ## 🎯 Campos Disponíveis para Consulta
 

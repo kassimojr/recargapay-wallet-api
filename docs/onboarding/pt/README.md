@@ -1,6 +1,6 @@
 # 🚀 Integração do Time & Configuração de Desenvolvimento
 
-Bem-vindo ao time da RecargaPay Wallet API! Esta seção contém tudo que você precisa para começar como um novo desenvolvedor no projeto.
+Bem-vindo ao time da Digital Wallet API! Esta seção contém tudo que você precisa para começar como um novo desenvolvedor no projeto.
 
 ## 📋 Navegação Rápida
 

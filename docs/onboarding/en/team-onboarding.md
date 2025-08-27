@@ -1,6 +1,6 @@
 # 🚀 Team Onboarding Checklist
 
-Welcome to the RecargaPay Wallet API team! Use this comprehensive checklist to ensure you're properly set up with all the tools, configurations, and knowledge needed to contribute effectively.
+Welcome to the Digital Wallet API team! Use this comprehensive checklist to ensure you're properly set up with all the tools, configurations, and knowledge needed to contribute effectively.
 
 ## 📋 Quick Start Checklist
 
@@ -70,10 +70,10 @@ Welcome to the RecargaPay Wallet API team! Use this comprehensive checklist to e
 - [ ] **Observability**: Get familiar with structured logging and tracing
 
 #### Key Components
-- [ ] **Domain Layer**: Business logic and entities (`com.recargapay.wallet.domain`)
-- [ ] **Application Layer**: Use cases and services (`com.recargapay.wallet.application`)
-- [ ] **Infrastructure Layer**: External integrations (`com.recargapay.wallet.infra`)
-- [ ] **API Layer**: REST controllers and DTOs (`com.recargapay.wallet.api`)
+- [ ] **Domain Layer**: Business logic and entities (`com.digital.wallet.domain`)
+- [ ] **Application Layer**: Use cases and services (`com.digital.wallet.application`)
+- [ ] **Infrastructure Layer**: External integrations (`com.digital.wallet.infra`)
+- [ ] **API Layer**: REST controllers and DTOs (`com.digital.wallet.api`)
 
 ### ✅ Development Workflow
 

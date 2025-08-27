@@ -1,6 +1,6 @@
 # 📊 Monitoring & Observability
 
-This section covers the comprehensive monitoring and observability setup for the RecargaPay Wallet API, including metrics collection, dashboards, alerting, and distributed tracing.
+This section covers the comprehensive monitoring and observability setup for the Digital Wallet API, including metrics collection, dashboards, alerting, and distributed tracing.
 
 ## 📋 Quick Navigation
 

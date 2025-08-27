@@ -1,6 +1,6 @@
-# RecargaPay Wallet API - Monitoring Guide
+# Digital Wallet API - Monitoring Guide
 
-This document outlines the monitoring approach for the RecargaPay Wallet API, including the metrics collected, dashboard setup, and alerting configuration.
+This document outlines the monitoring approach for the Digital Wallet API, including the metrics collected, dashboard setup, and alerting configuration.
 
 ## Overview
 
@@ -129,7 +129,7 @@ We've configured the following alerts:
 
 Alert notifications are configured to be sent to:
 - Slack channel: #wallet-api-alerts
-- Email: devops@recargapay.com
+- Email: devops@digitalwallet.com
 
 ## Dashboards
 

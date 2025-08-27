@@ -1,6 +1,6 @@
 # 💾 Redis Cache & Performance
 
-This section covers the distributed Redis cache implementation in the RecargaPay Wallet API, including setup, configuration, and performance optimization strategies.
+This section covers the distributed Redis cache implementation in the Digital Wallet API, including setup, configuration, and performance optimization strategies.
 
 ## 📋 Quick Navigation
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document provides practical examples and common configuration scenarios for the RecargaPay Wallet API.
+This document provides practical examples and common configuration scenarios for the Digital Wallet API.
 
 ---
 
@@ -14,7 +14,7 @@ This document provides practical examples and common configuration scenarios for
 ```yaml
 spring:
   application:
-    name: recargapay-wallet-api
+    name: digital-wallet-api
   
   # Local PostgreSQL
   datasource:
@@ -34,7 +34,7 @@ spring:
 # Development logging
 logging:
   level:
-    com.recargapay.wallet: DEBUG  # Detailed application logs
+    com.digital.wallet: DEBUG  # Detailed application logs
     org.springframework.web: INFO # Reduce Spring noise
 
 # Development monitoring
@@ -48,7 +48,7 @@ management:
 ```yaml
 spring:
   application:
-    name: recargapay-wallet-api
+    name: digital-wallet-api
   
   # External PostgreSQL with connection pooling
   datasource:
@@ -73,7 +73,7 @@ spring:
 logging:
   level:
     root: INFO
-    com.recargapay.wallet: INFO  # Less verbose in production
+    com.digital.wallet: INFO  # Less verbose in production
 
 # Production monitoring
 management:
@@ -341,7 +341,7 @@ environment:
 logging:
   level:
     root: WARN
-    com.recargapay.wallet: INFO
+    com.digital.wallet: INFO
   pattern:
     console: "%d{ISO8601} [%thread] %-5level %logger{36} - %msg%n"
 ```
@@ -356,7 +356,7 @@ logging:
 ```yaml
 logging:
   level:
-    com.recargapay.wallet: DEBUG
+    com.digital.wallet: DEBUG
     org.springframework.security: DEBUG
     org.springframework.web: DEBUG
     org.hibernate.SQL: DEBUG
@@ -469,7 +469,7 @@ spring:
 
 logging:
   level:
-    com.recargapay.wallet: DEBUG
+    com.digital.wallet: DEBUG
     org.springframework.test: DEBUG
 ```
 

@@ -1,8 +1,8 @@
-# RecargaPay Wallet API Monitoring Guide
+# Digital Wallet API Monitoring Guide
 
 ## Introduction to Monitoring and Observability
 
-Modern software systems require comprehensive monitoring to ensure reliability, availability, and performance. This guide explains how to use the monitoring stack implemented for the RecargaPay Wallet API.
+Modern software systems require comprehensive monitoring to ensure reliability, availability, and performance. This guide explains how to use the monitoring stack implemented for the Digital Wallet API.
 
 ### Core Concepts
 
@@ -15,7 +15,7 @@ Modern software systems require comprehensive monitoring to ensure reliability, 
 
 ## Monitoring Stack Components
 
-The RecargaPay Wallet API monitoring solution is built with industry-standard tools:
+The Digital Wallet API monitoring solution is built with industry-standard tools:
 
 ### 1. Spring Boot Actuator
 Provides endpoints to expose application health, metrics, and operational information.
@@ -35,7 +35,7 @@ A visualization platform that displays metrics in customizable dashboards.
 
 1. Navigate to the project root:
    ```bash
-   cd /path/to/recargapay-wallet-api
+   cd /path/to/digital-wallet-api
    ```
 
 2. Run the monitoring setup script:
@@ -110,7 +110,7 @@ Advanced queries:
 ### Exploring Grafana Dashboards
 
 1. Access Grafana at http://localhost:3000 (login with admin/admin)
-2. Navigate to Dashboards → RecargaPay → Wallet API Monitoring
+2. Navigate to Dashboards → Digital → Wallet API Monitoring
 
 The dashboard contains:
 - **Overview panels**: Current total balance and transaction counts
@@ -134,7 +134,7 @@ http://localhost:8080/actuator/loggers
 To change a log level:
 1. Send a POST request with the desired level:
    ```bash
-   curl -X POST http://localhost:8080/actuator/loggers/com.recargapay.wallet \
+   curl -X POST http://localhost:8080/actuator/loggers/com.digital.wallet \
      -H 'Content-Type: application/json' \
      -d '{"configuredLevel": "DEBUG"}'
    ```
@@ -223,7 +223,7 @@ Implementation details:
 
 ## Conclusion
 
-This monitoring setup provides comprehensive visibility into the RecargaPay Wallet API. By regularly reviewing metrics and health checks, you can ensure optimal performance and quickly identify issues before they affect users. The combination of metrics, health checks, and distributed tracing creates a robust observability solution for the entire application.
+This monitoring setup provides comprehensive visibility into the Digital Wallet API. By regularly reviewing metrics and health checks, you can ensure optimal performance and quickly identify issues before they affect users. The combination of metrics, health checks, and distributed tracing creates a robust observability solution for the entire application.
 
 ---
 

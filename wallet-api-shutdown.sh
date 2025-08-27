@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # =============================================================================
-# RecargaPay Wallet API - Complete Shutdown Script
+# Digital Wallet API - Complete Shutdown Script
 # =============================================================================
 # This script gracefully stops all services while preserving data:
 # 1. Stops Spring Boot application
@@ -29,7 +29,7 @@ APPLICATION_LOG="application.log"
 # =============================================================================
 
 print_header() {
-    echo -e "\n${BOLD}${CYAN}🛑 RecargaPay Wallet API - Complete Shutdown${NC}"
+    echo -e "\n${BOLD}${CYAN}🛑 Digital Wallet API - Complete Shutdown${NC}"
     echo -e "${CYAN}===============================================${NC}\n"
 }
 
@@ -315,7 +315,7 @@ cleanup_and_status() {
 display_final_info() {
     print_step "🎯 Shutdown Complete - Status Information"
     
-    echo -e "\n${BOLD}${GREEN}🛑 All RecargaPay Wallet API services have been stopped!${NC}\n"
+    echo -e "\n${BOLD}${GREEN}🛑 All Digital Wallet API services have been stopped!${NC}\n"
     
     echo -e "${BOLD}${CYAN}📊 What was stopped:${NC}"
     echo -e "${YELLOW}┌─────────────────────────────────────────────────────────────┐${NC}"

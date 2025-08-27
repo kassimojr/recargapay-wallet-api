@@ -13,7 +13,7 @@
     </root>
 
     <!-- Application specific loggers -->
-    <logger name="com.recargapay.wallet" level="INFO" additivity="false">
+    <logger name="com.digital.wallet" level="INFO" additivity="false">
         <appender-ref ref="CONSOLE" />
     </logger>
 
@@ -32,17 +32,17 @@
     <logger name="org.h2" level="WARN" />
     
     <!-- Metrics and monitoring loggers - keep at INFO for test validation -->
-    <logger name="com.recargapay.wallet.infra.metrics" level="INFO" />
-    <logger name="com.recargapay.wallet.infra.logging" level="INFO" />
+    <logger name="com.digital.wallet.infra.metrics" level="INFO" />
+    <logger name="com.digital.wallet.infra.logging" level="INFO" />
     
     <!-- Exception handlers - keep at INFO for test validation -->
-    <logger name="com.recargapay.wallet.infra.handler" level="INFO" />
+    <logger name="com.digital.wallet.infra.handler" level="INFO" />
     
     <!-- Test-specific loggers that should show expected errors -->
-    <logger name="com.recargapay.wallet.core.services.common.TransactionServiceTest" level="INFO" />
-    <logger name="com.recargapay.wallet.infra.handler.GlobalExceptionHandlerTest" level="INFO" />
+    <logger name="common.services.core.com.digital.wallet.TransactionServiceTest" level="INFO" />
+    <logger name="handler.infra.com.digital.wallet.GlobalExceptionHandlerTest" level="INFO" />
     
     <!-- WalletMetricsScheduler test - reduce ERROR level for expected test failures -->
-    <logger name="com.recargapay.wallet.infra.metrics.WalletMetricsScheduler" level="WARN" />
-    <logger name="com.recargapay.wallet.infra.metrics.WalletMetricsSchedulerTest" level="INFO" />
+    <logger name="com.digital.wallet.infra.metrics.WalletMetricsScheduler" level="WARN" />
+    <logger name="metrics.infra.com.digital.wallet.WalletMetricsSchedulerTest" level="INFO" />
 </configuration>

@@ -1,6 +1,6 @@
 # 🚀 Local Development Setup
 
-This guide helps you set up the RecargaPay Wallet API for local development with proper environment configuration and security practices.
+This guide helps you set up the Digital Wallet API for local development with proper environment configuration and security practices.
 
 ## 📋 Overview
 
@@ -164,7 +164,7 @@ Configure environment variables in your IDE:
       "type": "java",
       "name": "Spring Boot-WalletApiApplication",
       "request": "launch",
-      "mainClass": "com.recargapay.wallet.WalletApiApplication",
+      "mainClass": "com.digital.wallet.WalletApiApplication",
       "env": {
         "DB_USERNAME": "your_database_username",
         "DB_PASSWORD": "your_database_password",
@@ -224,7 +224,7 @@ env | grep -E "(DB_|JWT_|ADMIN_|REDIS_|CACHE_)"
 **Problem**: Cannot connect to PostgreSQL
 ```bash
 # Test database connection
-psql -h localhost -p 5432 -U your_username -d recargapay_wallet
+psql -h localhost -p 5432 -U your_username -d digital_wallet
 ```
 
 **Solutions**:
@@ -271,7 +271,7 @@ Import the provided collections:
 Connect to PostgreSQL:
 ```bash
 # Command line
-psql -h localhost -p 5432 -U your_username -d recargapay_wallet
+psql -h localhost -p 5432 -U your_username -d digital_wallet
 
 # Or use a GUI tool like pgAdmin, DBeaver, etc.
 ```

@@ -1,6 +1,6 @@
 # 📊 Monitoramento & Observabilidade
 
-Esta seção cobre a configuração abrangente de monitoramento e observabilidade para a RecargaPay Wallet API, incluindo coleta de métricas, dashboards, alertas e rastreamento distribuído.
+Esta seção cobre a configuração abrangente de monitoramento e observabilidade para a Digital Wallet API, incluindo coleta de métricas, dashboards, alertas e rastreamento distribuído.
 
 ## 📋 Navegação Rápida
 

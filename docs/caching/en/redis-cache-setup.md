@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide explains how to set up and use Redis distributed caching in the RecargaPay Wallet API following **industry best practices**. Redis caching improves performance by storing frequently accessed data in memory, reducing database queries and improving response times.
+This guide explains how to set up and use Redis distributed caching in the Digital Wallet API following **industry best practices**. Redis caching improves performance by storing frequently accessed data in memory, reducing database queries and improving response times.
 
 The implementation follows **financial industry standards** with:
 - **Hierarchical key naming** (`namespace:entity:operation:version`)
@@ -21,7 +21,7 @@ Add the following Redis configuration to your `.env` file:
 # Database Configuration
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=recargapay_wallet
+DB_NAME=digital_wallet
 DB_USERNAME=your_db_username
 DB_PASSWORD=your_secure_db_password
 
@@ -287,7 +287,7 @@ Many developers face difficulties when validating Redis cache due to **timing an
 **Why it fails:**
 - **Short TTL**: 3 minutes for financial data
 - **Human delay**: 2-5 minutes between request and verification
-- **Wrong pattern**: `wallet-api:*` instead of `recargapay-wallet-api:*`
+- **Wrong pattern**: `wallet-api:*` instead of `digital-wallet-api:*`
 
 #### **✅ Correct Methodology (That Works):**
 
@@ -313,7 +313,7 @@ echo "Time: ${first_time}ms"
 # 4. Check key IMMEDIATELY (no delay)
 echo "=== CHECKING CREATED KEY ==="
 docker exec wallet-redis redis-cli KEYS "*"
-docker exec wallet-redis redis-cli TTL "recargapay-wallet-api:wallet-list:v1:all"
+docker exec wallet-redis redis-cli TTL "digital-wallet-api:wallet-list:v1:all"
 
 # 5. Second request (cache hit) with timer
 echo "=== SECOND REQUEST (CACHE HIT) ==="
@@ -337,11 +337,11 @@ echo "Improvement: ${improvement}%"
 
 | **Operation** | **Generated Key** | **TTL** |
 |---------------|-------------------|---------|
-| Wallet list | `recargapay-wallet-api:wallet-list:v1:all` | configurable |
-| Individual wallet | `recargapay-wallet-api:wallet-single:v1:{walletId}` | configurable |
-| Wallet balance | `recargapay-wallet-api:wallet-balance:v1:{walletId}` | configurable |
-| Transactions | `recargapay-wallet-api:wallet-transactions:v1:{walletId}` | configurable |
-| User profile | `recargapay-wallet-api:user-profile:v1:{userId}` | configurable |
+| Wallet list | `digital-wallet-api:wallet-list:v1:all` | configurable |
+| Individual wallet | `digital-wallet-api:wallet-single:v1:{walletId}` | configurable |
+| Wallet balance | `digital-wallet-api:wallet-balance:v1:{walletId}` | configurable |
+| Transactions | `digital-wallet-api:wallet-transactions:v1:{walletId}` | configurable |
+| User profile | `digital-wallet-api:user-profile:v1:{userId}` | configurable |
 
 #### **Verification Commands:**
 
@@ -350,10 +350,10 @@ echo "Improvement: ${improvement}%"
 docker exec wallet-redis redis-cli KEYS "*"
 
 # ✅ CORRECT - Search application-specific keys
-docker exec wallet-redis redis-cli KEYS "recargapay-wallet-api:*"
+docker exec wallet-redis redis-cli KEYS "digital-wallet-api:*"
 
 # ✅ CORRECT - Search specific region keys
-docker exec wallet-redis redis-cli KEYS "recargapay-wallet-api:wallet-list:*"
+docker exec wallet-redis redis-cli KEYS "digital-wallet-api:wallet-list:*"
 
 # ❌ INCORRECT - Incomplete prefix
 docker exec wallet-redis redis-cli KEYS "wallet-api:*"
@@ -365,7 +365,7 @@ docker exec wallet-redis redis-cli KEYS "wallet-api:*"
 
 ```bash
 # Check TTL of specific key
-docker exec wallet-redis redis-cli TTL "recargapay-wallet-api:wallet-list:v1:all"
+docker exec wallet-redis redis-cli TTL "digital-wallet-api:wallet-list:v1:all"
 
 # Possible results:
 # 180 = 3 minutes remaining
@@ -385,7 +385,7 @@ curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/v1/wallets -s >
 
 # Check initial TTL
 echo "Initial TTL:"
-docker exec wallet-redis redis-cli TTL "recargapay-wallet-api:wallet-list:v1:all"
+docker exec wallet-redis redis-cli TTL "digital-wallet-api:wallet-list:v1:all"
 
 # Wait 1 minute
 echo "Waiting 1 minute..."
@@ -393,7 +393,7 @@ sleep 60
 
 # Check TTL after 1 minute
 echo "TTL after 1 minute:"
-docker exec wallet-redis redis-cli TTL "recargapay-wallet-api:wallet-list:v1:all"
+docker exec wallet-redis redis-cli TTL "digital-wallet-api:wallet-list:v1:all"
 
 # Wait 2 more minutes (total: 3 minutes)
 echo "Waiting 2 more minutes..."
@@ -401,7 +401,7 @@ sleep 120
 
 # Check if key expired
 echo "Keys after 3 minutes (should be empty):"
-docker exec wallet-redis redis-cli KEYS "recargapay-wallet-api:wallet-list:*"
+docker exec wallet-redis redis-cli KEYS "digital-wallet-api:wallet-list:*"
 ```
 
 ### **🧪 Complete Test Script**
@@ -463,7 +463,7 @@ fi
 echo "✅ Key created: $KEYS"
 
 # 5. Check TTL
-TTL=$(docker exec $REDIS_CONTAINER redis-cli TTL "recargapay-wallet-api:wallet-list:v1:all")
+TTL=$(docker exec $REDIS_CONTAINER redis-cli TTL "digital-wallet-api:wallet-list:v1:all")
 echo "⏰ TTL: ${TTL} seconds"
 
 # 6. Second request (cache hit)
@@ -537,7 +537,7 @@ Use this checklist to ensure cache is working correctly:
 - [ ] **Cache Miss**: First request creates key in Redis
 - [ ] **Cache Hit**: Second request is faster
 - [ ] **TTL**: Keys have appropriate TTL (configurable)
-- [ ] **Naming**: Keys follow pattern `recargapay-wallet-api:*`
+- [ ] **Naming**: Keys follow pattern `digital-wallet-api:*`
 - [ ] **Expiration**: Keys expire after configured TTL
 - [ ] **Invalidation**: Cache is cleared after write operations
 
