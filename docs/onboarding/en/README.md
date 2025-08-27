@@ -1,6 +1,6 @@
 # 🚀 Team Onboarding & Development Setup
 
-Welcome to the RecargaPay Wallet API team! This section contains everything you need to get started as a new developer on the project.
+Welcome to the Digital Wallet API team! This section contains everything you need to get started as a new developer on the project.
 
 ## 📋 Quick Navigation
 

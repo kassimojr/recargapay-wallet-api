@@ -200,7 +200,7 @@ Este documento fornece explicações detalhadas para todas as configurações do
 - **Finalidade**: Prometheus monitora a si mesmo
 - **Métricas**: Métricas internas do Prometheus
 
-#### Job: recargapay-wallet-api
+#### Job: digital-wallet-api
 - **Target**: host.docker.internal:8080
 - **Caminho de Métricas**: /actuator/prometheus
 - **Intervalo de Scrape**: 5s (mais frequente que padrão)

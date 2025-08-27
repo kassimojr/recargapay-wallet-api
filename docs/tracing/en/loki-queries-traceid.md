@@ -1,6 +1,6 @@
 # Loki Queries for TraceId and Business Operations
 
-This document explains how to query logs by `traceId`, `spanId`, and business operations (`operation`) in Grafana Loki for the RecargaPay Wallet API.
+This document explains how to query logs by `traceId`, `spanId`, and business operations (`operation`) in Grafana Loki for the Digital Wallet API.
 
 ## 🎯 Available Fields for Queries
 

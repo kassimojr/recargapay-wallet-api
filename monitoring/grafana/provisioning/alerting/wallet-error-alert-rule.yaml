@@ -3,7 +3,7 @@ apiVersion: 1
 groups:
   - orgId: 1
     name: 'Wallet API Alerts'
-    folder: 'RecargaPay'
+    folder: 'Digital Wallet'
     interval: 1m
     rules:
       - uid: wallet_error_rate

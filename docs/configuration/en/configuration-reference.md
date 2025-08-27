@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document provides a comprehensive reference for all configuration properties used in the RecargaPay Wallet API project. Each property is documented with its purpose, impact, and relationship to other configurations.
+This document provides a comprehensive reference for all configuration properties used in the Digital Wallet API project. Each property is documented with its purpose, impact, and relationship to other configurations.
 
 ## Table of Contents
 
@@ -19,7 +19,7 @@ This document provides a comprehensive reference for all configuration propertie
 
 #### spring.application.name
 - **Type**: string
-- **Current Value**: `recargapay-wallet-api`
+- **Current Value**: `digital-wallet-api`
 - **Description**: Defines the application name used across Spring Boot components
 - **Purpose**: Used in logging patterns, metrics labels, and distributed tracing to identify this service
 - **Impact**: If removed, default service identification will be lost in logs and monitoring
@@ -114,7 +114,7 @@ This document provides a comprehensive reference for all configuration propertie
 
 #### otel.service.name
 - **Type**: string
-- **Current Value**: `recargapay-wallet-api`
+- **Current Value**: `digital-wallet-api`
 - **Description**: Service name for distributed tracing
 - **Purpose**: Identifies service in distributed traces and logs
 - **Relationships**: Should match spring.application.name
@@ -136,7 +136,7 @@ This document provides a comprehensive reference for all configuration propertie
 - **Impact**: Essential for distributed tracing and log correlation
 - **Relationships**: Uses spring.application.name and MDC values from TraceContextFilter
 
-#### logging.level.com.recargapay.wallet
+#### logging.level.com.digital.wallet
 - **Type**: string
 - **Current Value**: `DEBUG`
 - **Description**: Application-specific log level
@@ -245,7 +245,7 @@ This document provides a comprehensive reference for all configuration propertie
 
 #### scrape_configs[1].job_name
 - **Type**: string
-- **Current Value**: `recargapay-wallet-api`
+- **Current Value**: `digital-wallet-api`
 - **Description**: Job name for wallet API metrics
 - **Purpose**: Identifies metrics source in Prometheus
 

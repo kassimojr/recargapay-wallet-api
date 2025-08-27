@@ -1,6 +1,6 @@
 spring:
   application:
-    name: recargapay-wallet-api
+    name: digital-wallet-api
   
   # H2 Database Configuration - Optimized for tests
   datasource:
@@ -25,12 +25,34 @@ spring:
       hibernate:
         format_sql: true
   
-  # JWT Configuration
+  # JWT Configuration for tests
   security:
     oauth2:
       resourceserver:
         jwt:
-          secret: ${JWT_SECRET}
+          secret: ${JWT_SECRET:test-jwt-secret-key-for-testing-purposes-only-minimum-32-characters-long}
+  
+  # Redis Configuration for tests (embedded/mock)
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2000ms
+      jedis:
+        pool:
+          max-active: 2
+          max-idle: 2
+          min-idle: 0
+          max-wait: -1ms
+
+  # Cache Configuration for tests
+  cache:
+    type: simple  # Use simple cache instead of Redis for tests
+    
+  # Flyway disabled for tests (using create-drop)
+  flyway:
+    enabled: false
 
 # Application Configuration for Tests
 app:

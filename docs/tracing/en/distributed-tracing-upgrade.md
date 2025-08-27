@@ -2,7 +2,7 @@
 
 ## 📋 Overview
 
-This document outlines the complete upgrade plan to implement **granular distributed tracing** in the Recargapay Wallet API, moving from the current single-span-per-request approach to a multi-span hierarchical tracing system.
+This document outlines the complete upgrade plan to implement **granular distributed tracing** in the Digital Wallet API, moving from the current single-span-per-request approach to a multi-span hierarchical tracing system.
 
 ## 🎯 Upgrade Goals
 

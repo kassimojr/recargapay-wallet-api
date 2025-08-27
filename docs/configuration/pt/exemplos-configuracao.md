@@ -13,7 +13,7 @@ Este documento fornece exemplos práticos de configuração para diferentes cen�
 ```yaml
 spring:
   application:
-    name: recargapay-wallet-api
+    name: digital-wallet-api
   
   # Configuração de banco para desenvolvimento
   datasource:
@@ -50,7 +50,7 @@ otel:
   sdk:
     disabled: true  # Desabilita auto-configuração
   service:
-    name: recargapay-wallet-api
+    name: digital-wallet-api
   propagators: tracecontext,baggage
 
 # SpringDoc para documentação
@@ -63,7 +63,7 @@ springdoc:
 # Logging para desenvolvimento
 logging:
   level:
-    com.recargapay.wallet: DEBUG
+    com.digital.wallet: DEBUG
     org.springframework.security: DEBUG
     org.hibernate.SQL: DEBUG
   pattern:
@@ -91,7 +91,7 @@ management:
 ```yaml
 spring:
   application:
-    name: recargapay-wallet-api
+    name: digital-wallet-api
   
   # Configuração de banco para produção
   datasource:
@@ -147,7 +147,7 @@ otel:
   sdk:
     disabled: true
   service:
-    name: recargapay-wallet-api
+    name: digital-wallet-api
     version: ${APP_VERSION:1.0.0}
     environment: ${ENVIRONMENT:production}
   propagators: tracecontext,baggage
@@ -163,7 +163,7 @@ springdoc:
 logging:
   level:
     root: WARN
-    com.recargapay.wallet: INFO
+    com.digital.wallet: INFO
     org.springframework.security: WARN
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [${spring.application.name:-wallet-api}] [%X{traceId:-},%X{spanId:-}] [%thread] %-5level %logger{36} - %msg%n"
@@ -231,7 +231,7 @@ otel:
 # Logging para testes
 logging:
   level:
-    com.recargapay.wallet: DEBUG
+    com.digital.wallet: DEBUG
     org.springframework.test: INFO
     org.testcontainers: INFO
   pattern:
@@ -478,7 +478,7 @@ version: '3.8'
 
 services:
   wallet-api:
-    image: recargapay/wallet-api:${VERSION}
+    image: digital/wallet-api:${VERSION}
     environment:
       - SPRING_PROFILES_ACTIVE=production
       - DB_URL=jdbc:postgresql://postgres:5432/walletdb
@@ -539,7 +539,7 @@ networks:
 logging:
   level:
     # Debug específico da aplicação
-    com.recargapay.wallet: DEBUG
+    com.digital.wallet: DEBUG
     
     # Debug de segurança
     org.springframework.security: DEBUG
@@ -595,7 +595,7 @@ spring:
 logging:
   level:
     root: WARN
-    com.recargapay.wallet: INFO
+    com.digital.wallet: INFO
   pattern:
     console: "%d{HH:mm:ss.SSS} %-5level - %msg%n"
 

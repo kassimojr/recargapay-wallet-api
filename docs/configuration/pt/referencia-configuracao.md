@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-Este documento fornece uma referência abrangente para todas as propriedades de configuração utilizadas no projeto RecargaPay Wallet API. Cada propriedade é documentada com seu propósito, impacto e relacionamento com outras configurações.
+Este documento fornece uma referência abrangente para todas as propriedades de configuração utilizadas no projeto Digital Wallet API. Cada propriedade é documentada com seu propósito, impacto e relacionamento com outras configurações.
 
 ## Índice
 
@@ -19,7 +19,7 @@ Este documento fornece uma referência abrangente para todas as propriedades de 
 
 #### spring.application.name
 - **Tipo**: string
-- **Valor Atual**: `recargapay-wallet-api`
+- **Valor Atual**: `digital-wallet-api`
 - **Descrição**: Define o nome da aplicação usado em componentes do Spring Boot
 - **Finalidade**: Usado em padrões de logging, labels de métricas e tracing distribuído para identificar este serviço
 - **Impacto**: Se removido, a identificação padrão do serviço será perdida em logs e monitoramento
@@ -114,7 +114,7 @@ Este documento fornece uma referência abrangente para todas as propriedades de 
 
 #### otel.service.name
 - **Tipo**: string
-- **Valor Atual**: `recargapay-wallet-api`
+- **Valor Atual**: `digital-wallet-api`
 - **Descrição**: Nome do serviço para tracing distribuído
 - **Finalidade**: Identifica serviço em traces distribuídos e logs
 - **Relacionamentos**: Deve corresponder a spring.application.name
@@ -136,7 +136,7 @@ Este documento fornece uma referência abrangente para todas as propriedades de 
 - **Impacto**: Essencial para tracing distribuído e correlação de logs
 - **Relacionamentos**: Usa spring.application.name e valores MDC do TraceContextFilter
 
-#### logging.level.com.recargapay.wallet
+#### logging.level.com.digital.wallet
 - **Tipo**: string
 - **Valor Atual**: `DEBUG`
 - **Descrição**: Nível de log específico da aplicação
@@ -245,7 +245,7 @@ Este documento fornece uma referência abrangente para todas as propriedades de 
 
 #### scrape_configs[1].job_name
 - **Tipo**: string
-- **Valor Atual**: `recargapay-wallet-api`
+- **Valor Atual**: `digital-wallet-api`
 - **Descrição**: Nome do job para métricas da wallet API
 - **Finalidade**: Identifica fonte de métricas no Prometheus
 

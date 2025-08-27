@@ -1,6 +1,6 @@
 # 🚀 Checklist de Integração do Time
 
-Bem-vindo ao time da RecargaPay Wallet API! Use este checklist abrangente para garantir que você esteja devidamente configurado com todas as ferramentas, configurações e conhecimento necessários para contribuir efetivamente.
+Bem-vindo ao time da Digital Wallet API! Use este checklist abrangente para garantir que você esteja devidamente configurado com todas as ferramentas, configurações e conhecimento necessários para contribuir efetivamente.
 
 ## 📋 Checklist de Início Rápido
 
@@ -69,10 +69,10 @@ Bem-vindo ao time da RecargaPay Wallet API! Use este checklist abrangente para g
 - [ ] **Event Sourcing**: Como eventos são utilizados no sistema
 
 #### Estrutura do Código
-- [ ] **Camada de Domínio**: Lógica de negócio (`com.recargapay.wallet.domain`)
-- [ ] **Camada de Aplicação**: Casos de uso (`com.recargapay.wallet.application`)
-- [ ] **Camada de Infraestrutura**: Integrações externas (`com.recargapay.wallet.infra`)
-- [ ] **Camada de API**: Controllers REST e DTOs (`com.recargapay.wallet.api`)
+- [ ] **Camada de Domínio**: Lógica de negócio (`com.digital.wallet.domain`)
+- [ ] **Camada de Aplicação**: Casos de uso (`com.digital.wallet.application`)
+- [ ] **Camada de Infraestrutura**: Integrações externas (`com.digital.wallet.infra`)
+- [ ] **Camada de API**: Controllers REST e DTOs (`com.digital.wallet.api`)
 
 ### ✅ Fluxo de Desenvolvimento
 
@@ -150,7 +150,7 @@ Você está pronto para contribuir quando conseguir:
 
 ---
 
-🎉 **Bem-vindo ao time!** Você agora está pronto para começar a contribuir com a RecargaPay Wallet API. Não hesite em fazer perguntas e compartilhar suas ideias!
+🎉 **Bem-vindo ao time!** Você agora está pronto para começar a contribuir com a Digital Wallet API. Não hesite em fazer perguntas e compartilhar suas ideias!
 
 ---
 

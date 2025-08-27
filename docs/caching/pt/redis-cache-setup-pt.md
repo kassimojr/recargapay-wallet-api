@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-Este guia explica como configurar e usar o cache distribuído Redis na RecargaPay Wallet API seguindo **melhores práticas da indústria**. O cache Redis melhora a performance armazenando dados frequentemente acessados em memória, reduzindo consultas ao banco de dados e melhorando os tempos de resposta.
+Este guia explica como configurar e usar o cache distribuído Redis na Digital Wallet API seguindo **melhores práticas da indústria**. O cache Redis melhora a performance armazenando dados frequentemente acessados em memória, reduzindo consultas ao banco de dados e melhorando os tempos de resposta.
 
 A implementação segue **padrões da indústria financeira** com:
 - **Nomenclatura hierárquica de chaves** (`namespace:entidade:operacao:versao`)
@@ -21,7 +21,7 @@ Adicione as seguintes configurações Redis ao seu arquivo `.env`:
 # Configuração do Banco de Dados
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=recargapay_wallet
+DB_NAME=digital_wallet
 DB_USERNAME=your_db_username
 DB_PASSWORD=your_secure_db_password
 
@@ -370,7 +370,7 @@ Muitos desenvolvedores enfrentam dificuldades ao validar o cache Redis devido a 
 **Por que falha:**
 - **TTL curto**: 3 minutos para dados financeiros
 - **Delay humano**: 2-5 minutos entre requisição e verificação
-- **Padrão incorreto**: `wallet-api:*` ao invés de `recargapay-wallet-api:*`
+- **Padrão incorreto**: `wallet-api:*` ao invés de `digital-wallet-api:*`
 
 #### **✅ Metodologia Correta (Que Funciona):**
 
@@ -396,7 +396,7 @@ echo "Tempo: ${first_time}ms"
 # 4. Verificar chave IMEDIATAMENTE (sem delay)
 echo "=== VERIFICANDO CHAVE CRIADA ==="
 docker exec wallet-redis redis-cli KEYS "*"
-docker exec wallet-redis redis-cli TTL "recargapay-wallet-api:wallet-list:v1:all"
+docker exec wallet-redis redis-cli TTL "digital-wallet-api:wallet-list:v1:all"
 
 # 5. Segunda requisição (cache hit) com cronômetro
 echo "=== SEGUNDA REQUISIÇÃO (CACHE HIT) ==="
@@ -475,7 +475,7 @@ Use este checklist para garantir que o cache está funcionando corretamente:
 - [ ] **Cache Miss**: Primeira requisição cria chave no Redis
 - [ ] **Cache Hit**: Segunda requisição é mais rápida
 - [ ] **TTL**: Chaves têm TTL apropriado (30s-3min)
-- [ ] **Nomenclatura**: Chaves seguem padrão `recargapay-wallet-api:*`
+- [ ] **Nomenclatura**: Chaves seguem padrão `digital-wallet-api:*`
 - [ ] **Expiração**: Chaves expiram após TTL configurado
 - [ ] **Invalidação**: Cache é limpo após operações de escrita
 

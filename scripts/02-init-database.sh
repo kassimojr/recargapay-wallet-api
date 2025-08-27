@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Database Initialization Script
-# This script handles PostgreSQL database setup for the RecargaPay Wallet API
+# This script handles PostgreSQL database setup for the Digital Wallet API
 
 # Load common utilities
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

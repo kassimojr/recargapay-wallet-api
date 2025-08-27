@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # =============================================================================
-# RecargaPay Wallet API - Environment Generator
+# Digital Wallet API - Environment Generator
 # =============================================================================
 # This script generates a .env file with working values based on src/main/resources/templates/.env.template
 # Purpose: Ensure 100% automated setup for testing and development
@@ -57,7 +57,7 @@ generate_secure_key() {
 
 # Main function to generate .env
 generate_env_file() {
-    print_info "Generating .env file for RecargaPay Wallet API..."
+    print_info "Generating .env file for Digital Wallet API..."
     
     # Check if template exists
     if [ ! -f "$ENV_TEMPLATE" ]; then
@@ -76,7 +76,7 @@ generate_env_file() {
     
     # Generate .env with exact values specified by user
     cat > "$ENV_FILE" << 'EOF'
-# RecargaPay Wallet API - Local Environment (Auto-generated)
+# Digital Wallet API - Local Environment (Auto-generated)
 # Generated automatically for development and testing
 
 # Database Configuration
@@ -185,7 +185,7 @@ verify_environment() {
 
 # Main execution
 main() {
-    echo -e "\n${BLUE}🔧 RecargaPay Wallet API - Environment Generator${NC}"
+    echo -e "\n${BLUE}🔧 Digital Wallet API - Environment Generator${NC}"
     echo -e "${BLUE}=================================================${NC}\n"
     
     verify_environment

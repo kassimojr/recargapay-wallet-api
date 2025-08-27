@@ -8,15 +8,15 @@
         <version>3.3.3</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.recargapay.wallet</groupId>
-    <artifactId>recargapay-wallet-api</artifactId>
-    <version>v1.2.1</version>
-    <name>recargapay-wallet-api</name>
-    <description>Wallet API RecargaPay Assessment</description>
+    <groupId>com.digital.wallet</groupId>
+    <artifactId>digital-wallet-api</artifactId>
+    <version>v1.3.0</version>
+    <name>digital-wallet-api</name>
+    <description>Digital Wallet API</description>
     <properties>
         <sonar.exclusions>
             **/test/**,
-            **/RecargapayWalletApiApplication.java,
+            **/DigitalWalletApiApplication.java,
             **/infra/config/WebMvcConfig.java,
             **/infra/config/CorsConfig.java,
             **/infra/config/OpenApiConfig.java,
@@ -287,28 +287,28 @@
                         <configuration>
                             <excludes>
                                 <!-- Main application class -->
-                                <exclude>com/recargapay/wallet/RecargapayWalletApiApplication*</exclude>
+                                <exclude>com/digital/wallet/DigitalWalletApiApplication*</exclude>
                                 
                                 <!-- Simple configuration classes -->
-                                <exclude>com/recargapay/wallet/infra/config/WebMvcConfig*</exclude>
-                                <exclude>com/recargapay/wallet/infra/config/CorsConfig*</exclude>
-                                <exclude>com/recargapay/wallet/infra/config/OpenApiConfig*</exclude>
-                                <exclude>com/recargapay/wallet/infra/config/LoggingConfig*</exclude>
-                                <exclude>com/recargapay/wallet/infra/config/TracingConfig*</exclude>
-                                <exclude>com/recargapay/wallet/infra/config/ParameterNameDiscovererConfig*</exclude>
+                                <exclude>com/digital/wallet/infra/config/WebMvcConfig*</exclude>
+                                <exclude>com/digital/wallet/infra/config/CorsConfig*</exclude>
+                                <exclude>com/digital/wallet/infra/config/OpenApiConfig*</exclude>
+                                <exclude>com/digital/wallet/infra/config/LoggingConfig*</exclude>
+                                <exclude>com/digital/wallet/infra/config/TracingConfig*</exclude>
+                                <exclude>com/digital/wallet/infra/config/ParameterNameDiscovererConfig*</exclude>
                                 
                                 <!-- Lombok builders -->
-                                <exclude>com/recargapay/wallet/adapter/dtos/**/*Builder*</exclude>
+                                <exclude>com/digital/wallet/adapter/dtos/**/*Builder*</exclude>
                                 
                                 <!-- Simple entities -->
-                                <exclude>com/recargapay/wallet/infra/persistence/entities/**</exclude>
+                                <exclude>com/digital/wallet/infra/persistence/entities/**</exclude>
                                 
                                 <!-- Simple exceptions -->
-                                <exclude>com/recargapay/wallet/core/exceptions/InvalidTransferException*</exclude>
+                                <exclude>com/digital/wallet/core/exceptions/InvalidTransferException*</exclude>
                                 
                                 <!-- Constants and annotations -->
-                                <exclude>com/recargapay/wallet/infra/metrics/MetricsConstants*</exclude>
-                                <exclude>com/recargapay/wallet/infra/tracing/Traced*</exclude>
+                                <exclude>com/digital/wallet/infra/metrics/MetricsConstants*</exclude>
+                                <exclude>com/digital/wallet/infra/tracing/Traced*</exclude>
                             </excludes>
                             <rules>
                                 <rule>

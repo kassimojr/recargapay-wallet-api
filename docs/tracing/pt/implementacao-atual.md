@@ -2,7 +2,7 @@
 
 ## 📋 Visão Geral
 
-A implementação atual de rastreamento distribuído na Recargapay Wallet API fornece **correlação básica de logs** através da geração de `traceId` e `spanId` únicos para cada requisição HTTP. Esta abordagem permite rastrear o fluxo completo de uma transação através dos logs estruturados, facilitando debugging, monitoramento e suporte ao cliente.
+A implementação atual de rastreamento distribuído na Digital Wallet API fornece **correlação básica de logs** através da geração de `traceId` e `spanId` únicos para cada requisição HTTP. Esta abordagem permite rastrear o fluxo completo de uma transação através dos logs estruturados, facilitando debugging, monitoramento e suporte ao cliente.
 
 ## 🏗️ Arquitetura
 
@@ -38,7 +38,7 @@ A implementação atual de rastreamento distribuído na Recargapay Wallet API fo
 
 ### 1. TraceContextFilter
 
-**Localização**: `src/main/java/com/recargapay/wallet/infra/logging/TraceContextFilter.java`
+**Localização**: `src/main/java/com/digital/wallet/infra/logging/TraceContextFilter.java`
 
 ```java
 @Component
@@ -103,7 +103,7 @@ public class TraceContextFilter extends OncePerRequestFilter {
 
 ### 2. OpenTelemetryConfig
 
-**Localização**: `src/main/java/com/recargapay/wallet/config/OpenTelemetryConfig.java`
+**Localização**: `src/main/java/com/digital/wallet/config/OpenTelemetryConfig.java`
 
 ```java
 @Configuration

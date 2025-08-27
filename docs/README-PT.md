@@ -1,8 +1,8 @@
-# 🚀 RecargaPay Wallet API
+# 🚀 Digital Wallet API
 
 ## 📌 Visão Geral
 
-O RecargaPay Wallet API é um serviço robusto de carteira digital que permite gerenciar o saldo financeiro dos usuários, oferecendo operações essenciais como depósito, saque e transferência de fundos entre usuários. Desenvolvido com arquitetura hexagonal e as melhores práticas de engenharia de software, este serviço garante alta disponibilidade, rastreabilidade completa e segurança em todas as operações financeiras.
+O Digital Wallet API é um serviço robusto de carteira digital que permite gerenciar o saldo financeiro dos usuários, oferecendo operações essenciais como depósito, saque e transferência de fundos entre usuários. Desenvolvido com arquitetura hexagonal e as melhores práticas de engenharia de software, este serviço garante alta disponibilidade, rastreabilidade completa e segurança em todas as operações financeiras.
 
 ---
 
@@ -51,7 +51,7 @@ O projeto foi implementado seguindo os princípios da **Arquitetura Hexagonal** 
 ### Estrutura de Pacotes
 
 ```
-com.recargapay.wallet/
+com.digital.wallet/
 ├── adapter/                     # Adaptadores (Controllers, Repositories, DTOs)
 │   ├── controllers/
 │   │   └── v1/                  # Controladores REST v1
@@ -192,8 +192,8 @@ O projeto utiliza um stack moderno e robusto:
 ### Clonando o Repositório
 
 ```bash
-git clone https://github.com/seu-usuario/recargapay-wallet-api.git
-cd recargapay-wallet-api
+git clone https://github.com/seu-usuario/digital-wallet-api.git
+cd digital-wallet-api
 ```
 
 ### 🎯 Validação Rápida (Recomendado)
@@ -461,7 +461,7 @@ Os logs são estruturados em formato JSON para melhor observabilidade:
 *Rastreamento distribuído e logging estruturado com IDs de correlação no Grafana/Loki*
 
 - **Desenvolvimento local**: Saída no console
-- **Deploy em container**: Disponível via `docker logs recargapay-wallet-api`
+- **Deploy em container**: Disponível via `docker logs digital-wallet-api`
 - **Produção**: Agregados no stack Loki/Grafana
 
 Exemplo de entrada de log:
@@ -471,7 +471,7 @@ Exemplo de entrada de log:
   "level": "INFO",
   "traceId": "b4ae80e90152b7ab443b5db11e0914b9",
   "spanId": "7f2c1a8b9e3d4c5f",
-  "logger": "com.recargapay.wallet.application.service.DepositService",
+  "logger": "com.digital.wallet.application.service.DepositService",
   "message": "Operação de depósito concluída com sucesso",
   "operation": "DEPOSIT",
   "walletId": "123e4567-e89b-12d3-a456-426614174000",
@@ -577,7 +577,7 @@ Toda a documentação do projeto está organizada por categorias, disponível em
 
 Este projeto foi planejado, refinado e guiado de forma estruturada e organizada utilizando **metodologia Kanban**.
 
-![Board Kanban RecargaPay Wallet API](utils/img/board-kanban-recargapay-walletapi.png)
+![Board Kanban Digital Wallet API](utils/img/board-kanban-digital-walletapi.png)
 *Planejamento e acompanhamento da execução do projeto usando metodologia Kanban*
 
 **🔗 Board Kanban**: [Ver Board do Projeto](https://github.com/users/kassimojr/projects/1/views/1)
@@ -651,4 +651,4 @@ O processo de desenvolvimento focou em decisões arquiteturais estratégicas e v
 linkedin: https://www.linkedin.com/in/kassimojr/
 
 ---
-**Construído com ❤️ por Kássimo Júnior para Assessment da RecargaPay**
+**Construído com ❤️ por Kássimo Júnior**

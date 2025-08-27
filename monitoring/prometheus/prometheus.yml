@@ -21,8 +21,8 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
 
-  # RecargaPay Wallet API metrics
-  - job_name: 'recargapay-wallet-api'
+  # Digital Wallet API metrics
+  - job_name: 'digital-wallet-api'
     metrics_path: '/actuator/prometheus'
     scrape_interval: 5s
     static_configs:

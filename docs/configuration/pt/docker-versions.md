@@ -1,6 +1,6 @@
 # Versões das Imagens Docker
 
-Este documento rastreia as versões das imagens Docker utilizadas no projeto RecargaPay Wallet API e a justificativa por trás da seleção de versões.
+Este documento rastreia as versões das imagens Docker utilizadas no projeto Digital Wallet API e a justificativa por trás da seleção de versões.
 
 ## Versões Atuais das Imagens
 

@@ -1,6 +1,6 @@
 # 🔒 Security & Authentication
 
-This section covers all security aspects of the RecargaPay Wallet API, including authentication, authorization, and security best practices.
+This section covers all security aspects of the Digital Wallet API, including authentication, authorization, and security best practices.
 
 ## 📋 Quick Navigation
 

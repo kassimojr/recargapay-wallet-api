@@ -18,7 +18,7 @@ spring:
 logging:
   level:
     root: ${LOGGING_LEVEL_ROOT}
-    com.recargapay.wallet: ${LOGGING_LEVEL_APP}
+    com.digital.wallet: ${LOGGING_LEVEL_APP}
     org.springframework.security: DEBUG
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE

@@ -1,6 +1,6 @@
 # Guia de Configuração de Ambiente
 
-Este documento fornece instruções abrangentes de configuração para todos os ambientes da RecargaPay Wallet API.
+Este documento fornece instruções abrangentes de configuração para todos os ambientes da Digital Wallet API.
 
 ## Índice
 
@@ -19,7 +19,7 @@ Este documento fornece instruções abrangentes de configuração para todos os 
 
 ## Visão Geral
 
-A RecargaPay Wallet API suporta múltiplos ambientes com configurações específicas:
+A Digital Wallet API suporta múltiplos ambientes com configurações específicas:
 
 - **Desenvolvimento** (`dev`) - Desenvolvimento local com debug completo
 - **Teste** (`test`) - Testes automatizados com banco em memória

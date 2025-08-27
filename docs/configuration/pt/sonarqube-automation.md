@@ -2,7 +2,7 @@
 
 ## 🎯 Visão Geral
 
-Este documento descreve a solução completa de automação para integração do SonarQube com a RecargaPay Wallet API, incluindo geração automática de tokens, validação de cobertura e quality gates que bloqueiam o deployment se a cobertura estiver abaixo de 90%.
+Este documento descreve a solução completa de automação para integração do SonarQube com a Digital Wallet API, incluindo geração automática de tokens, validação de cobertura e quality gates que bloqueiam o deployment se a cobertura estiver abaixo de 90%.
 
 ## 🔧 Problema Resolvido
 
@@ -47,7 +47,7 @@ curl -X POST -u "admin:admin" \
 ```bash
 # Comando Maven com validação de cobertura
 mvn clean verify sonar:sonar \
-  -Dsonar.projectKey=recargapay-wallet-api \
+  -Dsonar.projectKey=digital-wallet-api \
   -Dsonar.host.url=http://localhost:9000 \
   -Dsonar.login=<token-gerado> \
   -s settings.xml
@@ -179,7 +179,7 @@ curl -X POST -u "admin:admin" \
 ```bash
 # Verificar se análise foi concluída
 curl -s -u "admin:admin" \
-  "http://localhost:9000/api/measures/component?component=recargapay-wallet-api&metricKeys=coverage"
+  "http://localhost:9000/api/measures/component?component=digital-wallet-api&metricKeys=coverage"
 
 # Executar análise manualmente
 mvn clean verify sonar:sonar -Dsonar.host.url=http://localhost:9000
@@ -196,12 +196,12 @@ Quando volumes Docker são resetados:
 
 ### **Dashboard SonarQube**
 - **URL**: http://localhost:9000
-- **Projeto**: `recargapay-wallet-api`
+- **Projeto**: `digital-wallet-api`
 - **Credenciais**: `admin:admin` ou `admin:admin123`
 
 ### **Relatórios de Cobertura**
 - **Jacoco HTML**: `target/site/jacoco/index.html`
-- **SonarQube**: http://localhost:9000/dashboard?id=recargapay-wallet-api
+- **SonarQube**: http://localhost:9000/dashboard?id=digital-wallet-api
 
 ### **Arquivos de Log**
 - **Startup**: `logs/startup_YYYYMMDD_HHMMSS.log`
@@ -238,7 +238,7 @@ A automação é bem-sucedida quando:
 
 ---
 
-*Esta automação garante que apenas código de alta qualidade com cobertura de teste adequada chegue à produção, mantendo a confiabilidade e manutenibilidade da RecargaPay Wallet API.*
+*Esta automação garante que apenas código de alta qualidade com cobertura de teste adequada chegue à produção, mantendo a confiabilidade e manutenibilidade da Digital Wallet API.*
 
 ---
 
