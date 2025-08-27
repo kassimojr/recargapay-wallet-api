@@ -1,8 +1,8 @@
-# Guia de Monitoramento da API Wallet RecargaPay
+# Guia de Monitoramento da API Wallet Digital
 
 ## Introdução ao Monitoramento e Observabilidade
 
-Sistemas de software modernos necessitam de monitoramento abrangente para garantir confiabilidade, disponibilidade e desempenho. Este guia explica como usar a estrutura de monitoramento implementada para a API Wallet RecargaPay.
+Sistemas de software modernos necessitam de monitoramento abrangente para garantir confiabilidade, disponibilidade e desempenho. Este guia explica como usar a estrutura de monitoramento implementada para a API Wallet Digital.
 
 ### Conceitos Fundamentais
 
@@ -15,7 +15,7 @@ Sistemas de software modernos necessitam de monitoramento abrangente para garant
 
 ## Componentes da Estrutura de Monitoramento
 
-A solução de monitoramento da API Wallet RecargaPay é construída com ferramentas padrão da indústria:
+A solução de monitoramento da API Wallet Digital é construída com ferramentas padrão da indústria:
 
 ### 1. Spring Boot Actuator
 Fornece endpoints para expor saúde da aplicação, métricas e informações operacionais.
@@ -35,7 +35,7 @@ Uma plataforma de visualização que exibe métricas em dashboards personalizáv
 
 1. Navegue até a raiz do projeto:
    ```bash
-   cd /caminho/para/recargapay-wallet-api
+   cd /caminho/para/digital-wallet-api
    ```
 
 2. Execute o script de configuração de monitoramento:
@@ -110,7 +110,7 @@ Consultas avançadas:
 ### Explorando os Dashboards do Grafana
 
 1. Acesse o Grafana em http://localhost:3000 (login com admin/admin)
-2. Navegue até Dashboards → RecargaPay → Wallet API Monitoring
+2. Navegue até Dashboards → Digital → Wallet API Monitoring
 
 O dashboard contém:
 - **Painéis de visão geral**: Saldo total atual e contagem de transações
@@ -134,7 +134,7 @@ http://localhost:8080/actuator/loggers
 Para alterar um nível de log:
 1. Envie uma requisição POST com o nível desejado:
    ```bash
-   curl -X POST http://localhost:8080/actuator/loggers/com.recargapay.wallet \
+   curl -X POST http://localhost:8080/actuator/loggers/com.digital.wallet \
      -H 'Content-Type: application/json' \
      -d '{"configuredLevel": "DEBUG"}'
    ```
@@ -223,7 +223,7 @@ Detalhes da implementação:
 
 ## Conclusão
 
-Esta configuração de monitoramento fornece visibilidade abrangente na API Wallet RecargaPay. Ao revisar regularmente métricas e verificações de saúde, você pode garantir desempenho ideal e identificar rapidamente problemas antes que afetem os usuários. A combinação de métricas, verificações de saúde e rastreamento distribuído cria uma solução robusta de observabilidade para toda a aplicação.
+Esta configuração de monitoramento fornece visibilidade abrangente na API Wallet Digital. Ao revisar regularmente métricas e verificações de saúde, você pode garantir desempenho ideal e identificar rapidamente problemas antes que afetem os usuários. A combinação de métricas, verificações de saúde e rastreamento distribuído cria uma solução robusta de observabilidade para toda a aplicação.
 
 ---
 

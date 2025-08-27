@@ -161,7 +161,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(http_server_requests_seconds_count{job=\"recargapay-wallet-api\", status=~\"2[0-9][0-9]\"}[5m])",
+          "expr": "rate(http_server_requests_seconds_count{job=\"digital-wallet-api\", status=~\"2[0-9][0-9]\"}[5m])",
           "instant": false,
           "legendFormat": "{{uri}} ({{status}})",
           "range": true,
@@ -173,7 +173,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(http_server_requests_seconds_count{job=\"recargapay-wallet-api\", status=~\"4[0-9][0-9]\"}[5m])",
+          "expr": "rate(http_server_requests_seconds_count{job=\"digital-wallet-api\", status=~\"4[0-9][0-9]\"}[5m])",
           "hide": false,
           "instant": false,
           "legendFormat": "{{uri}} ({{status}})",
@@ -186,7 +186,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(http_server_requests_seconds_count{job=\"recargapay-wallet-api\", status=~\"5[0-9][0-9]\"}[5m])",
+          "expr": "rate(http_server_requests_seconds_count{job=\"digital-wallet-api\", status=~\"5[0-9][0-9]\"}[5m])",
           "hide": false,
           "instant": false,
           "legendFormat": "{{uri}} ({{status}})",
@@ -331,7 +331,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(http_server_requests_seconds_count{job=\"recargapay-wallet-api\"}[5m]))",
+          "expr": "sum(rate(http_server_requests_seconds_count{job=\"digital-wallet-api\"}[5m]))",
           "instant": true,
           "legendFormat": "Request Rate",
           "range": false,
@@ -343,7 +343,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "(sum(rate(http_server_requests_seconds_sum{job=\"recargapay-wallet-api\"}[5m])) / sum(rate(http_server_requests_seconds_count{job=\"recargapay-wallet-api\"}[5m]))) * 1000",
+          "expr": "(sum(rate(http_server_requests_seconds_sum{job=\"digital-wallet-api\"}[5m])) / sum(rate(http_server_requests_seconds_count{job=\"digital-wallet-api\"}[5m]))) * 1000",
           "hide": false,
           "instant": true,
           "legendFormat": "Avg Response Time",
@@ -817,7 +817,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "jvm_memory_used_bytes{job=\"recargapay-wallet-api\", area=\"heap\"}",
+          "expr": "jvm_memory_used_bytes{job=\"digital-wallet-api\", area=\"heap\"}",
           "instant": false,
           "legendFormat": "Heap Used",
           "range": true,
@@ -829,7 +829,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "jvm_memory_max_bytes{job=\"recargapay-wallet-api\", area=\"heap\"}",
+          "expr": "jvm_memory_max_bytes{job=\"digital-wallet-api\", area=\"heap\"}",
           "hide": false,
           "instant": false,
           "legendFormat": "Heap Max",
@@ -842,7 +842,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "jvm_memory_used_bytes{job=\"recargapay-wallet-api\", area=\"nonheap\"}",
+          "expr": "jvm_memory_used_bytes{job=\"digital-wallet-api\", area=\"nonheap\"}",
           "hide": false,
           "instant": false,
           "legendFormat": "Non-Heap Used",
@@ -918,7 +918,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "process_cpu_usage{job=\"recargapay-wallet-api\"}",
+          "expr": "process_cpu_usage{job=\"digital-wallet-api\"}",
           "instant": true,
           "legendFormat": "Process CPU",
           "range": false,
@@ -930,7 +930,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "system_cpu_usage{job=\"recargapay-wallet-api\"}",
+          "expr": "system_cpu_usage{job=\"digital-wallet-api\"}",
           "hide": false,
           "instant": true,
           "legendFormat": "System CPU",
@@ -1177,7 +1177,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "up{job=\"recargapay-wallet-api\"}",
+          "expr": "up{job=\"digital-wallet-api\"}",
           "instant": true,
           "legendFormat": "Wallet API",
           "range": false,
@@ -1320,7 +1320,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(http_server_requests_seconds_count{job=\"recargapay-wallet-api\", status=~\"5..\"}[5m])",
+          "expr": "rate(http_server_requests_seconds_count{job=\"digital-wallet-api\", status=~\"5..\"}[5m])",
           "instant": false,
           "legendFormat": "HTTP 5xx Errors ({{uri}})",
           "range": true,
@@ -1332,7 +1332,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(wallet_transaction_errors_total{job=\"recargapay-wallet-api\"}[5m])",
+          "expr": "rate(wallet_transaction_errors_total{job=\"digital-wallet-api\"}[5m])",
           "hide": false,
           "instant": false,
           "legendFormat": "Transaction Errors ({{operation}})",

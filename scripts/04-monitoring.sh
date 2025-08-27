@@ -19,7 +19,7 @@ BLUE='\033[0;34m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-echo -e "${GREEN}RecargaPay Wallet API Monitoring Environment${NC}"
+echo -e "${GREEN}Digital Wallet API Monitoring Environment${NC}"
 echo -e "${YELLOW}This script manages PostgreSQL, Prometheus, and Grafana services using Docker Compose${NC}"
 
 # Function to check if a container is running
@@ -104,7 +104,7 @@ else
   echo -e "${YELLOW}1. Check http://localhost:8080/actuator/health for health checks${NC}"
   echo -e "${YELLOW}2. View http://localhost:8080/actuator/prometheus for raw metrics${NC}"
   echo -e "${YELLOW}3. Verify http://localhost:9090/targets to confirm Prometheus is collecting data${NC}"
-  echo -e "${YELLOW}4. Access http://localhost:3000 and navigate to RecargaPay folder > Wallet API Monitoring dashboard${NC}"
+  echo -e "${YELLOW}4. Access http://localhost:3000 and navigate to Digital folder > Wallet API Monitoring dashboard${NC}"
   
   echo -e "\n${GREEN}===== API AUTHENTICATION =====${NC}"
   echo -e "${YELLOW}Before calling any endpoints, you need to authenticate:${NC}"

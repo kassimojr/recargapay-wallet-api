@@ -2,7 +2,7 @@
 
 ## Overview
 
-This directory contains comprehensive documentation for all configuration files and properties used in the RecargaPay Wallet API project. Each configuration is thoroughly documented with its purpose, impact, and relationships.
+This directory contains comprehensive documentation for all configuration files and properties used in the Digital Wallet API project. Each configuration is thoroughly documented with its purpose, impact, and relationships.
 
 ## Documentation Structure
 
@@ -188,7 +188,7 @@ Grafana → Correlates by traceId → Trace View
 
 ### ⚙️ Configuration & Environment Setup
 
-This section contains comprehensive documentation for all configuration aspects of the RecargaPay Wallet API, including environment setup, local development, and deployment configurations.
+This section contains comprehensive documentation for all configuration aspects of the Digital Wallet API, including environment setup, local development, and deployment configurations.
 
 ### 📋 Quick Navigation
 

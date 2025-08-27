@@ -2,7 +2,7 @@
 
 ## 📋 Visão Geral
 
-Esta documentação descreve a implementação de rastreamento distribuído (distributed tracing) na Recargapay Wallet API. O sistema atual fornece correlação básica de logs através de `traceId` e `spanId` únicos por requisição HTTP, permitindo rastrear o fluxo completo de uma transação através dos logs estruturados.
+Esta documentação descreve a implementação de rastreamento distribuído (distributed tracing) na Digital Wallet API. O sistema atual fornece correlação básica de logs através de `traceId` e `spanId` únicos por requisição HTTP, permitindo rastrear o fluxo completo de uma transação através dos logs estruturados.
 
 ## 📁 Estrutura da Documentação
 

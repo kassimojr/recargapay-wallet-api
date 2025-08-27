@@ -200,7 +200,7 @@ This document provides detailed explanations for all monitoring stack configurat
 - **Purpose**: Prometheus monitors itself
 - **Metrics**: Prometheus internal metrics
 
-#### Job: recargapay-wallet-api
+#### Job: digital-wallet-api
 - **Target**: host.docker.internal:8080
 - **Metrics Path**: /actuator/prometheus
 - **Scrape Interval**: 5s (more frequent than default)

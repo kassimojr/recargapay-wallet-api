@@ -1,6 +1,6 @@
 # Environment Configuration Guide
 
-This document provides comprehensive configuration instructions for all environments of the RecargaPay Wallet API.
+This document provides comprehensive configuration instructions for all environments of the Digital Wallet API.
 
 ## Table of Contents
 
@@ -19,7 +19,7 @@ This document provides comprehensive configuration instructions for all environm
 
 ## Overview
 
-The RecargaPay Wallet API supports multiple environments with specific configurations:
+The Digital Wallet API supports multiple environments with specific configurations:
 
 - **Development** (`dev`) - Local development with full debugging
 - **Test** (`test`) - Automated testing with in-memory database

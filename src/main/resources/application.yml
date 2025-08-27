@@ -1,6 +1,6 @@
 spring:
   application:
-    name: recargapay-wallet-api
+    name: digital-wallet-api
   
   config:
     import: optional:file:.env[.properties]
@@ -87,7 +87,7 @@ springdoc:
   cache:
     disabled: true
   show-actuator: true
-  packages-to-scan: com.recargapay.wallet.adapter.controllers
+  packages-to-scan: com.digital.wallet.adapter.controllers
   paths-to-match: /api/**
 
 # Application Configuration
@@ -126,11 +126,11 @@ otel:
     webmvc:
       enabled: false # Disable automatic WebMVC instrumentation since we have our own TraceContextFilter
   service:
-    name: recargapay-wallet-api
+    name: digital-wallet-api
     version: 1.0.0
   resource:
     attributes:
-      service.name: recargapay-wallet-api
+      service.name: digital-wallet-api
       service.version: 1.0.0
   # Removed OTLP exporter configuration to prevent connection errors
   propagators: tracecontext,baggage
@@ -145,7 +145,7 @@ logging:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [${spring.application.name:-wallet-api}] [%X{traceId:-},%X{spanId:-}] [%thread] %-5level %logger{36} - %msg%n"
   level:
     root: INFO
-    com.recargapay.wallet: DEBUG
+    com.digital.wallet: DEBUG
     org:
       springframework:
         web:

@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-Este diretório contém documentação abrangente para todos os arquivos de configuração e propriedades utilizados no projeto RecargaPay Wallet API. Cada configuração é documentada detalhadamente com sua finalidade, impacto e relacionamentos.
+Este diretório contém documentação abrangente para todos os arquivos de configuração e propriedades utilizados no projeto Digital Wallet API. Cada configuração é documentada detalhadamente com sua finalidade, impacto e relacionamentos.
 
 ## Estrutura da Documentação
 

@@ -1,6 +1,6 @@
 # Monitoring Configuration
 
-This directory contains all monitoring and observability configurations for the RecargaPay Wallet API.
+This directory contains all monitoring and observability configurations for the Digital Wallet API.
 
 ## Structure
 
@@ -43,12 +43,12 @@ This will start PostgreSQL, Prometheus, Grafana, and SonarQube via Docker Compos
 
 - **Grafana**: `http://localhost:3000` (login: admin/admin)
   - Used for metrics visualization
-  - Pre-configured dashboards in the RecargaPay folder
+  - Pre-configured dashboards in the Digital folder
 
 ## Related Code
 
 The implementation uses:
 - Spring Boot Actuator for exposing metrics and health checks
 - Micrometer with @Timed annotations for recording metrics
-- Custom health indicators in `com.recargapay.wallet.infra.health`
+- Custom health indicators in `com.digital.wallet.infra.health`
 - Distributed tracing with @Traced annotations in service classes

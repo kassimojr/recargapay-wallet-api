@@ -1,6 +1,6 @@
 # Docker Image Versions
 
-This document tracks the Docker image versions used in the RecargaPay Wallet API project and the rationale behind version selection.
+This document tracks the Docker image versions used in the Digital Wallet API project and the rationale behind version selection.
 
 ## Current Image Versions
 

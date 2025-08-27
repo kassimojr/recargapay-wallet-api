@@ -80,7 +80,7 @@
             <appender-ref ref="Json"/>
             <appender-ref ref="JsonFile"/>
         </root>
-        <logger name="com.recargapay.wallet" level="INFO"/>
+        <logger name="com.digital.wallet" level="INFO"/>
     </springProfile>
     
     <!-- Perfil para desenvolvimento com logs coloridos -->
@@ -89,6 +89,6 @@
             <appender-ref ref="Console"/>
             <appender-ref ref="JsonFile"/>
         </root>
-        <logger name="com.recargapay.wallet" level="DEBUG"/>
+        <logger name="com.digital.wallet" level="DEBUG"/>
     </springProfile>
 </configuration>

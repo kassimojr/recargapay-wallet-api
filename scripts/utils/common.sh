@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Common utilities for RecargaPay Wallet API scripts
+# Common utilities for Digital Wallet API scripts
 # This file contains shared functions used across multiple scripts
 
 # Color variables for consistent output formatting
@@ -180,7 +180,7 @@ load_env_file() {
 ensure_project_root() {
     if [ ! -f "pom.xml" ] || [ ! -f "docker-compose.yml" ]; then
         print_error "This script must be run from the project root directory"
-        print_info "Please run: cd /path/to/recargapay-wallet-api && $0"
+        print_info "Please run: cd /path/to/digital-wallet-api && $0"
         exit 1
     fi
 }

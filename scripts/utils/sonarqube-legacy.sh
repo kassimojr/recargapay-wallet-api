@@ -14,7 +14,7 @@ set -e
 
 # Configuration
 SONAR_HOST_URL="http://localhost:9000"
-PROJECT_KEY="recargapay-wallet-api"
+PROJECT_KEY="digital-wallet-api"
 REQUIRED_COVERAGE=90
 
 # Colors for output

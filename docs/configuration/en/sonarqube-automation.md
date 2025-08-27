@@ -2,7 +2,7 @@
 
 ## 🎯 Overview
 
-This document describes the complete automation solution for SonarQube integration with the RecargaPay Wallet API, including automatic token generation, coverage validation, and quality gates that block deployment if coverage is below 90%.
+This document describes the complete automation solution for SonarQube integration with the Digital Wallet API, including automatic token generation, coverage validation, and quality gates that block deployment if coverage is below 90%.
 
 ## 🔧 Problem Solved
 
@@ -47,7 +47,7 @@ curl -X POST -u "admin:admin" \
 ```bash
 # Maven command with coverage validation
 mvn clean verify sonar:sonar \
-  -Dsonar.projectKey=recargapay-wallet-api \
+  -Dsonar.projectKey=digital-wallet-api \
   -Dsonar.host.url=http://localhost:9000 \
   -Dsonar.login=<generated-token> \
   -s settings.xml
@@ -179,7 +179,7 @@ curl -X POST -u "admin:admin" \
 ```bash
 # Check if analysis completed
 curl -s -u "admin:admin" \
-  "http://localhost:9000/api/measures/component?component=recargapay-wallet-api&metricKeys=coverage"
+  "http://localhost:9000/api/measures/component?component=digital-wallet-api&metricKeys=coverage"
 
 # Run analysis manually
 mvn clean verify sonar:sonar -Dsonar.host.url=http://localhost:9000
@@ -196,12 +196,12 @@ When Docker volumes are reset:
 
 ### **SonarQube Dashboard**
 - **URL**: http://localhost:9000
-- **Project**: `recargapay-wallet-api`
+- **Project**: `digital-wallet-api`
 - **Credentials**: `admin:admin` or `admin:admin123`
 
 ### **Coverage Reports**
 - **Jacoco HTML**: `target/site/jacoco/index.html`
-- **SonarQube**: http://localhost:9000/dashboard?id=recargapay-wallet-api
+- **SonarQube**: http://localhost:9000/dashboard?id=digital-wallet-api
 
 ### **Log Files**
 - **Startup**: `logs/startup_YYYYMMDD_HHMMSS.log`
@@ -238,7 +238,7 @@ The automation is successful when:
 
 ---
 
-*This automation ensures that only high-quality code with adequate test coverage reaches production, maintaining the reliability and maintainability of the RecargaPay Wallet API.*
+*This automation ensures that only high-quality code with adequate test coverage reaches production, maintaining the reliability and maintainability of the Digital Wallet API.*
 
 ---
 

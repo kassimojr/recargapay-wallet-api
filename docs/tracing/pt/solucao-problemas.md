@@ -254,7 +254,7 @@ git push origin main
 
 # Reimplantar aplicação
 ./mvnw clean package
-java -jar target/recargapay-wallet-api-*.jar
+java -jar target/digital-wallet-api-*.jar
 ```
 
 ### 3. Soluções Temporárias

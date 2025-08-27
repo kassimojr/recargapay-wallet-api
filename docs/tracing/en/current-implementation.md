@@ -2,7 +2,7 @@
 
 ## 📋 Overview
 
-The Recargapay Wallet API currently implements **basic distributed tracing** with the following characteristics:
+The Digital Wallet API currently implements **basic distributed tracing** with the following characteristics:
 
 - **Single span per HTTP request**: One server span created for each incoming request
 - **Unique trace and span IDs**: Generated using UUID-based algorithm
@@ -31,7 +31,7 @@ HTTP Request → TraceContextFilter → Application Logic → HTTP Response
 
 ### 1. TraceContextFilter.java
 
-**Location**: `src/main/java/com/recargapay/wallet/infra/logging/TraceContextFilter.java`
+**Location**: `src/main/java/com/digital/wallet/infra/logging/TraceContextFilter.java`
 
 **Key Features**:
 - Creates one OpenTelemetry server span per HTTP request
@@ -65,7 +65,7 @@ try (Scope scope = serverSpan.makeCurrent()) {
 
 ### 2. OpenTelemetryConfig.java
 
-**Location**: `src/main/java/com/recargapay/wallet/config/OpenTelemetryConfig.java`
+**Location**: `src/main/java/com/digital/wallet/config/OpenTelemetryConfig.java`
 
 **Key Features**:
 - Manual OpenTelemetry SDK initialization
@@ -79,7 +79,7 @@ try (Scope scope = serverSpan.makeCurrent()) {
 public OpenTelemetry openTelemetry() {
     Resource resource = Resource.getDefault()
         .merge(Resource.create(Attributes.of(
-            ResourceAttributes.SERVICE_NAME, "recargapay-wallet-api",
+            ResourceAttributes.SERVICE_NAME, "digital-wallet-api",
             ResourceAttributes.SERVICE_VERSION, "1.0.0"
         )));
 

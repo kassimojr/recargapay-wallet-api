@@ -1,6 +1,6 @@
 # Improved Business Operation Logging Features
 
-This document describes the enhanced logging system implemented for the RecargaPay Wallet API, providing better visibility and querying capabilities in Grafana Loki.
+This document describes the enhanced logging system implemented for the Digital Wallet API, providing better visibility and querying capabilities in Grafana Loki.
 
 ## 🎯 Overview
 
@@ -84,7 +84,7 @@ Logs now have a dual structure for maximum compatibility:
 {
   "timestamp": "2025-08-09T02:08:31.604784-03:00",
   "level": "INFO",
-  "logger": "com.recargapay.wallet.core.services.DepositService",
+  "logger": "services.core.com.digital.wallet.DepositService",
   "operation": "DEPOSIT",           // ✅ Direct field
   "status": "SUCCESS",              // ✅ Direct field  
   "walletId": "aaaaaaaa-...",       // ✅ Direct field
@@ -263,4 +263,4 @@ The improved logging system provides:
 - ✅ **Backward compatibility** with existing systems
 - ✅ **Better debugging** experience for developers
 
-This enhancement significantly improves the observability and monitoring capabilities of the RecargaPay Wallet API while maintaining system stability and performance.
+This enhancement significantly improves the observability and monitoring capabilities of the Digital Wallet API while maintaining system stability and performance.

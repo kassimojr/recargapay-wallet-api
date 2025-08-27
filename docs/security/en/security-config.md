@@ -1,10 +1,10 @@
 # 🔒 Security Configuration Guide
 
-This document provides a comprehensive overview of the security configuration system implemented in the RecargaPay Wallet API, following industry best practices for secure application deployment.
+This document provides a comprehensive overview of the security configuration system implemented in the Digital Wallet API, following industry best practices for secure application deployment.
 
 ## 📋 Executive Summary
 
-The RecargaPay Wallet API has been successfully migrated from hardcoded credentials to a secure, externalized configuration system. This implementation ensures zero risk of credential exposure while maintaining operational excellence across all environments.
+The Digital Wallet API has been successfully migrated from hardcoded credentials to a secure, externalized configuration system. This implementation ensures zero risk of credential exposure while maintaining operational excellence across all environments.
 
 ## 🛡️ Security Improvements Implemented
 

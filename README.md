@@ -1,8 +1,8 @@
-# 🚀 RecargaPay Wallet API
+# 🚀 Digital Wallet API
 
 ## 📌 Overview
 
-The RecargaPay Wallet API is a robust digital wallet service that enables users to manage their financial balance, offering essential operations such as deposit, withdrawal, and fund transfers between users. Built with hexagonal architecture and software engineering best practices, this service ensures high availability, complete traceability, and security in all financial operations.
+The Digital Wallet API is a robust digital wallet service that enables users to manage their financial balance, offering essential operations such as deposit, withdrawal, and fund transfers between users. Built with hexagonal architecture and software engineering best practices, this service ensures high availability, complete traceability, and security in all financial operations.
 
 ---
 
@@ -51,7 +51,7 @@ The project is implemented following **Hexagonal Architecture** (or Ports and Ad
 ### Package Structure
 
 ```
-com.recargapay.wallet/
+com.digital.wallet/
 ├── adapter/                     # Adapters (Controllers, Repositories, DTOs)
 │   ├── controllers/
 │   │   └── v1/                  # REST Controllers v1
@@ -174,8 +174,8 @@ The project uses a modern and robust technology stack:
 ### Cloning the Repository
 
 ```bash
-git clone https://github.com/your-username/recargapay-wallet-api.git
-cd recargapay-wallet-api
+git clone https://github.com/your-username/digital-wallet-api.git
+cd digital-wallet-api
 ```
 
 ### 🎯 Quick Validation (Recommended)
@@ -441,7 +441,7 @@ Logs are structured in JSON format for better observability:
 *Distributed tracing and structured logging with correlation IDs in Grafana/Loki*
 
 - **Local development**: Console output
-- **Container deployment**: Available via `docker logs recargapay-wallet-api`
+- **Container deployment**: Available via `docker logs digital-wallet-api`
 - **Production**: Aggregated in Loki/Grafana stack
 
 Example log entry:
@@ -451,7 +451,7 @@ Example log entry:
   "level": "INFO",
   "traceId": "b4ae80e90152b7ab443b5db11e0914b9",
   "spanId": "7f2c1a8b9e3d4c5f",
-  "logger": "com.recargapay.wallet.application.service.DepositService",
+  "logger": "com.digital.wallet.application.service.DepositService",
   "message": "Deposit operation completed successfully",
   "operation": "DEPOSIT",
   "walletId": "123e4567-e89b-12d3-a456-426614174000",
@@ -570,7 +570,7 @@ All project documentation is organized by categories, available in English and P
 
 This project was planned, refined, and guided in a structured and organized manner using **Kanban methodology**.
 
-![Kanban Board RecargaPay Wallet API](docs/utils/img/board-kanban-recargapay-walletapi.png)
+![Kanban Board Digital Wallet API](docs/utils/img/board-kanban-digital-walletapi.png)
 *Project planning and execution tracking using Kanban methodology*
 
 **🔗 Kanban Board**: [View Project Board](https://github.com/users/kassimojr/projects/1/views/1)
@@ -644,4 +644,4 @@ The development process focused on strategic architectural decisions and busines
 linkedin: https://www.linkedin.com/in/kassimojr/
 
 ---
-**Built with ❤️ by Kássimo Júnior for RecargaPay Assessment**
+**Built with ❤️ by Kássimo Júnior**

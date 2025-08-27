@@ -460,7 +460,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "up{job=\"recargapay-wallet-api\"}",
+          "expr": "up{job=\"digital-wallet-api\"}",
           "instant": true,
           "legendFormat": "Wallet API",
           "range": false,

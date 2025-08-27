@@ -1,6 +1,6 @@
 # Distributed Tracing & Log Correlation
 
-This section contains comprehensive documentation about the distributed tracing implementation in the RecargaPay Wallet API, including structured logging, correlation, and observability features.
+This section contains comprehensive documentation about the distributed tracing implementation in the Digital Wallet API, including structured logging, correlation, and observability features.
 
 ## Quick Navigation
 
@@ -56,7 +56,7 @@ This section contains comprehensive documentation about the distributed tracing 
   "level": "INFO",
   "traceId": "b4ae80e90152b7ab443b5db11e0914b9",
   "spanId": "7f2c1a8b9e3d4c5f",
-  "logger": "com.recargapay.wallet.application.service.DepositService",
+  "logger": "com.digital.wallet.application.service.DepositService",
   "message": "Deposit operation completed successfully",
   "operation": "DEPOSIT",
   "walletId": "123e4567-e89b-12d3-a456-426614174000",
